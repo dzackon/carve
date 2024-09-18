@@ -92,7 +92,6 @@ inductive Wf : (Ψ:ctx) {Δ:[Ψ ⊢ lctx k]} ctype =
 | Wf/n : Wf [_ ⊢ nil]
 | Wf/c : Wf [_ ⊢ Δ] → ([_ ⊢ lookup_n #p Δ] → [ ⊢ false]) → Wf [_ ⊢ cons Δ #p _ _];
 
-% TODO
 % Context contains only variables from the LF context
 
 inductive VarCtx : (Ψ:ctx) {Δ:[Ψ ⊢ lctx k]} ctype =
