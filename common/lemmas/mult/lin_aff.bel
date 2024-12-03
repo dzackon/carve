@@ -10,22 +10,22 @@
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
   / total /
   fn m1, m2 ⇒ case m1 of
-  | [ ⊢ •/us] ⇒ let [ ⊢ •/us] = m2 in [ ⊢ mult/refl]
-  | [ ⊢ •/a1] ⇒ let [ ⊢ •/a1] = m2 in [ ⊢ mult/refl]
-  | [ ⊢ •/a2] ⇒ let [ ⊢ •/a2] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/10] ⇒ let [ ⊢ •/10] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
   ;
 
-% Identity: 
+% Identity:
 % (1) If α₁ ∙ α₂ = α and α₁ is an identity element, then α₂ = α
 % (2) For any α, obtain an identity element β such that β • α = α
 
 rec mult_id : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α₁] → [ ⊢ mult_eq α₂ α] =
-  / total 1 /
+  / total /
   fn m, u ⇒
   let [ ⊢ ident/0] = u in
   case m of
-  | [ ⊢ •/us] ⇒ [ ⊢ mult/refl]
-  | [ ⊢ •/a2] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/00] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ [ ⊢ mult/refl]
   ;
 
 LF get_u∙ : mult → type =
@@ -34,17 +34,17 @@ LF get_u∙ : mult → type =
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_u∙ α] =
   / total /
   mlam α ⇒ case [ ⊢ α] of
-  | [ ⊢ 𝟘] ⇒ [ ⊢ get-u∙ ident/0 •/us]
-  | [ ⊢ 𝟙] ⇒ [ ⊢ get-u∙ ident/0 •/a2]
+  | [ ⊢ 𝟘] ⇒ [ ⊢ get-u∙ ident/0 •/00]
+  | [ ⊢ 𝟙] ⇒ [ ⊢ get-u∙ ident/0 •/01]
   ;
 
 % Zero-sum-freedom: If α₁ ∙ α₂ = α and α is an identity element, then α₁ = α
 
 rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_eq α₁ α] =
   / total /
-  fn m, u ⇒ 
+  fn m, u ⇒
   let [ ⊢ ident/0] = u in
-  let [ ⊢ •/us] = m in
+  let [ ⊢ •/00] = m in
   [ ⊢ mult/refl]
   ;
 
@@ -53,9 +53,9 @@ rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_e
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total /
   fn m ⇒ case m of
-  | [ ⊢ •/us] ⇒ [ ⊢ •/us]
-  | [ ⊢ •/a1] ⇒ [ ⊢ •/a2]
-  | [ ⊢ •/a2] ⇒ [ ⊢ •/a1]
+  | [ ⊢ •/00] ⇒ [ ⊢ •/00]
+  | [ ⊢ •/10] ⇒ [ ⊢ •/01]
+  | [ ⊢ •/01] ⇒ [ ⊢ •/10]
   ;
 
 % Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
@@ -66,11 +66,11 @@ LF •assoc : • _ _ _ → • _ _ _ → type =
 rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]} [ ⊢ •assoc M1 M2] =
   / total 2 /
   mlam M1, M2 ⇒ case [ ⊢ M2] of
-  | [ ⊢ •/us] ⇒ let [ ⊢ •/us] = [ ⊢ M1] in [ ⊢ •/assoc •/us •/us M1 M2]
-  | [ ⊢ •/a2] ⇒ let [ ⊢ •/us] = [ ⊢ M1] in [ ⊢ •/assoc •/a2 •/a2 M1 M2]
-  | [ ⊢ •/a1] ⇒ case [ ⊢ M1] of
-    | [ ⊢ •/a1] ⇒ [ ⊢ •/assoc •/us •/a1 M1 M2]
-    | [ ⊢ •/a2] ⇒ [ ⊢ •/assoc •/a1 •/a2 M1 M2]
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = [ ⊢ M1] in [ ⊢ •/assoc •/00 •/00 M1 M2]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/00] = [ ⊢ M1] in [ ⊢ •/assoc •/01 •/01 M1 M2]
+  | [ ⊢ •/10] ⇒ case [ ⊢ M1] of
+    | [ ⊢ •/10] ⇒ [ ⊢ •/assoc •/00 •/10 M1 M2]
+    | [ ⊢ •/01] ⇒ [ ⊢ •/assoc •/10 •/01 M1 M2]
   ;
 
 % Cancellativity: If α₁ ∙ α₂ = α and α₁ ∙ α₂' = α, then α₂ = α₂'
@@ -78,9 +78,9 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
 rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
   fn m1, m2 ⇒ case m1 of
-  | [ ⊢ •/us] ⇒ let [ ⊢ •/us] = m2 in [ ⊢ mult/refl]
-  | [ ⊢ •/a1] ⇒ let [ ⊢ •/a1] = m2 in [ ⊢ mult/refl]
-  | [ ⊢ •/a2] ⇒ let [ ⊢ •/a2] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/10] ⇒ let [ ⊢ •/10] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
   ;
 
 % Corollaries
@@ -101,22 +101,22 @@ rec mult_get_id_cor : {α:[ ⊢ mult]} [ ⊢ • 𝟘 α α] =
   ;
 
 %------------------------------------------------------%
-% Properties of unrestricted elements
+% Properties of harmless elements
 %------------------------------------------------------%
 
-% Technical lemmas about unrestricted elements (used to prove context lemmas)
+% Technical lemmas about harmless elements (used to prove context lemmas)
 
-rec mult_unr_id : [ ⊢ unr α] → [ ⊢ • α α α] =
+rec mult_hal_id : [ ⊢ hal α] → [ ⊢ • α α α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/0] = u in [ ⊢ •/us]
+  fn u ⇒ let [ ⊢ hal/0] = u in [ ⊢ •/00]
   ;
 
-rec mult_ident_unr : [ ⊢ ident α] → [ ⊢ unr α] =
+rec mult_ident_hal : [ ⊢ ident α] → [ ⊢ hal α] =
   / total /
-  fn u ⇒ let [ ⊢ ident/0] = u in [ ⊢ unr/0]
+  fn u ⇒ let [ ⊢ ident/0] = u in [ ⊢ hal/0]
   ;
 
-rec mult_unr_ident : [ ⊢ unr α] → [ ⊢ ident α] =
+rec mult_hal_ident : [ ⊢ hal α] → [ ⊢ ident α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/0] = u in [ ⊢ ident/0]
+  fn u ⇒ let [ ⊢ hal/0] = u in [ ⊢ ident/0]
   ;

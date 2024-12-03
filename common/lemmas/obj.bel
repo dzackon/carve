@@ -4,14 +4,14 @@
 
 % Weaken object inequality judgment
 
-rec neq_weak_v : (Ψ:ctx) ([Ψ ⊢ obj_eq M N] → [ ⊢ false]) → ([Ψ,x:obj ⊢ obj_eq M[..] N[..]] → [ ⊢ false]) =
+rec neq_weak_v : (Ψ:ctx) ([Ψ ⊢ obj_eq X Y] → [ ⊢ false]) → ([Ψ,x:obj ⊢ obj_eq X[..] Y[..]] → [ ⊢ false]) =
   / total /
   fn n, e ⇒ let [_,x:obj ⊢ obj/refl] = e in impossible n [_ ⊢ obj/refl]
   ;
 
 % Object inequality is commutative
 
-rec neq_comm_v : (Ψ:ctx) ([Ψ ⊢ obj_eq M N] → [ ⊢ false]) → ([Ψ ⊢ obj_eq N M] → [ ⊢ false]) =
+rec neq_comm_v : (Ψ:ctx) ([Ψ ⊢ obj_eq X Y] → [ ⊢ false]) → ([Ψ ⊢ obj_eq Y X] → [ ⊢ false]) =
   / total /
   fn n, e ⇒ let [_ ⊢ obj/refl] = e in impossible n [_ ⊢ obj/refl]
   ;

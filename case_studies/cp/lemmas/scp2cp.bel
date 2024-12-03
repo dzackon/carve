@@ -6,13 +6,13 @@
 % Properties of RelUsed, RelName, and Dec
 %------------------------------------------------------%
 
-% If RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ], then Δ is unrestricted
+% If RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ], then Δ is exhausted
 
-rec relus_unr : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
+rec relus_exh : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
   / total 1 /
   fn ru ⇒ case ru of
   | relUsed/n ⇒ [ ⊢ exh/n]
-  | relUsed/c ru1 ⇒ let [_ ⊢ EXH] = relus_unr ru1 in [_,x:obj ⊢ exh/c EXH[..] unr/0]
+  | relUsed/c ru1 ⇒ let [_ ⊢ EXH] = relus_exh ru1 in [_,x:obj ⊢ exh/c EXH[..] hal/0]
   ;
 
 % If RelName [Ψ ⊢ x] [Ψ ⊢ Δ] [Φ ⊢ σ] and (x : A) ∈ Φ, then x is the unique linear element of Δ
@@ -23,12 +23,12 @@ rec relnm_unqlin : RelName [Ψ ⊢ X] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ hyp 
   / total 1 /
   fn rn, hp ⇒ case rn of
   | relName/t ru ⇒
-    let [_ ⊢ EXH] = relus_unr ru in
+    let [_ ⊢ EXH] = relus_exh ru in
     let [_,b:block x:obj,h:hyp _ _ ⊢ b.2] = hp in
-    [_,x:obj ⊢ unql (upd/t _) (exh/c EXH[..] unr/0)]
+    [_,x:obj ⊢ unql (upd/t _) (exh/c EXH[..] hal/0)]
   | relName/n rn ⇒
     let [_ ⊢ unql U1 EXH] = relnm_unqlin rn (prune_hyp hp) in
-    [_,x:obj ⊢ unql (upd/n U1[..]) (exh/c EXH[..] unr/0)]
+    [_,x:obj ⊢ unql (upd/n U1[..]) (exh/c EXH[..] hal/0)]
   ;
 
 % Given Dec relation, obtain hyp judgment from look-up in explicit context

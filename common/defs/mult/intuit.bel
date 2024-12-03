@@ -8,12 +8,12 @@ LF mult : type =
 % α₁ • α₂ = α
 
 LF • : mult → mult → mult → type =
-| •/ω : • ω ω ω;
+| •/ωω : • ω ω ω;
 
-% α is unrestricted
+% α is harmless
 
-LF unr : mult → type =
-| unr/ω : unr ω;
+LF hal : mult → type =
+| hal/ω : hal ω;
 
 % α is an identity element w.r.t. •
 

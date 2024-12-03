@@ -3,7 +3,15 @@
 %======================================================%
 
 LF step : obj → obj → type =
+
+% Principal β-reductions
+| s/red : step (app (lam M) N) (M N)
+| s/red! : step (letbang (bang M) N) (N M)
+
+% Reduction under term constructs
 | s/app1 : step M M' → step (app M N) (app M' N)
 | s/app2 : step N N' → step (app M N) (app M N')
 | s/lam : ({x:obj} step (M x) (M' x)) → step (lam M) (lam M')
-| s/red : step (app (lam M) N) (M N);
+| s/bang : step M M' → step (bang M) (bang M')
+| s/letbang1 : step M M' → step (letbang M N) (letbang M' N)
+| s/letbang2 : ({x:obj} step (N x) (N' x)) → step (letbang M N) (letbang M N');

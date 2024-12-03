@@ -55,7 +55,7 @@ LF seq : lctx _ → tp → type =
 
 | L&2 :
     upd Δ _ X X (A & B) (A & B) 𝟙 𝟘 Δ'
-  → ({x:obj} seq (cons Δ' x B 𝟙) C) 
+  → ({x:obj} seq (cons Δ' x B 𝟙) C)
   → seq Δ C
 
 | R⊕1 :
@@ -117,7 +117,6 @@ LF seq_cf : lctx _ → tp → type =
     ({x:obj} seq_cf (cons Δ x A 𝟙) B)
   → seq_cf Δ (A -o B)
 
-
 | L-o_cf :
     upd Δ _ X X (A -o B) (A -o B) 𝟙 𝟘 Δ'
   → merge Δ₁ Δ₂ Δ'
@@ -138,7 +137,7 @@ LF seq_cf : lctx _ → tp → type =
 
 | L&2_cf :
     upd Δ _ X X (A & B) (A & B) 𝟙 𝟘 Δ'
-  → ({x:obj} seq_cf (cons Δ' x B 𝟙) C) 
+  → ({x:obj} seq_cf (cons Δ' x B 𝟙) C)
   → seq_cf Δ C
 
 | R⊕1_cf :

@@ -1,6 +1,6 @@
 # Overview
 
-This is an artifact for the CPP 2025 submission "Split Decisions: Explicit Contexts for Substructural Languages". The artifact contains an implementation in [Beluga](https://github.com/Beluga-lang/Beluga) of CARVe, a general infrastructure for encoding substructural systems and reasoning about their meta-theory. It also includes encodings of several case studies: the linear λ-calculus using HOAS (`lin_lam`), the linear λ-calculus using de Bruijn levels and an environment-based operational semantics (`closures`), the affine λ-calculus (`aff_lam`), the linear sequent calculus (`seq`), the bidirectional linear natural deduction calculus (`nd`), and the multiplicative-additive fragment of the session-typed process calculus [CP](https://dl.acm.org/doi/10.1145/2398856.2364568) (`cp`). We implement proofs of various metatheoretical and equivalence properties for each encoding.
+This is an artifact supporting the paper "Split Decisions: Explicit Contexts for Substructural Languages" (CPP 2025). The artifact contains an implementation in [Beluga](https://github.com/Beluga-lang/Beluga) of CARVe, a general infrastructure for encoding substructural systems and reasoning about their meta-theory. It also includes encodings of several case studies: the linear λ-calculus using HOAS (`lin_lam`), the linear λ-calculus using de Bruijn levels and an environment-based operational semantics (`closures`), the affine λ-calculus (`aff_lam`), the linear sequent calculus (`seq`), the bidirectional linear natural deduction calculus (`nd`), and the multiplicative-additive fragment of the session-typed process calculus [CP](https://dl.acm.org/doi/10.1145/2398856.2364568) (`cp`). We implement proofs of various metatheoretical and equivalence properties for each encoding.
 
 ## Structure
 
@@ -68,8 +68,8 @@ Below is a more detailed breakdown:
 | Definition                                   | Paper           | File / folder                        | Definition name                                   |
 |----------------------------------------------|-----------------|------------------------------------- |---------------------------------------------------|
 | Typing contexts                              | §2, §4.1        | common/defs/ctx.bel                  | lctx                                              |
-| Linear multiplicities                        | §2.1, §4.1      | common/defs/mult/lin_aff.bel         | mult, •, unr                                      |
-| Alternative multiplicity structures          | §5              | common/defs/mult/                    | mult, •, unr                                      |
+| Linear multiplicities                        | §2.1, §4.1      | common/defs/mult/lin_aff.bel         | mult, •, hal                                      |
+| Alternative multiplicity structures          | §5              | common/defs/mult/                    | mult, •, hal                                      |
 | Context merge                                | §2.1, §4.1      | common/defs/ctx.bel                  | merge                                             |
 | Exhaustedness                                | §2.2, §4.1      | common/defs/ctx.bel                  | exh                                               |
 | Context update                               | §2.3, §4.1      | common/defs/ctx.bel                  | upd                                               |
@@ -94,7 +94,7 @@ Below is a more detailed breakdown:
 |----------------------------------------------|-----------------|--------------------------------      |---------------------------------------------------|
 | Algebraic properties of lin. multiplicities  | §2.1            | common/lemmas/mult/lin_aff.bel       | mult_func, mult_canc, mult_assoc,                 |
 |                                              |                 |                                      | mult_comm, mult_zsfree                            |
-| Algebraic properties of context merge        | §2.1, Prop 2.1  | common/lemmas/merge/unrid.bel        | merge_id                                          |
+| Algebraic properties of context merge        | §2.1, Prop 2.1  | common/lemmas/merge/halid.bel        | merge_id                                          |
 |                                              |                 | common/lemmas/merge/main.bel         | merge_assoc, merge_comm                           |
 |                                              |                 | common/lemmas/merge/cancl.bel        | mult_canc                                         |
 | Well-formedness properties of context merge  | §2.1, Prop 2.2  | common/lemmas/mult/merge/            | wf_merge, wf_merge_l                              |
@@ -118,7 +118,7 @@ This mechanization is compatible with Beluga version 1.1.1.
 
 Beluga may be installed using the OCaml package manager ([`opam`](https://opam.ocaml.org/doc/Install.html)):
 
-	>> opam install beluga.1.1.1
+    >> opam install beluga.1.1.1
 
 It may also be built and installed from source following the instructions at https://github.com/Beluga-lang/Beluga.
 
@@ -127,7 +127,7 @@ It may also be built and installed from source following the instructions at htt
 Once installed, Beluga can be run on the file `run_all.cfg`. The expected total runtime is approximately 0m7s, and the expected output as follows.
 
 <details>
-	<summary>View expected output</summary>
+    <summary>View expected output</summary>
     >> beluga run_all.cfg
     ## Type Reconstruction begin: ./run/mult/../../common/defs/mult/intuit.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/defs/mult/intuit.bel ##
@@ -163,8 +163,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/wf.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/varctx.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/varctx.bel ##
-    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/defs/mult/lin_aff.bel ##
@@ -203,8 +203,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/varctx.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/upd/lin_aff.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/upd/lin_aff.bel ##
-    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/defs/mult/expon.bel ##
@@ -275,8 +275,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/wf.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/varctx.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/varctx.bel ##
-    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/defs/nat.bel ##
@@ -317,8 +317,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/wf.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/varctx.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/varctx.bel ##
-    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction done:  ./run/mult/../../common/lemmas/merge/cancl.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/defs/general.bel ##
@@ -357,8 +357,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/exh.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/main.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/main.bel ##
-    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/same_elts.bel ##
@@ -437,8 +437,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/exh.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/main.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/main.bel ##
-    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/varctx.bel ##
@@ -523,8 +523,8 @@ Once installed, Beluga can be run on the file `run_all.cfg`. The expected total 
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/exh.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/main.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/main.bel ##
-    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
-    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/unrid.bel ##
+    ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/merge/halid.bel ##
+    ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/merge/halid.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction done:  ./run/case_studies/../../common/lemmas/upd/exch.bel ##
     ## Type Reconstruction begin: ./run/case_studies/../../case_studies/cp/lemmas/tp.bel ##

@@ -28,7 +28,7 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
   [ ⊢ mult/refl]
   ;
 
-% Identity: 
+% Identity:
 % (1) If α₁ ∙ α₂ = α and α₁ is an identity element, then α₂ = α
 % (2) For any α, obtain an identity element β such that β • α = α
 
@@ -52,7 +52,7 @@ rec mult_get_id : {β:[ ⊢ mult]} [ ⊢ get_u∙ β] =
 
 rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_eq α₁ α] =
   / total /
-  fn m, u ⇒ 
+  fn m, u ⇒
   let [ ⊢ ident/z] = u in
   let [ ⊢ •/plus pl/z] = m in
   [ ⊢ mult/refl]
@@ -62,7 +62,7 @@ rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_e
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total /
-  fn m ⇒ 
+  fn m ⇒
   let [ ⊢ •/plus P1] = m in
   let [ ⊢ P2] = plus_comm [ ⊢ P1] in
   [ ⊢ •/plus P2]
@@ -94,22 +94,22 @@ rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ �
   ;
 
 %------------------------------------------------------%
-% Properties of unrestricted elements
+% Properties of harmless elements
 %------------------------------------------------------%
 
-% Technical lemmas about unrestricted elements (used to prove context lemmas)
+% Technical lemmas about harmless elements (used to prove context lemmas)
 
-rec mult_unr_id : [ ⊢ unr α] → [ ⊢ • α α α] =
+rec mult_hal_id : [ ⊢ hal α] → [ ⊢ • α α α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/z] = u in [ ⊢ •/plus pl/z]
+  fn u ⇒ let [ ⊢ hal/z] = u in [ ⊢ •/plus pl/z]
   ;
 
-rec mult_ident_unr : [ ⊢ ident α] → [ ⊢ unr α] =
+rec mult_ident_hal : [ ⊢ ident α] → [ ⊢ hal α] =
   / total /
-  fn u ⇒ let [ ⊢ ident/z] = u in [ ⊢ unr/z]
+  fn u ⇒ let [ ⊢ ident/z] = u in [ ⊢ hal/z]
   ;
 
-rec mult_unr_ident : [ ⊢ unr α] → [ ⊢ ident α] =
+rec mult_hal_ident : [ ⊢ hal α] → [ ⊢ ident α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/z] = u in [ ⊢ ident/z]
+  fn u ⇒ let [ ⊢ hal/z] = u in [ ⊢ ident/z]
   ;

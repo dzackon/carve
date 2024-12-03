@@ -4,25 +4,48 @@
 
 % Type preservation for the linear λ-calculus
 
-rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]]) [Ψ ⊢ oft Δ M A] → [Ψ ⊢ step M M'] → VarCtx [Ψ ⊢ Δ]
-→ [Ψ ⊢ oft Δ M' A] =
+rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) [Ψ ⊢ oft Δ M C] → [Ψ ⊢ step M M'] → VarCtx [Ψ ⊢ Δ]
+→ [Ψ ⊢ oft Δ M' C] =
   / total 1 /
   fn d, st, vc ⇒ case d of
   | [_ ⊢ oft/var U _] ⇒ let Is-Var = varctx_isvar vc [_ ⊢ U] in impossible st
-  | [_ ⊢ oft/lam \x.O1] ⇒
-    let [_ ⊢ s/lam \x.ST1] = st in
-    let [_,x:obj ⊢ O1'] = tps [_,x:obj ⊢ O1] [_,x:obj ⊢ ST1] (varctx_extcons vc) in
-    [_ ⊢ oft/lam \x.O1']
-  | [_ ⊢ oft/app O1 O2 M1] ⇒
-    case st of
-    | [_ ⊢ s/app1 ST1] ⇒
-      let [_ ⊢ O1'] = tps [_ ⊢ O1] [_ ⊢ ST1] (varctx_merge vc [_ ⊢ M1]) in
-      [_ ⊢ oft/app O1' O2 M1]
-    | [_ ⊢ s/app2 ST2] ⇒
-      let [_ ⊢ O2'] = tps [_ ⊢ O2] [_ ⊢ ST2] (varctx_merge_r vc [_ ⊢ M1]) in 
-      [_ ⊢ oft/app O1 O2' M1]
+  | [_ ⊢ oft/vari U _] ⇒ let Is-Var = varctx_isvar vc [_ ⊢ U] in impossible st
+  | [_ ⊢ oft/lam \x.D1] ⇒
+    let [_ ⊢ s/lam \x.S1] = st in
+    let [_,x:obj ⊢ D1'] = tps [_,x:obj ⊢ D1] [_,x:obj ⊢ S1] (varctx_extcons vc) in
+    [_ ⊢ oft/lam \x.D1']
+  | [_ ⊢ oft/app D1 D2 M1] ⇒
+    (case st of
+    | [_ ⊢ s/app1 S1] ⇒
+      let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] (varctx_merge vc [_ ⊢ M1]) in
+      [_ ⊢ oft/app D1' D2 M1]
+    | [_ ⊢ s/app2 S2] ⇒
+      let [_ ⊢ D2'] = tps [_ ⊢ D2] [_ ⊢ S2] (varctx_merge_r vc [_ ⊢ M1]) in
+      [_ ⊢ oft/app D1 D2' M1]
     | [_ ⊢ s/red] ⇒
-      case [_ ⊢ O1] of
+      (case [_ ⊢ D1] of
       | [_ ⊢ oft/var U _] ⇒ impossible varctx_isvar (varctx_merge vc [_ ⊢ M1]) [_ ⊢ U]
-      | [_ ⊢ oft/lam \x.O1'] ⇒ sub_lem [_,x:obj ⊢ O1'] [_ ⊢ O2] [_ ⊢ M1]
+      | [_ ⊢ oft/vari U _] ⇒ impossible varctx_isvar (varctx_merge vc [_ ⊢ M1]) [_ ⊢ U]
+      | [_ ⊢ oft/lam \x.D1'] ⇒ sub_lem [_,x:obj ⊢ D1'] [_ ⊢ D2] [_ ⊢ M1]
+      )
+    )
+  | [_ ⊢ oft/bang E1 D1] ⇒
+    let [_ ⊢ s/bang S1] = st in
+    let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] vc in
+    [_ ⊢ oft/bang E1 D1']
+  | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
+    (case st of
+    | [_ ⊢ s/letbang1 S1] ⇒
+      let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] (varctx_merge vc [_ ⊢ M1]) in
+      [_ ⊢ oft/letbang D1' (\x.D2) M1]
+    | [_ ⊢ s/letbang2 \x.S2] ⇒
+      let [_,x:obj ⊢ D2'] = tps [_,x:obj ⊢ D2] [_,x:obj ⊢ S2] (varctx_extcons (varctx_merge_r vc [_ ⊢ M1])) in
+      [_ ⊢ oft/letbang D1 (\x.D2') M1]
+    | [_ ⊢ s/red!] ⇒
+      (case [_ ⊢ D1] of
+      | [_ ⊢ oft/var U _] ⇒ impossible varctx_isvar (varctx_merge vc [_ ⊢ M1]) [_ ⊢ U]
+      | [_ ⊢ oft/vari U _] ⇒ impossible varctx_isvar (varctx_merge vc [_ ⊢ M1]) [_ ⊢ U]
+      | [_ ⊢ oft/bang E1 D1'] ⇒ sub_lemω [_,x:obj ⊢ D2] [_ ⊢ D1'] [_ ⊢ E1] (merge_comm [_ ⊢ M1])
+      )
+    )
   ;

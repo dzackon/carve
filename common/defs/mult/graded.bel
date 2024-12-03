@@ -10,10 +10,10 @@ LF mult : type =
 LF • : mult → mult → mult → type =
 | •/plus : plus n m k → • (num n) (num m) (num k);
 
-% α is unrestricted
+% α is harmless
 
-LF unr : mult → type =
-| unr/z : unr (num zero);
+LF hal : mult → type =
+| hal/z : hal (num zero);
 
 % α is an identity element w.r.t. •
 

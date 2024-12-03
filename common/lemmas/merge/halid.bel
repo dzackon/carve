@@ -1,6 +1,6 @@
 %======================================================%
 % Properties of merge that only hold
-% if all unrestricted elements are identity elements
+% if all harmless elements are identity elements
 %======================================================%
 
 % Identity properties:
@@ -15,7 +15,7 @@ rec merge_id : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ merge Δ₁ Δ₂ Δ] →
   | [_ ⊢ mg/c M1 T1[]] ⇒
     let [_ ⊢ exh/c E1 U1[]] = e in
     let [_ ⊢ cx/refl] = merge_id [_ ⊢ M1] [_ ⊢ E1] in
-    let [ ⊢ mult/refl] = mult_id [ ⊢ T1] (mult_unr_ident [ ⊢ U1]) in
+    let [ ⊢ mult/refl] = mult_id [ ⊢ T1] (mult_hal_ident [ ⊢ U1]) in
     [_ ⊢ cx/refl]
   ;
 
@@ -33,8 +33,8 @@ rec merge_zsfree : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → {M:[Ψ �
   | [_ ⊢ mg/n] ⇒ [_ ⊢ mg_ident _]
   | [_ ⊢ mg/c M1 T1[]] ⇒
     let [_ ⊢ exh/c E1 U1[]] = e in
-    let [ ⊢ mult/refl] = mult_zsfree [ ⊢ T1] (mult_unr_ident [ ⊢ U1]) in
-    let [ ⊢ mult/refl] = mult_zsfree (mult_comm [ ⊢ T1]) (mult_unr_ident [ ⊢ U1]) in
+    let [ ⊢ mult/refl] = mult_zsfree [ ⊢ T1] (mult_hal_ident [ ⊢ U1]) in
+    let [ ⊢ mult/refl] = mult_zsfree (mult_comm [ ⊢ T1]) (mult_hal_ident [ ⊢ U1]) in
     let [_ ⊢ mg_ident _] = merge_zsfree [_ ⊢ E1] [_ ⊢ M1] in
     [_ ⊢ mg_ident _]
   ;

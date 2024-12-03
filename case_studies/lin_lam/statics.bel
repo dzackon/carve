@@ -4,7 +4,11 @@
 
 LF oft : lctx _ → obj → tp → type =
 | oft/var : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ' → oft Δ X A
+| oft/vari : upd Δ _ X _ A _ ω _ _ → exh Δ  → oft Δ X A
 | oft/lam : ({x:obj} oft (cons Δ x A 𝟙) (M x) B)
 	→ oft Δ (lam M) (A -o B)
 | oft/app : oft Δ₁ M (A -o B) → oft Δ₂ N A → merge Δ₁ Δ₂ Δ
-	→ oft Δ (app M N) B;
+	→ oft Δ (app M N) B
+| oft/bang : exh Δ → oft Δ M A → oft Δ (bang M) (! A) % (promotion)
+| oft/letbang : oft Δ₁ M (! A) → ({x:obj} oft (cons Δ₂ x A ω) (N x) B) → merge Δ₁ Δ₂ Δ
+	→ oft Δ (letbang M N) B; % (intuitionistic cut)

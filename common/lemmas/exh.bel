@@ -19,9 +19,9 @@ rec prune_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ,x:obj ⊢ exh Δ[..]] → [�
 % Interaction with updating
 %------------------------------------------------------%
 
-% Variables in an exhausted context must have unrestricted multiplicity
+% Variables in an exhausted context must have harmless multiplicity
 
-rec exh_lookup : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → [Ψ ⊢ upd Δ n X Y A B α[] β Δ'] → [ ⊢ unr α] =
+rec exh_lookup : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → [Ψ ⊢ upd Δ n X Y A B α[] β Δ'] → [ ⊢ hal α] =
   / total 1 /
   fn e, u ⇒ case u of
   | [_ ⊢ upd/t _] ⇒ let [_ ⊢ exh/c E M[]] = e in [ ⊢ M]
@@ -29,18 +29,17 @@ rec exh_lookup : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → [Ψ ⊢ upd
   ;
 
 % Changing type of an element of an exhausted context preserves exhaustedness
-% (1) If exh(Δ) and unr(β), then exh(Δ[x :α A ↦ₙ y :β B]) 
+% (1) If exh(Δ) and hal(β), then exh(Δ[x :α A ↦ₙ y :β B])
 % (2) If exh(Δ), then exh(Δ[x :α A ↦ₙ y :α B]) [corollary of (1) and exh_lookup]
 
-rec exh_changetp : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → [ ⊢ unr β] → [Ψ ⊢ upd Δ n X Y A B α β[] Δ'] → [Ψ ⊢ exh Δ'] =
+rec exh_changetp : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exh Δ] → [ ⊢ hal β] → [Ψ ⊢ upd Δ n X Y A B α β[] Δ'] → [Ψ ⊢ exh Δ'] =
   / total 1 /
   fn e, b, u ⇒
-  let [ ⊢ M1] = b in
   case e of
   | [_ ⊢ exh/n] ⇒ impossible u
   | [_ ⊢ exh/c E1 M2] ⇒
     case u of
-    | [_ ⊢ upd/t _] ⇒ [_ ⊢ exh/c E1 M1[]]
+    | [_ ⊢ upd/t _] ⇒ let [ ⊢ M1] = b in [_ ⊢ exh/c E1 M1[]]
     | [_ ⊢ upd/n U] ⇒ let [_ ⊢ E2] = exh_changetp [_ ⊢ E1] b [_ ⊢ U] in [_ ⊢ exh/c E2 M2]
   ;
 

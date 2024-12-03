@@ -15,7 +15,7 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
   | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
-% Identity: 
+% Identity:
 % (1) If α₁ ∙ α₂ = α and α₁ is an identity element, then α₂ = α
 % (2) For any α, obtain an identity element β such that β • α = α
 
@@ -86,22 +86,22 @@ rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ �
   ;
 
 %------------------------------------------------------%
-% Properties of unrestricted elements
+% Properties of harmless elements
 %------------------------------------------------------%
 
-% Technical lemmas about unrestricted elements (used to prove context lemmas)
+% Technical lemmas about harmless elements (used to prove context lemmas)
 
-rec mult_unr_id : [ ⊢ unr α] → [ ⊢ • α α α] =
+rec mult_hal_id : [ ⊢ hal α] → [ ⊢ • α α α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/ω] = u in [ ⊢ •/ωω]
+  fn u ⇒ let [ ⊢ hal/ω] = u in [ ⊢ •/ωω]
   ;
 
-rec mult_ident_unr : [ ⊢ ident α] → [ ⊢ unr α] =
+rec mult_ident_hal : [ ⊢ ident α] → [ ⊢ hal α] =
   / total /
-  fn u ⇒ let [ ⊢ ident/ω] = u in [ ⊢ unr/ω]
+  fn u ⇒ let [ ⊢ ident/ω] = u in [ ⊢ hal/ω]
   ;
 
-rec mult_unr_ident : [ ⊢ unr α] → [ ⊢ ident α] =
+rec mult_hal_ident : [ ⊢ hal α] → [ ⊢ ident α] =
   / total /
-  fn u ⇒ let [ ⊢ unr/ω] = u in [ ⊢ ident/ω]
+  fn u ⇒ let [ ⊢ hal/ω] = u in [ ⊢ ident/ω]
   ;

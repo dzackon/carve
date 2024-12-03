@@ -15,7 +15,7 @@ LF wf_subst : lctx _ → subst N → lctx N → type =
 | wf_subst_cons1 :
 	  wf_subst Δ₁ σ Γ
 	→ chk Δ₂ e T
-	→ merge Δ₁ Δ₂ Δ 
+	→ merge Δ₁ Δ₂ Δ
 	→ wf_subst Δ (scons σ e) (cons Γ _ T 𝟙)
 | wf_subst_cons0 :
 	  wf_subst Δ σ Γ

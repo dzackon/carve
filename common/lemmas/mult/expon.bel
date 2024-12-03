@@ -3,70 +3,30 @@
 % (linear systems with exponentials)
 %======================================================%
 
-% Remark: cancellativity does not hold since ω ∙ α = ω for any α
-
-% Totality: For any α₁, α₂, there exists an α such that α₁ ∙ α₂ = α
-
-LF get∙ : mult → mult → type =
-| get-∙ : • α₁ α₂ α → get∙ α₁ α₂;
-
-rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get∙ α₁ α₂] =
-  / total /
-  mlam α₁, α₂ ⇒
-  case [ ⊢ α₁] of
-  | [ ⊢ 𝟘] ⇒ [_ ⊢ get-∙ •/0-1]
-  | [ ⊢ ω] ⇒ [_ ⊢ get-∙ •/ω-1]
-  | [ ⊢ 𝟙] ⇒
-    case [ ⊢ α₂] of
-    | [ ⊢ 𝟘] ⇒ [ ⊢ get-∙ •/0-2]
-    | [ ⊢ ω] ⇒ [ ⊢ get-∙ •/ω-2]
-    | [ ⊢ 𝟙] ⇒ [ ⊢ get-∙ •/1]
-  ;
+% Remark: • is not total since 𝟙 • 𝟙, ω • 𝟙, etc. are undefined
 
 % Functionality: If α₁ ∙ α₂ = α and α₁ ∙ α₂ = α', then α = α'
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
   / total /
-  fn MLT1, MLT2 ⇒ case MLT1 of 
-  | [ ⊢ •/0-1] ⇒
-    (case MLT2 of
-    | [ ⊢ •/0-1] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/0-2] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ mult/refl]
-    )
-  | [ ⊢ •/0-2] ⇒
-    (case MLT2 of
-    | [ ⊢ •/0-1] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/0-2] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-1] ⇒ [ ⊢ mult/refl]
-    )
-  | [ ⊢ •/1] ⇒ let [ ⊢ •/1] = MLT2 in [ ⊢ mult/refl]
-  | [ ⊢ •/ω-1] ⇒
-    (case MLT2 of
-    | [ ⊢ •/0-2] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-1] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ mult/refl]
-    )
-  | [ ⊢ •/ω-2] ⇒
-    (case MLT2 of
-    | [ ⊢ •/0-1] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-1] ⇒ [ ⊢ mult/refl]
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ mult/refl]
-    )
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/10] ⇒ let [ ⊢ •/10] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
-% Identity: 
+% Identity:
 % (1) If α₁ ∙ α₂ = α and α₁ is an identity element, then α₂ = α
 % (2) For any α, obtain an identity element β such that β • α = α
 
 rec mult_id : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α₁] → [ ⊢ mult_eq α₂ α] =
-  / total 1 /
-  fn m, u ⇒
-  let [ ⊢ ident/0] = u in
-  case m of
-  | [ ⊢ •/0-1] ⇒ [ ⊢ mult/refl]
-  | [ ⊢ •/0-2] ⇒ [ ⊢ mult/refl]
-  | [ ⊢ •/ω-2] ⇒ [ ⊢ mult/refl]
+  / total /
+  fn m, i ⇒ case m of
+  | [ ⊢ •/00] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/10] ⇒ impossible i
+  | [ ⊢ •/ωω] ⇒ [ ⊢ mult/refl]
   ;
 
 LF get_u∙ : mult → type =
@@ -74,84 +34,100 @@ LF get_u∙ : mult → type =
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_u∙ α] =
   / total /
-  mlam _ ⇒ [ ⊢ get-u∙ ident/0 •/0-1]
+  mlam α ⇒ case [ ⊢ α] of
+  | [ ⊢ 𝟘] ⇒ [ ⊢ get-u∙ ident/0 •/00]
+  | [ ⊢ 𝟙] ⇒ [ ⊢ get-u∙ ident/0 •/01]
+  | [ ⊢ ω] ⇒ [ ⊢ get-u∙ ident/ω •/ωω]
   ;
 
 % Zero-sum-freedom: If α₁ ∙ α₂ = α and α is an identity element, then α₁ = α
 
 rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_eq α₁ α] =
-  / total 1 /
-  fn m, u ⇒ 
-  let [ ⊢ ident/0] = u in
-  case m of
-  | [ ⊢ •/0-1] ⇒ [ ⊢ mult/refl]
-  | [ ⊢ •/0-2] ⇒ [ ⊢ mult/refl]
+  / total /
+  fn m, u ⇒ case u of
+  | [ ⊢ ident/0] ⇒ let [ ⊢ •/00] = m in [ ⊢ mult/refl]
+  | [ ⊢ ident/ω] ⇒ let [ ⊢ •/ωω] = m in [ ⊢ mult/refl]
+  ;
+
+rec mult_zsfree_cor : [ ⊢ • α₁ α₂ 𝟘] → [ ⊢ mult_eq α₁ 𝟘] =
+  / total /
+  fn m ⇒ mult_zsfree m [ ⊢ ident/0]
   ;
 
 % Commutativity: If α₁ ∙ α₂ = α, then α₂ ∙ α₁ = α
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total /
-  fn MLT ⇒ case MLT of 
-  | [ ⊢ •/0-1] ⇒ [ ⊢ •/0-2]
-  | [ ⊢ •/0-2] ⇒ [ ⊢ •/0-1]
-  | [ ⊢ •/1]   ⇒ [ ⊢ •/1]
-  | [ ⊢ •/ω-1] ⇒ [ ⊢ •/ω-2]
-  | [ ⊢ •/ω-2] ⇒ [ ⊢ •/ω-1]
+  fn m ⇒ case m of
+  | [ ⊢ •/00] ⇒ [ ⊢ •/00]
+  | [ ⊢ •/01] ⇒ [ ⊢ •/10]
+  | [ ⊢ •/10] ⇒ [ ⊢ •/01]
+  | [ ⊢ •/ωω] ⇒ [ ⊢ •/ωω]
   ;
 
 % Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
 
 LF •assoc : • _ _ _ → • _ _ _ → type =
-| •/assoc : • α₂ α₃ α₂₃ → • α₁ α₂₃ α →
-            {MLT1:• α₁ α₂ α₁₂}{MLT2:• α₁₂ α₃ α} •assoc MLT1 MLT2;
+  •/assoc : • α₂ α₃ α₂₃ → • α₁ α₂₃ α → {M1:• α₁ α₂ α₁₂} {M2:• α₁₂ α₃ α} •assoc M1 M2;
 
-rec mult_assoc : {MLT1:[ ⊢ • α₁ α₂ α₁₂]} {MLT2:[ ⊢ • α₁₂ α₃ α]} [ ⊢ •assoc MLT1 MLT2] =
+rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]} [ ⊢ •assoc M1 M2] =
+  / total 2 /
+  mlam M1, M2 ⇒ case [ ⊢ M2] of
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = [ ⊢ M1] in [ ⊢ •/assoc •/00 •/00 M1 M2]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/00] = [ ⊢ M1] in [ ⊢ •/assoc •/01 •/01 M1 M2]
+  | [ ⊢ •/10] ⇒
+    (case [ ⊢ M1] of
+    | [ ⊢ •/10] ⇒ [ ⊢ •/assoc •/00 •/10 M1 M2]
+    | [ ⊢ •/01] ⇒ [ ⊢ •/assoc •/10 •/01 M1 M2]
+    )
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = [ ⊢ M1] in [ ⊢ •/assoc •/ωω •/ωω M1 M2]
+  ;
+
+% Cancellativity: If α₁ ∙ α₂ = α and α₁ ∙ α₂' = α, then α₂ = α₂'
+
+rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
-  mlam MLT1, MLT2 ⇒ case [ ⊢ MLT1] of 
-  | [ ⊢ •/0-1] ⇒ [ ⊢ •/assoc MLT2 •/0-1 _ _]
-  | [ ⊢ •/0-2] ⇒ [ ⊢ •/assoc •/0-1 MLT2 _ _]
-  | [ ⊢ •/1] ⇒
-    (case [ ⊢ MLT2] of
-    | [ ⊢ •/0-2] ⇒ [ ⊢ •/assoc •/0-2 •/1 _ _]
-    | [ ⊢ •/ω-1]:[ ⊢ • _ α₃ _] ⇒
-      (case mult_total [ ⊢ 𝟙] [ ⊢ α₃] of
-      | [ ⊢ get-∙ •/0-2] ⇒ [ ⊢ •/assoc •/0-2 •/1 _ _]
-      | [ ⊢ get-∙ •/1] ⇒ [ ⊢ •/assoc •/1 •/ω-2 _ _]
-      | [ ⊢ get-∙ •/ω-2] ⇒ [ ⊢ •/assoc •/ω-2 •/ω-2 _ _]
-      )
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ •/assoc •/ω-2 •/ω-2 _ _]
-    )
-  | [ ⊢ •/ω-1]:[ ⊢ • _ α₂ _] ⇒
-    (case [ ⊢ MLT2] of
-    | [ ⊢ •/0-2] ⇒ [ ⊢ •/assoc •/0-2 •/ω-1 _ _]
-    | [ ⊢ •/ω-1]:[ ⊢ • _ α₃ _] ⇒
-      let [ ⊢ get-∙ MLT3] = mult_total [ ⊢ α₂] [ ⊢ α₃] in
-      [ ⊢ •/assoc MLT3 •/ω-1 _ _]
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ •/assoc •/ω-2 •/ω-1 _ _]
-    )
-  | [ ⊢ •/ω-2] ⇒
-    (case [ ⊢ MLT2] of
-    | [ ⊢ •/0-2] ⇒ [ ⊢ •/assoc •/ω-1 •/ω-2 _ _]
-    | [ ⊢ •/ω-1] ⇒ [ ⊢ •/assoc •/ω-1 •/ω-2 _ _]
-    | [ ⊢ •/ω-2] ⇒ [ ⊢ •/assoc •/ω-1 •/ω-2 _ _]
-    )
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/10] ⇒ let [ ⊢ •/10] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
 %------------------------------------------------------%
-% Properties of unrestricted elements
+% Properties of harmless elements
 %------------------------------------------------------%
 
-% Technical lemmas about unrestricted elements (used to prove context lemmas)
+% Technical lemmas about harmless elements (used to prove context lemmas)
 
-rec mult_unr_id : [ ⊢ unr α] → [ ⊢ • α α α] =
+rec mult_hal_id : [ ⊢ hal α] → [ ⊢ • α α α] =
   / total /
   fn u ⇒ case u of
-  | [ ⊢ unr/0] ⇒ [ ⊢ •/0-1]
-  | [ ⊢ unr/ω] ⇒ [ ⊢ •/ω-1]
+  | [ ⊢ hal/0] ⇒ [ ⊢ •/00]
+  | [ ⊢ hal/ω] ⇒ [ ⊢ •/ωω]
   ;
 
-rec mult_ident_unr : [ ⊢ ident α] → [ ⊢ unr α] =
+rec mult_ident_hal : [ ⊢ ident α] → [ ⊢ hal α] =
   / total /
-  fn u ⇒ let [ ⊢ ident/0] = u in [ ⊢ unr/0]
+  fn u ⇒ case u of
+  | [ ⊢ ident/0] ⇒ [ ⊢ hal/0]
+  | [ ⊢ ident/ω] ⇒ [ ⊢ hal/ω]
+  ;
+
+rec mult_hal_ident : [ ⊢ hal α] → [ ⊢ ident α] =
+  / total /
+  fn u ⇒ case u of
+  | [ ⊢ hal/0] ⇒ [ ⊢ ident/0]
+  | [ ⊢ hal/ω] ⇒ [ ⊢ ident/ω]
+  ;
+
+% If α₁ ∙ α₂ = α and hal(α), then hal(α₁) and hal(α₂)
+
+LF get_hal∙ : mult → type =
+| get-hal∙ : hal α₁ → hal α₂ → • α₁ α₂ α → get_hal∙ α;
+
+rec mult_get_hal : [ ⊢ hal α] → [ ⊢ get_hal∙ α] =
+  fn u ⇒ case u of
+  | [ ⊢ hal/0] ⇒ [ ⊢ get-hal∙ hal/0 hal/0 •/00]
+  | [ ⊢ hal/ω] ⇒ [ ⊢ get-hal∙ hal/ω hal/ω •/ωω]
   ;

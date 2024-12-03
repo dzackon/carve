@@ -35,7 +35,7 @@ LF in_proc : obj → obj → type =
 | inpr/pcomp_1 : ({x:obj} in_proc X (P x)) → in_proc X (pcomp A P Q)
 | inpr/pcomp_2 : ({x:obj} in_proc X (Q x)) → in_proc X (pcomp A P Q)
 | inpr/inl_1 : in_proc X (inl X P)
-| inpr/inl_2' : ({x:obj} in_proc Y (P x)) → in_proc Y (inl X P)
+| inpr/inl_2 : ({x:obj} in_proc Y (P x)) → in_proc Y (inl X P)
 | inpr/inr_1 : in_proc X (inr X P)
 | inpr/inr_2 : ({x:obj} in_proc Y (P x)) → in_proc Y (inr X P)
 | inpr/choice_1 : in_proc X (choice X P Q)

@@ -152,6 +152,7 @@ rec exch_lookup : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]]) [Ψ ⊢ exch Δ₁ m Y k Z 
   fn e, u ⇒
   let [_ ⊢ exch/u NEQ[] U1 U2] = e in
   let [_ ⊢ U'] = upd_refl u in
-  let [_ ⊢ exch-e _ _ LK _ _ _ _ _] = exch_upd [ ⊢ NEQ] [_ ⊢ U1] [_ ⊢ U2] [_ ⊢ U'] in
-  [_ ⊢ look LK]
+  let [_ ⊢ exch-e _ _ U3 _ _ _ _ _] = exch_upd [ ⊢ NEQ] [_ ⊢ U1] [_ ⊢ U2] [_ ⊢ U'] in
+  let [_ ⊢ U3'] = upd_refl [_ ⊢ U3] in
+  [_ ⊢ look U3']
   ;

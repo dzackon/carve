@@ -6,4 +6,6 @@
 
 LF obj : type =
 | lam : (obj → obj) → obj
-| app : obj → obj → obj;
+| app : obj → obj → obj
+| bang : obj → obj
+| letbang : obj → (obj → obj) → obj;

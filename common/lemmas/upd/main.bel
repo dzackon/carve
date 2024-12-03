@@ -145,27 +145,6 @@ rec lookup_unq_obj : [Ψ ⊢ upd Δ n[] X Y₁ A₁[] B₁ α₁[] β₁ Δ₁] 
     )
   ;
 
-% Preservation of look-up under update:
-% If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ and n ≠ m, then (x :α A) ∈ₙ Δ[y :β B ↦ₘ y' :β' B'] for any y',B',β'
-
-rec lookup_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ n[] Y Y' B B' β β' Δ'] → [Ψ ⊢ upd Δ m[] X X' A A' α α' Δ'']
-→ [ ⊢ neq n m] → [Ψ ⊢ lookup_intm m[] X A α Δ'] =
-  fn u1, u2, n ⇒
-  case u1 of
-  | [_ ⊢ upd/t _] ⇒
-    (case u2 of
-    | [_ ⊢ upd/t _] ⇒ impossible neq_irreflex n
-    | [_ ⊢ upd/n U2'] ⇒ [_ ⊢ lookintm (upd/n U2')])
-  | [_ ⊢ upd/n U1']:[_ ⊢ upd _ _ _ _ _ _ _ _ (cons Δ' _ _ _)] ⇒
-    case u2 of
-    | [_ ⊢ upd/t _]:[_ ⊢ upd _ _ Y _ B[] _ β[] _ _] ⇒
-      let [_ ⊢ U3] = refl_top [_ ⊢ Δ'] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
-      [_ ⊢ lookintm U3]
-    | [_ ⊢ upd/n U2'] ⇒
-      let [_ ⊢ lookintm U3] = lookup_upd [_ ⊢ U1'] [_ ⊢ U2'] n in
-      [_ ⊢ lookintm (upd/n U3)]
-  ;
-
 % If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ, and Δ is well-formed, then n ≠ m iff x ≠ y
 
 rec lookup_neq_nat2var : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ n[] X X' A[] A' α[] α' Δ'] → [Ψ ⊢ upd Δ m[] Y Y' B[] B' β[] β' Δ'']
@@ -236,6 +215,10 @@ rec upd_refl : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ n X X' A A' α α'
   fn u ⇒ case u of
   | [_ ⊢ upd/t _] ⇒ [_ ⊢ upd/t _]
   | [_ ⊢ upd/n U] ⇒ let [_ ⊢ U1] = upd_refl [_ ⊢ U] in [_ ⊢ upd/n U1]
+  ;
+
+rec upd_refl2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ n X X A A α α Δ'] → [Ψ ⊢ cx_eq Δ' Δ] =
+  fn u ⇒ upd_func u (upd_refl u)
   ;
 
 % Symmetry: If Δ[x :α A ↦ₙ y :β B] = Δ', then Δ[y :β B ↦ₙ x :α A] = Δ'
@@ -394,6 +377,35 @@ rec upd_conf_obj : [Ψ ⊢ upd Δ₁ _ X₁ X₂ A₁[] A₂[] α₁[] α₂[] �
     )
   ;
 
+%------------------------------------------------------%
+% Look-up properties II
+%------------------------------------------------------%
+
+% Preservation of look-up under update:
+% If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ and n ≠ m, then (x :α A) ∈ₙ Δ[y :β B ↦ₘ y' :β' B'] for any y',B',β'
+
+rec lookup_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ n[] Y Y' B B' β β' Δ'] → [Ψ ⊢ upd Δ m[] X X' A A' α α' Δ'']
+→ [ ⊢ neq n m] → [Ψ ⊢ lookup_intm m[] X A α Δ'] =
+  fn u1, u2, n ⇒
+  case u1 of
+  | [_ ⊢ upd/t _] ⇒
+    (case u2 of
+    | [_ ⊢ upd/t _] ⇒ impossible neq_irreflex n
+    | [_ ⊢ upd/n U2'] ⇒ let [_ ⊢ U3] = upd_refl [_ ⊢ U2'] in [_ ⊢ lookintm (upd/n U3)])
+  | [_ ⊢ upd/n U1']:[_ ⊢ upd _ _ _ _ _ _ _ _ (cons Δ' _ _ _)] ⇒
+    case u2 of
+    | [_ ⊢ upd/t _]:[_ ⊢ upd _ _ Y _ B[] _ β[] _ _] ⇒
+      let [_ ⊢ U3] = refl_top [_ ⊢ Δ'] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
+      [_ ⊢ lookintm U3]
+    | [_ ⊢ upd/n U2'] ⇒
+      let [_ ⊢ lookintm U3] = lookup_upd [_ ⊢ U1'] [_ ⊢ U2'] n in
+      [_ ⊢ lookintm (upd/n U3)]
+  ;
+
+%------------------------------------------------------%
+% Corollaries of algebraic properties
+%------------------------------------------------------%
+
 % Practical corollaries:
 % (1) If Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂][y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ' and n ≠ m, then
 %     Δ[y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ'' and Δ''[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂] = Δ' for some Δ''
@@ -449,7 +461,8 @@ rec lookup_changenmlab : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ m Y Y B 
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_names/eq] ⇒
     let [_ ⊢ obj-tp-lab-refl] = lookup_unq u1 u2 in
-    [_ ⊢ lookin U1_symm]
+    let [_ ⊢ U2] = upd_refl [_ ⊢ U1_symm] in
+    [_ ⊢ lookin U2]
   | [ ⊢ comp_names/neq NEQ] ⇒
     let [_ ⊢ lookintm U3] = lookup_upd u1 u2 [ ⊢ NEQ] in
     [_ ⊢ lookin U3]
@@ -463,7 +476,8 @@ rec lookup_changelab : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ upd Δ m Y Y B B 
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_names/eq] ⇒
     let [_ ⊢ obj-tp-lab-refl] = lookup_unq u1 u2 in
-    [_ ⊢ lookint U1_symm]
+    let [_ ⊢ U2] = upd_refl [_ ⊢ U1_symm] in
+    [_ ⊢ lookint U2]
   | [ ⊢ comp_names/neq NEQ] ⇒
     let [_ ⊢ lookintm U3] = lookup_upd u1 u2 [ ⊢ NEQ] in
     [_ ⊢ lookint U3]

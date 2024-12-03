@@ -19,7 +19,7 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ oft Δ M A] → [Ψ ⊢ step M
       let [_ ⊢ O1'] = tps [_ ⊢ O1] [_ ⊢ ST1] (varctx_merge vc [_ ⊢ M1]) in
       [_ ⊢ oft/app O1' O2 M1]
     | [_ ⊢ s/app2 ST2] ⇒
-      let [_ ⊢ O2'] = tps [_ ⊢ O2] [_ ⊢ ST2] (varctx_merge_r vc [_ ⊢ M1]) in 
+      let [_ ⊢ O2'] = tps [_ ⊢ O2] [_ ⊢ ST2] (varctx_merge_r vc [_ ⊢ M1]) in
       [_ ⊢ oft/app O1 O2' M1]
     | [_ ⊢ s/red] ⇒
       case [_ ⊢ O1] of

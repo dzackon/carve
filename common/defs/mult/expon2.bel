@@ -11,10 +11,11 @@ LF mult : type =
 % α₁ • α₂ = α
 
 LF • : mult → mult → mult → type =
-| •/00 : • 𝟘 𝟘 𝟘
-| •/01 : • 𝟘 𝟙 𝟙
-| •/10 : • 𝟙 𝟘 𝟙
-| •/ωω : • ω ω ω;
+| •/0a : • 𝟘 α α
+| •/a0 : • α 𝟘 α
+| •/11 : • 𝟙 𝟙 ω
+| •/ωa : • ω _ ω
+| •/aω : • _ ω ω;
 
 % α is unrestricted or used
 
@@ -25,8 +26,7 @@ LF hal : mult → type =
 % α is an identity element w.r.t. •
 
 LF ident : mult → type =
-| ident/0 : ident 𝟘
-| ident/ω : ident ω;
+| ident/0 : ident 𝟘;
 
 % α = α
 

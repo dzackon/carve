@@ -18,14 +18,14 @@ rec varctx_ext : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ Δ[..]] =
   fn vc ⇒ case vc of
   | VCtx/n ⇒ VCtx/n
   | VCtx/c vc ⇒ VCtx/c (varctx_ext vc)
-  ; 
+  ;
 
 % Extending a context with a fresh variable preserves VarCtx predicate
 
 rec varctx_extcons : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ cons Δ[..] x _ _] =
   / total /
   fn vc ⇒ VCtx/c (varctx_ext vc)
-  ; 
+  ;
 
 % If VarCtx [Ψ ⊢ Δ] and Δ₁ ⋈ Δ₂ = Δ, then VarCtx [Ψ ⊢ Δ₁] and VarCtx [Ψ ⊢ Δ₂]
 

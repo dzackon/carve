@@ -12,7 +12,7 @@ rec len_vlook_lt : (η:[ ⊢ venv N]) [ ⊢ lookup_venv n[] W η] → [ ⊢ lt n
   ;
 
 % Determine a value's type by performing a look-up in the linear context:
-% If η : Δ, A^𝟙 ∈ₙ Δ, and W ∈ₙ η, then W : A
+% If η : Δ, A¹ ∈ₙ Δ, and W ∈ₙ η, then W : A
 
 rec lookup_hasty : [ ⊢ hasty_env η Δ] → [ ⊢ upd Δ n _ _ A _ 𝟙 _ _] → [ ⊢ lookup_venv n W η]
 → [ ⊢ hasty W A] =

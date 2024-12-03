@@ -1,0 +1,157 @@
+%======================================================%
+% Algebraic properties of multiplicities
+% (linear systems with exponentials)
+%======================================================%
+
+% Remark: cancellativity does not hold since ω ∙ α = ω for any α
+
+% Totality: For any α₁, α₂, there exists an α such that α₁ ∙ α₂ = α
+
+LF get∙ : mult → mult → type =
+| get-∙ : • α₁ α₂ α → get∙ α₁ α₂;
+
+rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get∙ α₁ α₂] =
+  / total /
+  mlam α₁, α₂ ⇒
+  case [ ⊢ α₁] of
+  | [ ⊢ 𝟘] ⇒ [_ ⊢ get-∙ •/0a]
+  | [ ⊢ ω] ⇒ [_ ⊢ get-∙ •/ωa]
+  | [ ⊢ 𝟙] ⇒
+    case [ ⊢ α₂] of
+    | [ ⊢ 𝟘] ⇒ [ ⊢ get-∙ •/a0]
+    | [ ⊢ ω] ⇒ [ ⊢ get-∙ •/aω]
+    | [ ⊢ 𝟙] ⇒ [ ⊢ get-∙ •/11]
+  ;
+
+% Functionality: If α₁ ∙ α₂ = α and α₁ ∙ α₂ = α', then α = α'
+
+rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
+  / total /
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/0a] ⇒
+    (case m2 of
+    | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/aω] ⇒ [ ⊢ mult/refl]
+    )
+  | [ ⊢ •/a0] ⇒
+    (case m2 of
+    | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/ωa] ⇒ [ ⊢ mult/refl]
+    )
+  | [ ⊢ •/11] ⇒ let [ ⊢ •/11] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωa] ⇒
+    (case m2 of
+    | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/ωa] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/aω] ⇒ [ ⊢ mult/refl]
+    )
+  | [ ⊢ •/aω] ⇒
+    (case m2 of
+    | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/ωa] ⇒ [ ⊢ mult/refl]
+    | [ ⊢ •/aω] ⇒ [ ⊢ mult/refl]
+    )
+  ;
+
+% Identity:
+% (1) If α₁ ∙ α₂ = α and α₁ is an identity element, then α₂ = α
+% (2) For any α, obtain an identity element β such that β • α = α
+
+rec mult_id : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α₁] → [ ⊢ mult_eq α₂ α] =
+  / total 1 /
+  fn m, u ⇒
+  let [ ⊢ ident/0] = u in
+  case m of
+  | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/aω] ⇒ [ ⊢ mult/refl]
+  ;
+
+LF get_u∙ : mult → type =
+| get-u∙ : ident β → • β α α → get_u∙ α;
+
+rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_u∙ α] =
+  / total /
+  mlam _ ⇒ [ ⊢ get-u∙ ident/0 •/0a]
+  ;
+
+% Zero-sum-freedom: If α₁ ∙ α₂ = α and α is an identity element, then α₁ = α
+
+rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ ident α] → [ ⊢ mult_eq α₁ α] =
+  / total /
+  fn m, u ⇒
+  let [ ⊢ ident/0] = u in
+  case m of
+  | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
+  ;
+
+% Commutativity: If α₁ ∙ α₂ = α, then α₂ ∙ α₁ = α
+
+rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
+  / total /
+  fn m ⇒ case m of
+  | [ ⊢ •/0a] ⇒ [ ⊢ •/a0]
+  | [ ⊢ •/a0] ⇒ [ ⊢ •/0a]
+  | [ ⊢ •/11] ⇒ [ ⊢ •/11]
+  | [ ⊢ •/ωa] ⇒ [ ⊢ •/aω]
+  | [ ⊢ •/aω] ⇒ [ ⊢ •/ωa]
+  ;
+
+% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
+
+LF •assoc : • _ _ _ → • _ _ _ → type =
+| •/assoc : • α₂ α₃ α₂₃ → • α₁ α₂₃ α →
+            {M1:• α₁ α₂ α₁₂}{M2:• α₁₂ α₃ α} •assoc M1 M2;
+
+rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]} [ ⊢ •assoc M1 M2] =
+  / total /
+  mlam M1, M2 ⇒ case [ ⊢ M1] of
+  | [ ⊢ •/0a] ⇒ [ ⊢ •/assoc M2 •/0a _ _]
+  | [ ⊢ •/a0] ⇒ [ ⊢ •/assoc •/0a M2 _ _]
+  | [ ⊢ •/11] ⇒
+    (case [ ⊢ M2] of
+    | [ ⊢ •/a0] ⇒ [ ⊢ •/assoc •/a0 •/11 _ _]
+    | [ ⊢ •/ωa]:[ ⊢ • _ α₃ _] ⇒
+      (case mult_total [ ⊢ 𝟙] [ ⊢ α₃] of
+      | [ ⊢ get-∙ •/a0] ⇒ [ ⊢ •/assoc •/a0 •/11 _ _]
+      | [ ⊢ get-∙ •/11] ⇒ [ ⊢ •/assoc •/11 •/aω _ _]
+      | [ ⊢ get-∙ •/aω] ⇒ [ ⊢ •/assoc •/aω •/aω _ _]
+      )
+    | [ ⊢ •/aω] ⇒ [ ⊢ •/assoc •/aω •/aω _ _]
+    )
+  | [ ⊢ •/ωa]:[ ⊢ • _ α₂ _] ⇒
+    (case [ ⊢ M2] of
+    | [ ⊢ •/a0] ⇒ [ ⊢ •/assoc •/a0 •/ωa _ _]
+    | [ ⊢ •/ωa]:[ ⊢ • _ α₃ _] ⇒
+      let [ ⊢ get-∙ M3] = mult_total [ ⊢ α₂] [ ⊢ α₃] in
+      [ ⊢ •/assoc M3 •/ωa _ _]
+    | [ ⊢ •/aω] ⇒ [ ⊢ •/assoc •/aω •/ωa _ _]
+    )
+  | [ ⊢ •/aω] ⇒
+    (case [ ⊢ M2] of
+    | [ ⊢ •/a0] ⇒ [ ⊢ •/assoc •/ωa •/aω _ _]
+    | [ ⊢ •/ωa] ⇒ [ ⊢ •/assoc •/ωa •/aω _ _]
+    | [ ⊢ •/aω] ⇒ [ ⊢ •/assoc •/ωa •/aω _ _]
+    )
+  ;
+
+%------------------------------------------------------%
+% Properties of harmless elements
+%------------------------------------------------------%
+
+% Technical lemmas about harmless elements (used to prove context lemmas)
+
+rec mult_hal_id : [ ⊢ hal α] → [ ⊢ • α α α] =
+  / total /
+  fn u ⇒ case u of
+  | [ ⊢ hal/0] ⇒ [ ⊢ •/0a]
+  | [ ⊢ hal/ω] ⇒ [ ⊢ •/ωa]
+  ;
+
+rec mult_ident_hal : [ ⊢ ident α] → [ ⊢ hal α] =
+  / total /
+  fn u ⇒ let [ ⊢ ident/0] = u in [ ⊢ hal/0]
+  ;

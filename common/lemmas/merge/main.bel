@@ -74,7 +74,7 @@ rec merge_getid : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ mg_getid Δ] =
     let [_ ⊢ merge-getid M EXH] = merge_getid [_ ⊢ Δ'] in
     let [ ⊢ get-u∙ U1 T1] = mult_get_id [ ⊢ α] in
     let [ ⊢ T2] = mult_comm [ ⊢ T1] in
-    let [ ⊢ U2] = mult_ident_unr [ ⊢ U1] in
+    let [ ⊢ U2] = mult_ident_hal [ ⊢ U1] in
     [_ ⊢ merge-getid (mg/c M T2[]) (exh/c EXH U2[])]
   ;
 
@@ -153,7 +153,7 @@ rec merge_lookup2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {U:[Ψ ⊢ upd Δ₁ n X X' 
 % Distributivity of updating over ⋈:
 % Δ₁[x :α₁ A ↦ₙ x' :β₁ B] ⋈ Δ₂[x :α₂ A ↦ₙ x' :β₂ B] = (Δ₁ ⋈ Δ₂)[x :(α₁•α₂) A ↦ₙ x' :(β₁•β₂) B]
 
-rec merge_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ upd Δ₁ n X X' A B α₁ β₁[] Δ₁'] → [Ψ ⊢ upd Δ₂ n X X' A B α₂ β₂[] Δ₂'] → [Ψ ⊢ upd Δ n X X' A B α β[] Δ'] 
+rec merge_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ upd Δ₁ n X X' A B α₁ β₁[] Δ₁'] → [Ψ ⊢ upd Δ₂ n X X' A B α₂ β₂[] Δ₂'] → [Ψ ⊢ upd Δ n X X' A B α β[] Δ']
 → [ ⊢ • β₁ β₂ β] → [Ψ ⊢ merge Δ₁' Δ₂' Δ'] =
   / total 4 /
   fn m, u1, u2, u, t ⇒ case u of

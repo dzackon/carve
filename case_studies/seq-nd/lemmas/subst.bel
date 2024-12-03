@@ -8,7 +8,7 @@ rec subst_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]]) [Ψ ⊢ w
   / total 1 /
   fn SUB, EXH ⇒ case SUB of
   | [_ ⊢ wf_subst_empty EXH1] ⇒ [_ ⊢ EXH1]
-  | [_ ⊢ wf_subst_cons1 _ _ _] ⇒ 
+  | [_ ⊢ wf_subst_cons1 _ _ _] ⇒
     let [_ ⊢ exh/c _ T[]] = EXH in
     impossible [ ⊢ T]
   | [_ ⊢ wf_subst_cons0 SUB1 _ _] ⇒
@@ -37,17 +37,17 @@ rec subst_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   	let [_ ⊢ mg/c M' MLT[]] = [_ ⊢ M] in
   	let [_ ⊢ sub-mg SUB2 SUB3 M2 _ _] = subst_merge [_ ⊢ SUB1] [_ ⊢ M'] in
   	(case [ ⊢ MLT] of
-  	| [ ⊢ •/a1] ⇒
+  	| [ ⊢ •/10] ⇒
       let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M1] [_ ⊢ M2] in
       let [_ ⊢ SE] = same_elts_trans (merge_same_elts (merge_comm [_ ⊢ M2])) (merge_same_elts_cor [_ ⊢ M1]) in
       [_ ⊢ sub-mg (wf_subst_cons1 SUB2 CH1 M3) (wf_subst_cons0 SUB3 CH1 SE) M4 _ _]
-  	| [ ⊢ •/a2] ⇒
+  	| [ ⊢ •/01] ⇒
       let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
       let [_ ⊢ SE] = same_elts_trans (merge_same_elts [_ ⊢ M2]) (merge_same_elts_cor [_ ⊢ M1]) in
       [_ ⊢ sub-mg (wf_subst_cons0 SUB2 CH1 SE) (wf_subst_cons1 SUB3 CH1 M3) M4 _ _]
   	)
   | [_ ⊢ wf_subst_cons0 SUB1 CH1 SE1] ⇒
-  	let [_ ⊢ mg/c M1 •/us] = [_ ⊢ M] in
+  	let [_ ⊢ mg/c M1 •/00] = [_ ⊢ M] in
     let [_ ⊢ sub-mg SUB2 SUB3 M2 _ _] = subst_merge [_ ⊢ SUB1] [_ ⊢ M1] in
     let [_ ⊢ SE2] = same_elts_trans (merge_same_elts [_ ⊢ M2]) [_ ⊢ SE1] in
     let [_ ⊢ SE3] = same_elts_trans (merge_same_elts (merge_comm [_ ⊢ M2])) [_ ⊢ SE1] in
@@ -89,11 +89,11 @@ rec subst_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
 [Ψ ⊢ wf_subst Δ σ Γ] → {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ wf_subst (cons Δ X A[] 𝟘) σ Γ] =
   / total 1 /
   fn SUB ⇒ mlam X, A ⇒ case SUB of
-  | [_ ⊢ wf_subst_empty E] ⇒ [_ ⊢ wf_subst_empty (exh/c E unr/0)]
+  | [_ ⊢ wf_subst_empty E] ⇒ [_ ⊢ wf_subst_empty (exh/c E hal/0)]
   | [_ ⊢ wf_subst_cons1 SUB1 CH1 M1] ⇒
     let [_ ⊢ SUB1'] = subst_weak [_ ⊢ SUB1] [_ ⊢ X] [ ⊢ A] in
     let [_ ⊢ CH1'] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
-    [_ ⊢ wf_subst_cons1 SUB1' CH1' (mg/c M1 •/us)]
+    [_ ⊢ wf_subst_cons1 SUB1' CH1' (mg/c M1 •/00)]
   | [_ ⊢ wf_subst_cons0 SUB1 CH1 SE1] ⇒
     let [_ ⊢ SUB1'] = subst_weak [_ ⊢ SUB1] [_ ⊢ X] [ ⊢ A] in
     let [_ ⊢ CH1'] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
@@ -110,6 +110,6 @@ rec subst_extend : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   let [_ ⊢ merge-getid M E] = merge_getid [_ ⊢ Δ] in
   let [_ ⊢ SE] = merge_same_elts_cor [_ ⊢ M] in
   case [ ⊢ α] of
-  | [ ⊢ 𝟘] ⇒ [_ ⊢ wf_subst_cons0 SUB1 (conv (init (upd/t _) (exh/c E unr/0))) (se/c SE)]
-  | [ ⊢ 𝟙] ⇒ [_ ⊢ wf_subst_cons1 SUB1 (conv (init (upd/t _) (exh/c E unr/0))) (mg/c M •/a2)]
+  | [ ⊢ 𝟘] ⇒ [_ ⊢ wf_subst_cons0 SUB1 (conv (init (upd/t _) (exh/c E hal/0))) (se/c SE)]
+  | [ ⊢ 𝟙] ⇒ [_ ⊢ wf_subst_cons1 SUB1 (conv (init (upd/t _) (exh/c E hal/0))) (mg/c M •/01)]
   ;

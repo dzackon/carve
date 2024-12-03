@@ -3,6 +3,7 @@
 %======================================================%
 
 LF tp : type =
+| base : tp
 | -o : tp → tp → tp
-| base : tp;
+| ! : tp → tp;
 --infix -o 5 right.

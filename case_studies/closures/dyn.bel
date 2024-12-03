@@ -18,7 +18,7 @@ LF lookup_venv : nat → val → venv _ → type =
 | vlook/t : {η:venv N} lookup_venv (suc N) W (vcons η W)
 | vlook/n : lookup_venv n W η → lookup_venv n W (vcons η W');
 
-% η, M ⇒ w, i.e., in environment η, expression M evaluates to value W
+% η ⊢ M ⇓ w, i.e., in environment η, expression M evaluates to value W
 
 LF eval : venv _ → obj → val → type =
 | eval/var : lookup_venv n W η → eval η (var n) W

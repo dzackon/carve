@@ -9,14 +9,14 @@ LF mult : type =
 % α₁ • α₂ = α
 
 LF • : mult → mult → mult → type =
-| •/us : • 𝟘 𝟘 𝟘
-| •/a1 : • 𝟙 𝟘 𝟙
-| •/a2 : • 𝟘 𝟙 𝟙;
+| •/00 : • 𝟘 𝟘 𝟘
+| •/10 : • 𝟙 𝟘 𝟙
+| •/01 : • 𝟘 𝟙 𝟙;
 
-% α is unavilable/consumed
+% α is harmless
 
-LF unr : mult → type =
-| unr/0 : unr 𝟘;
+LF hal : mult → type =
+| hal/0 : hal 𝟘;
 
 % α is an identity element w.r.t. •
 

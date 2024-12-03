@@ -10,9 +10,9 @@
 
 rec dual_sym : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
   / total 1 /
-  fn DU ⇒ case DU of
+  fn d ⇒ case d of
   | [ ⊢ D1] ⇒ [ ⊢ D⊥]
-  | [ ⊢ D⊥] ⇒  [ ⊢ D1]
+  | [ ⊢ D⊥] ⇒ [ ⊢ D1]
   | [ ⊢ D⊗ Dl Dr] ⇒
     let [ ⊢ l] = dual_sym [ ⊢ Dl] in
     let [ ⊢ r] = dual_sym [ ⊢ Dr] in
@@ -35,26 +35,26 @@ rec dual_sym : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
 
 rec dual_uniq : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ eq A' A''] =
   / total 1 /
-  fn DU1, DU2 ⇒ case DU1 of
-  | [ ⊢ D1] ⇒ let [ ⊢ D1] = DU2 in [ ⊢ refl]
-  | [ ⊢ D⊥] ⇒ let [ ⊢ D⊥] = DU2 in [ ⊢ refl]
+  fn d1, d2 ⇒ case d1 of
+  | [ ⊢ D1] ⇒ let [ ⊢ D1] = d2 in [ ⊢ refl]
+  | [ ⊢ D⊥] ⇒ let [ ⊢ D⊥] = d2 in [ ⊢ refl]
   | [ ⊢ D⊗ DU1l DU1r] ⇒
-    let [ ⊢ D⊗ DU2l DU2r] = DU2 in
+    let [ ⊢ D⊗ DU2l DU2r] = d2 in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ refl]
   | [ ⊢ D⅋ DU1l DU1r] ⇒
-    let [ ⊢ D⅋ DU2l DU2r] = DU2 in
+    let [ ⊢ D⅋ DU2l DU2r] = d2 in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ refl]
   | [ ⊢ D& DU1l DU1r] ⇒
-    let [ ⊢ D& DU2l DU2r] = DU2 in
+    let [ ⊢ D& DU2l DU2r] = d2 in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ refl]
   | [ ⊢ D⊕ DU1l DU1r] ⇒
-    let [ ⊢ D⊕ DU2l DU2r] = DU2 in
+    let [ ⊢ D⊕ DU2l DU2r] = d2 in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
     let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ refl]
@@ -62,7 +62,7 @@ rec dual_uniq : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ eq A' A''] =
 
 % For any types A,B, either A = B or A ≠ B
 
-LF subtp_pair : (tp → tp) → (tp → tp) → type = 
+LF subtp_pair : (tp → tp) → (tp → tp) → type =
   | comp_tp/⊗1 : subtp_pair (\t.t ⊗ _) (\t.t ⊗ _)
   | comp_tp/⊗2 : subtp_pair (\t._ ⊗ t) (\t._ ⊗ t)
   | comp_tp/⅋1 : subtp_pair (\t.t ⅋ _) (\t.t ⅋ _)
@@ -89,7 +89,7 @@ rec comp_subtp : ([ ⊢ eq A A'] → [ ⊢ false])
   | [ ⊢ comp_tp/-o2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
   | [ ⊢ comp_tp/⊕1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
   | [ ⊢ comp_tp/⊕2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  ; 
+  ;
 
 inductive CompareTp : {A:[ ⊢ tp]} {B:[ ⊢ tp]} ctype =
   | Tp-Eq : CompareTp [ ⊢ A] [ ⊢ A]
