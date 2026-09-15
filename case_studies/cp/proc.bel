@@ -48,5 +48,6 @@ LF in_proc : obj → obj → type =
 
 LF ≡ : obj → obj → type =
 | ≡comm : dual A A' → ≡ (pcomp A P Q) (pcomp A' Q P)
-| ≡assoc : ≡ (pcomp B (\y.pcomp A P (\x.Q x y)) R) (pcomp A P (\x.pcomp B (Q x) R));
+| ≡assoc : ≡ (pcomp B (\y.pcomp A P (\x.Q x y)) R)
+  (pcomp A P (\x.pcomp B (Q x) R));
 --infix ≡ 11 left.

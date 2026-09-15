@@ -1,0 +1,158 @@
+%======================================================%
+% Algebraic properties of multiplicities
+% (graded systems)
+%======================================================%
+
+% Totality: For any α₁, α₂, there exists an α such that α₁ • α₂ = α
+
+rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂] =
+  / total /
+  mlam α₁, α₂ ⇒
+  let [ ⊢ num n] = [ ⊢ α₁] in
+  let [ ⊢ num m] = [ ⊢ α₂] in
+  let [ ⊢ get-plus P] = plus_total [ ⊢ n] [ ⊢ m] in
+  [ ⊢ get-mult (•/plus P)]
+  ;
+
+rec mult_total_rec : Total =
+  / total /
+  Is-Total mult_total
+  ;
+
+% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
+
+rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
+  / total /
+  fn m1, m2 ⇒
+  let [ ⊢ •/plus P1] = m1 in
+  let [ ⊢ •/plus P2] = m2 in
+  let [ ⊢ nat/refl] = plus_func [ ⊢ P1] [ ⊢ P2] in
+  [ ⊢ mult/refl]
+  ;
+
+% Identity elements:
+% (1) num zero is an identity element
+% (2) every harmless element is an identity element
+
+rec ident_z_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • (num zero) m m2]
+                → [ ⊢ mult_eq m m2] =
+  / total /
+  mlam m, m2 ⇒ fn d ⇒ let [ ⊢ •/plus pl/z] = d in [ ⊢ mult/refl]
+  ;
+
+rec mult_ident_z : Ident [ ⊢ num zero] =
+  / total /
+  Is-Id ident_z_prf
+  ;
+
+rec halident_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → Ident [ ⊢ α] =
+  / total /
+  mlam α ⇒ fn h ⇒ let [ ⊢ hal/z] = h in mult_ident_z
+  ;
+
+rec mult_halident : HalIdent =
+  / total /
+  Hal-Ident halident_prf
+  ;
+
+% Every unit element is harmless
+
+rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
+  / total /
+  mlam _, _ ⇒ fn d ⇒ case d of
+  | [ ⊢ •/plus pl/z] ⇒ [ ⊢ hal/z]
+  | [ ⊢ •/plus (pl/s P)] ⇒ impossible plus_lt_absurd [ ⊢ P] (lt_suc [ ⊢ _])
+  ;
+
+rec mult_unithal : UnitHal =
+  / total /
+  Unit-Hal unithal_prf
+  ;
+
+% For any β, obtain a harmless identity element α such that α • β = β
+
+rec mult_get_id : {β:[ ⊢ mult]} [ ⊢ get_unit β] =
+  / total /
+  mlam α ⇒ let [ ⊢ num n] = [ ⊢ α] in [ ⊢ get-unit hal/z (•/plus pl/z)]
+  ;
+
+% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
+
+rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total /
+  fn m, u ⇒
+  let [ ⊢ hal/z] = u in
+  let [ ⊢ •/plus pl/z] = m in
+  [ ⊢ mult/refl]
+  ;
+
+rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total /
+  mlam _, _, _ ⇒ fn m, u ⇒ mult_zsfree m u
+  ;
+
+rec mult_zsfree_rec : ZsFree =
+  / total /
+  Is-ZsFree zsfree_prf
+  ;
+
+% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
+
+rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
+  / total /
+  fn m ⇒
+  let [ ⊢ •/plus P1] = m in
+  let [ ⊢ P2] = plus_comm [ ⊢ P1] in
+  [ ⊢ •/plus P2]
+  ;
+
+% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
+
+rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
+                 [ ⊢ mult_assoc_res M1 M2] =
+  / total /
+  mlam M1, M2 ⇒
+  let [ ⊢ •/plus P1] = [ ⊢ M1] in
+  let [ ⊢ •/plus P2] = [ ⊢ M2] in
+  let [ ⊢ plus-assoc P3 P4 _ _] = plus_assoc [ ⊢ P1] [ ⊢ P2] in
+  [ ⊢ mult-assoc (•/plus P3) (•/plus P4) _ _]
+  ;
+
+% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
+
+rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total /
+  fn m1, m2 ⇒
+  let [ ⊢ •/plus P1] = m1 in
+  let [ ⊢ •/plus P2] = m2 in
+  let [ ⊢ nat/refl] = plus_canc [ ⊢ P1] [ ⊢ P2] in
+  [ ⊢ mult/refl]
+  ;
+
+rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
+               [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total /
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_canc m1 m2
+  ;
+
+rec mult_cancl : Cancl =
+  / total /
+  Is-Cancl canc_prf
+  ;
+
+%------------------------------------------------------%
+% Properties of harmless elements
+%------------------------------------------------------%
+
+% Harmless elements are idempotent
+
+rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
+  / total /
+  mlam _ ⇒ fn h ⇒ let [ ⊢ hal/z] = h in [ ⊢ •/plus pl/z]
+  ;
+
+rec mult_halidem_rec : HalIdem =
+  / total /
+  Is-HalIdem halidem_prf
+  ;

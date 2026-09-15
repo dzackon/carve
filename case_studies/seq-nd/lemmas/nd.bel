@@ -8,22 +8,25 @@
 
 % 'Prune' LF context to remove dependencies
 
-inductive PruneChk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {CH:[Ψ,x:obj ⊢ chk Δ[..] M C[]]} ctype =
+inductive PruneChk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  {CH:[Ψ,x:obj ⊢ chk Δ[..] M C[]]} ctype =
   Prune-Chk : [Ψ ⊢ chk Δ M C[]]
   → {CH:[Ψ,x:obj ⊢ chk Δ[..] M[..] C[]]} PruneChk [Ψ,x:obj ⊢ CH];
 
-inductive PruneSyn : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {SY:[Ψ,x:obj ⊢ syn Δ[..] M C[]]} ctype =
+inductive PruneSyn : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  {SY:[Ψ,x:obj ⊢ syn Δ[..] M C[]]} ctype =
   Prune-Syn : [Ψ ⊢ syn Δ M C[]]
   → {SY:[Ψ,x:obj ⊢ syn Δ[..] M[..] C[]]} PruneSyn [Ψ,x:obj ⊢ SY];
 
 rec prune_chk : {CH:[Ψ,x:obj ⊢ chk Δ[..] M C[]]} PruneChk [Ψ,x:obj ⊢ CH] =
+  / total c (prune_chk c) /
   mlam CH ⇒ case [_,x:obj ⊢ CH] of
   | [_,x:obj ⊢ conv SY1] ⇒
     let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY1] in
     Prune-Chk [_ ⊢ conv SY2] [_,x:obj ⊢ _]
-  | [_,x:obj ⊢ I① EXH1] ⇒
-    let [_ ⊢ EXH2] = prune_exh [_,x:obj ⊢ EXH1] in
-    Prune-Chk [_ ⊢ I① EXH2] [_,x:obj ⊢ _]
+  | [_,x:obj ⊢ I① E1] ⇒
+    let [_ ⊢ E2] = prune_exh [_,x:obj ⊢ E1] in
+    Prune-Chk [_ ⊢ I① E2] [_,x:obj ⊢ _]
   | [_,x:obj ⊢ E① SY1 CH1 M1] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY1] in
@@ -37,10 +40,12 @@ rec prune_chk : {CH:[Ψ,x:obj ⊢ chk Δ[..] M C[]]} PruneChk [Ψ,x:obj ⊢ CH] 
   | [_,x:obj ⊢ E⊗ SY1 (\y.\z.CH1) M1] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY1] in
-    let Prune-Chk [_,y:obj,z:obj ⊢ CH2] [_,y:obj,z:obj,x:obj ⊢ _] = prune_chk [_,y:obj,z:obj,x:obj ⊢ CH1[..,x,y,z]] in
+    let Prune-Chk [_,y:obj,z:obj ⊢ CH2] [_,y:obj,z:obj,x:obj ⊢ _] =
+      prune_chk [_,y:obj,z:obj,x:obj ⊢ CH1[..,x,y,z]] in
     Prune-Chk [_ ⊢ E⊗ SY2 (\y.\z.CH2) M2] [_,x:obj ⊢ _]
   | [_,x:obj ⊢ I-o \y.CH1] ⇒
-    let Prune-Chk [_,y:obj ⊢ CH2] [_,y:obj,x:obj ⊢ _] = prune_chk [_,y:obj,x:obj ⊢ CH1[..,x,y]] in
+    let Prune-Chk [_,y:obj ⊢ CH2] [_,y:obj,x:obj ⊢ _] =
+      prune_chk [_,y:obj,x:obj ⊢ CH1[..,x,y]] in
     Prune-Chk [_ ⊢ I-o \y.CH2] [_,x:obj ⊢ _]
   | [_,x:obj ⊢ I& CH1 CH2] ⇒
     let Prune-Chk [_ ⊢ CH3] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH1] in
@@ -55,20 +60,23 @@ rec prune_chk : {CH:[Ψ,x:obj ⊢ chk Δ[..] M C[]]} PruneChk [Ψ,x:obj ⊢ CH] 
   | [_,x:obj ⊢ E⊕ SY1 (\y.CH1) (\y.CH2) M1] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY1] in
-    let Prune-Chk [_,y:obj ⊢ CH1'] [_,y:obj,x:obj ⊢ _] = prune_chk [_,y:obj,x:obj ⊢ CH1[..,x,y]] in
-    let Prune-Chk [_,y:obj ⊢ CH2'] [_,y:obj,x:obj ⊢ _] = prune_chk [_,y:obj,x:obj ⊢ CH2[..,x,y]] in
+    let Prune-Chk [_,y:obj ⊢ CH1'] [_,y:obj,x:obj ⊢ _] =
+      prune_chk [_,y:obj,x:obj ⊢ CH1[..,x,y]] in
+    let Prune-Chk [_,y:obj ⊢ CH2'] [_,y:obj,x:obj ⊢ _] =
+      prune_chk [_,y:obj,x:obj ⊢ CH2[..,x,y]] in
     Prune-Chk [_ ⊢ E⊕ SY2 (\y.CH1') (\y.CH2') M2] [_,x:obj ⊢ _]
 
 and rec prune_syn : {SY:[Ψ,x:obj ⊢ syn Δ[..] M C[]]} PruneSyn [Ψ,x:obj ⊢ SY] =
+  / total s (prune_syn s) /
   mlam SY ⇒
   case [_,x:obj ⊢ SY] of
   | [_,x:obj ⊢ coe CH1] ⇒
     let Prune-Chk [_ ⊢ CH2] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH1] in
     Prune-Syn [_ ⊢ coe CH2] [_,x:obj ⊢ _]
-  | [_,x:obj ⊢ init UPD1 EXH1] ⇒
-    let Prune-Upd [_ ⊢ UPD2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ UPD1] in
-    let [_ ⊢ EXH2] = prune_exh [_,x:obj ⊢ EXH1] in
-    Prune-Syn [_ ⊢ init UPD2 EXH2] [_,x:obj ⊢ _]
+  | [_,x:obj ⊢ init U1 E1] ⇒
+    let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1] in
+    let [_ ⊢ E2] = prune_exh [_,x:obj ⊢ E1] in
+    Prune-Syn [_ ⊢ init U2 E2] [_,x:obj ⊢ _]
   | [_,x:obj ⊢ E-o SY1 CH1 M1] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY1] in
@@ -85,33 +93,42 @@ and rec prune_syn : {SY:[Ψ,x:obj ⊢ syn Δ[..] M C[]]} PruneSyn [Ψ,x:obj ⊢ 
 % Exchange lemmas:
 % (1) If Δ ⊢ e ⟸ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟸ A
 % (1) If Δ ⊢ e ⟹ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟹ A
-% (Plus two corollaries as helper lemmas for permuting the topmost elements of a context)
+% (Plus two corollaries as helper lemmas for permuting the topmost elements of a
+% context)
 
-rec chk_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk Δ M C] → [Ψ ⊢ exch Δ n X m Y Δ'] → [Ψ ⊢ chk Δ' M C] =
+rec chk_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ chk Δ M C]
+  → [Ψ ⊢ exch Δ n X m Y Δ']
+  → [Ψ ⊢ chk Δ' M C] =
   / total 1 /
   fn ch1, ex1 ⇒
   let [_ ⊢ exch/u NEQ[] EX1 EX2] = ex1 in
   case ch1 of
   | [_ ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] ex1 in [_ ⊢ conv SY2]
-  | [_ ⊢ I① EXH1] ⇒ let [_ ⊢ EXH2] = exch_exh [_ ⊢ EXH1] ex1 in [_ ⊢ I① EXH2]
+  | [_ ⊢ I① E1] ⇒ let [_ ⊢ E2] = exch_exh [_ ⊢ E1] ex1 in [_ ⊢ I① E2]
   | [_ ⊢ E① SY1 CH1 M1] ⇒
-    let [_ ⊢ exch-mg EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] = exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
+    let [_ ⊢ exch-merge EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] =
+      exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
     let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] [_ ⊢ exch/u NEQ[] EX1a EX2a] in
     let [_ ⊢ CH2] = chk_exch [_ ⊢ CH1] [_ ⊢ exch/u NEQ[] EX1b EX2b] in
     [_ ⊢ E① SY2 CH2 M2]
   | [_ ⊢ I⊗ CH1a CH1b M1] ⇒
-    let [_ ⊢ exch-mg EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] = exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
+    let [_ ⊢ exch-merge EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] =
+      exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
     let [_ ⊢ CH2a] = chk_exch [_ ⊢ CH1a] [_ ⊢ exch/u NEQ[] EX1a EX2a] in
     let [_ ⊢ CH2b] = chk_exch [_ ⊢ CH1b] [_ ⊢ exch/u NEQ[] EX1b EX2b] in
     [_ ⊢ I⊗ CH2a CH2b M2]
   | [_ ⊢ E⊗ SY1 (\x.\y.CH1) M1] ⇒
-    let [_ ⊢ exch-mg EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] = exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
+    let [_ ⊢ exch-merge EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] =
+      exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
     let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] [_ ⊢ exch/u NEQ[] EX1a EX2a] in
     let [_,x:obj,y:obj ⊢ CH2] = chk_exch [_,x:obj,y:obj ⊢ CH1]
-      [_,x:obj,y:obj ⊢ exch/u NEQ[] (upd/n (upd/n EX1b[..])) (upd/n (upd/n EX2b[..]))] in
+      [_,x:obj,y:obj ⊢ exch/u NEQ[] (upd/n (upd/n EX1b[..]))
+        (upd/n (upd/n EX2b[..]))] in
     [_ ⊢ E⊗ SY2 (\x.\y.CH2) M2]
   | [_ ⊢ I-o \x.CH1] ⇒
-    let [_,x:obj ⊢ CH2] = chk_exch [_,x:obj ⊢ CH1] [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1[..]) (upd/n EX2[..])] in
+    let [_,x:obj ⊢ CH2] = chk_exch [_,x:obj ⊢ CH1]
+      [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1[..]) (upd/n EX2[..])] in
     [_ ⊢ I-o \x.CH2]
   | [_ ⊢ I& CH1a CH1b] ⇒
     let [_ ⊢ CH2a] = chk_exch [_ ⊢ CH1a] ex1 in
@@ -120,24 +137,32 @@ rec chk_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk Δ M C] → [Ψ ⊢ e
   | [_ ⊢ I⊕1 CH1] ⇒ let [_ ⊢ CH2] = chk_exch [_ ⊢ CH1] ex1 in [_ ⊢ I⊕1 CH2]
   | [_ ⊢ I⊕2 CH1] ⇒ let [_ ⊢ CH2] = chk_exch [_ ⊢ CH1] ex1 in [_ ⊢ I⊕2 CH2]
   | [_ ⊢ E⊕ SY1 (\x.CH1a) (\x.CH1b) M1] ⇒
-    let [_ ⊢ exch-mg EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] = exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
+    let [_ ⊢ exch-merge EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] =
+      exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
     let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] [_ ⊢ exch/u NEQ[] EX1a EX2a] in
-    let [_,x:obj ⊢ CH2a] = chk_exch [_,x:obj ⊢ CH1a] [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1b[..]) (upd/n EX2b[..])] in
-    let [_,x:obj ⊢ CH2b] = chk_exch [_,x:obj ⊢ CH1b] [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1b[..]) (upd/n EX2b[..])] in
+    let [_,x:obj ⊢ CH2a] = chk_exch [_,x:obj ⊢ CH1a]
+      [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1b[..]) (upd/n EX2b[..])] in
+    let [_,x:obj ⊢ CH2b] = chk_exch [_,x:obj ⊢ CH1b]
+      [_,x:obj ⊢ exch/u NEQ[] (upd/n EX1b[..]) (upd/n EX2b[..])] in
     [_ ⊢ E⊕ SY2 (\x.CH2a) (\x.CH2b) M2]
 
-and rec syn_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn Δ M C] → [Ψ ⊢ exch Δ n X m Y Δ'] → [Ψ ⊢ syn Δ' M C] =
+and rec syn_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ syn Δ M C]
+  → [Ψ ⊢ exch Δ n X m Y Δ']
+  → [Ψ ⊢ syn Δ' M C] =
   / total 1 /
   fn s1, ex1 ⇒
   let [_ ⊢ exch/u NEQ[] EX1 EX2] = ex1 in
   case s1 of
   | [_ ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = chk_exch [_ ⊢ CH1] ex1 in [_ ⊢ coe CH2]
-  | [_ ⊢ init UPD1 EXH1] ⇒
-    let [_ ⊢ exch-e EX1' EX2' UPD2 _ _ _ _ _] = exch_upd [ ⊢ NEQ] [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ UPD1] in
-    let [_ ⊢ EXH2] = exch_exh [_ ⊢ EXH1] [_ ⊢ exch/u NEQ[] EX1' EX2'] in
-    [_ ⊢ init UPD2 EXH2]
+  | [_ ⊢ init U1 E1] ⇒
+    let [_ ⊢ exch-upd EX1' EX2' U2 _ _ _ _ _] =
+      exch_upd [ ⊢ NEQ] [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ U1] in
+    let [_ ⊢ E2] = exch_exh [_ ⊢ E1] [_ ⊢ exch/u NEQ[] EX1' EX2'] in
+    [_ ⊢ init U2 E2]
   | [_ ⊢ E-o SY1 CH1 M1] ⇒
-    let [_ ⊢ exch-mg EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] = exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
+    let [_ ⊢ exch-merge EX1a EX2a EX1b EX2b _ M2 _ _ _ _ _] =
+      exch_merge [_ ⊢ EX1] [_ ⊢ EX2] [_ ⊢ M1] in
     let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] [_ ⊢ exch/u NEQ[] EX1a EX2a] in
     let [_ ⊢ CH2] = chk_exch [_ ⊢ CH1] [_ ⊢ exch/u NEQ[] EX1b EX2b] in
     [_ ⊢ E-o SY2 CH2 M2]
@@ -146,17 +171,22 @@ and rec syn_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn Δ M C] → [Ψ �
   ;
 
 rec chk_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-[Ψ ⊢ chk (cons (cons Δ X A[] α[]) Y B[] β[]) M C] → [Ψ ⊢ chk (cons (cons Δ Y B[] β[]) X A[] α[]) M C] =
+  [Ψ ⊢ chk (cons (cons Δ X A[] α[]) Y B[] β[]) M C]
+  → [Ψ ⊢ chk (cons (cons Δ Y B[] β[]) X A[] α[]) M C] =
   / total /
-  fn ch1 ⇒ chk_exch ch1 (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
+  fn ch1 ⇒ chk_exch ch1
+    (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
 
 rec chk_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-[Ψ ⊢ chk (cons (cons (cons Δ X A α) Y B β) Z C γ) M D] → [Ψ ⊢ chk (cons (cons (cons Δ Y B β) Z C γ) X A α) M D] =
+  [Ψ ⊢ chk (cons (cons (cons Δ X A α) Y B β) Z C γ) M D]
+  → [Ψ ⊢ chk (cons (cons (cons Δ Y B β) Z C γ) X A α) M D] =
   / total /
   fn sq1 ⇒
-  let [_ ⊢ _]:[_ ⊢ chk (cons (cons (cons Δ X A[] α[]) Y B[] β[]) _ _ _) _ _] = sq1 in
-  let [_,x:obj,y:obj ⊢ exch/u NEQ[] EX1 EX2] = exch_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
+  let [_ ⊢ _]:[_ ⊢ chk (cons (cons (cons Δ X A[] α[]) Y B[] β[]) _ _ _) _ _] =
+    sq1 in
+  let [_,x:obj,y:obj ⊢ exch/u NEQ[] EX1 EX2] =
+    exch_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
   chk_exch_top (chk_exch sq1 [_ ⊢ exch/u NEQ[] (upd/n EX1) (upd/n EX2)])
   ;
 
@@ -164,11 +194,13 @@ rec chk_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % (1) If (Δ, x :⁰ A) ⊢ e ⟸ A, then Δ ⊢ e ⟸ A
 % (2) If (Δ, x :⁰ A) ⊢ e ⟹ A, then Δ ⊢ e ⟹ A
 
-rec chk_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk (cons Δ X A[] 𝟘) M C] → [Ψ ⊢ chk Δ M C] =
+rec chk_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ chk (cons Δ X A[] 𝟘) M C]
+  → [Ψ ⊢ chk Δ M C] =
   / total d (chk_str d) /
   fn ch1 ⇒ case ch1 of
   | [_ ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = syn_str [_ ⊢ SY1] in [_ ⊢ conv SY2]
-  | [_ ⊢ I① (exh/c EXH1 _)] ⇒ [_ ⊢ I① EXH1]
+  | [_ ⊢ I① (exh/c E1 _)] ⇒ [_ ⊢ I① E1]
   | [_ ⊢ E① SY1 CH1 (mg/c M1 •/00)] ⇒
     let [_ ⊢ SY2] = syn_str [_ ⊢ SY1] in
     let [_ ⊢ CH2] = chk_str [_ ⊢ CH1] in
@@ -196,11 +228,13 @@ rec chk_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk (cons Δ X A[] 𝟘) M
     let [_,x:obj ⊢ CH2b] = chk_str (chk_exch_top [_,x:obj ⊢ CH1b]) in
     [_ ⊢ E⊕ SY2 (\x.CH2a) (\x.CH2b) M1]
 
-and rec syn_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn (cons Δ X A[] 𝟘) M C] → [Ψ ⊢ syn Δ M C] =
+and rec syn_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ syn (cons Δ X A[] 𝟘) M C]
+  → [Ψ ⊢ syn Δ M C] =
   / total d (syn_str d) /
   fn s1 ⇒ case s1 of
   | [_ ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = chk_str [_ ⊢ CH1] in [_ ⊢ coe CH2]
-  | [_ ⊢ init (upd/n UPD1) (exh/c EXH1 _)] ⇒ [_ ⊢ init UPD1 EXH1]
+  | [_ ⊢ init (upd/n U1) (exh/c E1 _)] ⇒ [_ ⊢ init U1 E1]
   | [_ ⊢ E-o SY1 CH1 (mg/c M1 •/00)] ⇒
     let [_ ⊢ SY2] = syn_str [_ ⊢ SY1] in
     let [_ ⊢ CH2] = chk_str [_ ⊢ CH1] in
@@ -213,13 +247,15 @@ and rec syn_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn (cons Δ X A[] �
 % (1) If Δ ⊢ e ⟸ A, then (Δ, x :⁰ A) ⊢ e ⟸ A for any x, A
 % (2) If Δ ⊢ e ⟹ A, then (Δ, x :⁰ A) ⊢ e ⟹ A for any x, A
 
-rec chk_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk Δ M C]
-→ {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ chk (cons Δ X A[] 𝟘) M C] =
+rec chk_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ chk Δ M C]
+  → {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ chk (cons Δ X A[] 𝟘) M C] =
   / total 1 /
   fn ch1 ⇒ mlam X, A ⇒
   case ch1 of
-  | [_ ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ conv SY2]
-  | [_ ⊢ I① EXH1] ⇒ [_ ⊢ I① (exh/c EXH1 hal/0)]
+  | [_ ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ conv SY2]
+  | [_ ⊢ I① E1] ⇒ [_ ⊢ I① (exh/c E1 hal/0)]
   | [_ ⊢ E① SY1 CH1 M1] ⇒
     let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
     let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
@@ -230,39 +266,52 @@ rec chk_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk Δ M C]
     [_ ⊢ I⊗ CH3 CH4 (mg/c M1 •/00)]
   | [_ ⊢ E⊗ SY1 (\x.\y.CH1) M1] ⇒
     let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
-    let [_,x:obj,y:obj ⊢ CH1'']:[_,x:obj,y:obj ⊢ chk (cons (cons (cons Δ₂[..] _ B1[] _) _ _ _) _ _ _) _ _] =
-      chk_exch_top (chk_weak [_,x:obj,y:obj ⊢ CH1] [_,x:obj,y:obj ⊢ X[..]] [ ⊢ A]) in
-    let [_,x:obj ⊢ exch/u NEQ[] EX1 EX2] = exch_top [_,x:obj ⊢ Δ₂[..]] [_,x:obj ⊢ x] [ ⊢ B1] [ ⊢ 𝟙] [_,x:obj ⊢ X[..]] [ ⊢ A] [ ⊢ 𝟘] in
-    let [_,x:obj,y:obj ⊢ CH1'] = chk_exch [_,x:obj,y:obj ⊢ CH1''] [_,x:obj,y:obj ⊢ exch/u NEQ[] (upd/n EX1[..,x]) (upd/n EX2[..,x])] in
+    let [_,x:obj,y:obj ⊢ CH1'']:
+      [_,x:obj,y:obj ⊢ chk (cons (cons (cons Δ₂[..] _ B1[] _) _ _ _) _ _ _) _ _]
+      = chk_exch_top
+        (chk_weak [_,x:obj,y:obj ⊢ CH1] [_,x:obj,y:obj ⊢ X[..]] [ ⊢ A]) in
+    let [_,x:obj ⊢ exch/u NEQ[] EX1 EX2] = exch_top [_,x:obj ⊢ Δ₂[..]]
+      [_,x:obj ⊢ x] [ ⊢ B1] [ ⊢ 𝟙] [_,x:obj ⊢ X[..]] [ ⊢ A] [ ⊢ 𝟘] in
+    let [_,x:obj,y:obj ⊢ CH1'] = chk_exch [_,x:obj,y:obj ⊢ CH1'']
+      [_,x:obj,y:obj ⊢ exch/u NEQ[] (upd/n EX1[..,x]) (upd/n EX2[..,x])] in
     [_ ⊢ E⊗ SY2 (\x.\y.CH1') (mg/c M1 •/00)]
   | [_ ⊢ I-o \x.CH1] ⇒
-    let [_,x:obj ⊢ CH2] = chk_exch_top (chk_weak [_,x:obj ⊢ CH1] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
+    let [_,x:obj ⊢ CH2] =
+      chk_exch_top (chk_weak [_,x:obj ⊢ CH1] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
     [_ ⊢ I-o \x.CH2]
   | [_ ⊢ I& CH1 CH2] ⇒
     let [_ ⊢ CH3] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
     let [_ ⊢ CH4] = chk_weak [_ ⊢ CH2] [_ ⊢ X] [ ⊢ A] in
     [_ ⊢ I& CH3 CH4]
-  | [_ ⊢ I⊕1 CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ I⊕1 CH2]
-  | [_ ⊢ I⊕2 CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ I⊕2 CH2]
+  | [_ ⊢ I⊕1 CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ I⊕1 CH2]
+  | [_ ⊢ I⊕2 CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ I⊕2 CH2]
   | [_ ⊢ E⊕ SY1 (\x.CH1) (\x.CH2) M1] ⇒
     let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
-    let [_,x:obj ⊢ CH1'] = chk_exch_top (chk_weak [_,x:obj ⊢ CH1] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
-    let [_,x:obj ⊢ CH2'] = chk_exch_top (chk_weak [_,x:obj ⊢ CH2] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
+    let [_,x:obj ⊢ CH1'] =
+      chk_exch_top (chk_weak [_,x:obj ⊢ CH1] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
+    let [_,x:obj ⊢ CH2'] =
+      chk_exch_top (chk_weak [_,x:obj ⊢ CH2] [_,x:obj ⊢ X[..]] [ ⊢ A]) in
     [_ ⊢ E⊕ SY2 (\x.CH1') (\x.CH2') (mg/c M1 •/00)]
 
-and rec syn_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn Δ M C]
-→ {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ syn (cons Δ X A[] 𝟘) M C] =
+and rec syn_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ syn Δ M C]
+  → {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ syn (cons Δ X A[] 𝟘) M C] =
   / total 1 /
   fn sy ⇒ mlam X, A ⇒
   case sy of
-  | [_ ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ coe CH2]
-  | [_ ⊢ init UPD1 EXH1] ⇒ [_ ⊢ init (upd/n UPD1) (exh/c EXH1 hal/0)]
+  | [_ ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ coe CH2]
+  | [_ ⊢ init U1 E1] ⇒ [_ ⊢ init (upd/n U1) (exh/c E1 hal/0)]
   | [_ ⊢ E-o SY1 CH1 M1] ⇒
     let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
     let [_ ⊢ CH2] = chk_weak [_ ⊢ CH1] [_ ⊢ X] [ ⊢ A] in
     [_ ⊢ E-o SY2 CH2 (mg/c M1 •/00)]
-  | [_ ⊢ E&1 SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ E&1 SY2]
-  | [_ ⊢ E&2 SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in [_ ⊢ E&2 SY2]
+  | [_ ⊢ E&1 SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ E&1 SY2]
+  | [_ ⊢ E&2 SY1] ⇒ let [_ ⊢ SY2] = syn_weak [_ ⊢ SY1] [_ ⊢ X] [ ⊢ A] in
+    [_ ⊢ E&2 SY2]
   ;
 
 %------------------------------------------------------%
@@ -274,15 +323,19 @@ and rec syn_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ syn Δ M C]
 % (2) If (Δ₁, x :¹ A) ⊢ e ⟹ C, Δ₂ ⊢ s ⟹ A, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ e[s/x] ⟹ C
 
 rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-[Ψ,x:obj ⊢ chk (cons Δ₁[..] x A[] 𝟙) e C[]] → [Ψ ⊢ syn Δ₂ s A[]] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ chk Δ e[..,s] C[]] =
+  [Ψ,x:obj ⊢ chk (cons Δ₁[..] x A[] 𝟙) e C[]]
+  → [Ψ ⊢ syn Δ₂ s A[]]
+  → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ chk Δ e[..,s] C[]] =
   fn ch1, sy2, mg ⇒
   let ([_ ⊢ SY],[_ ⊢ M]) = (sy2,mg) in
   case ch1 of
-  | [_,x:obj ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in [_ ⊢ conv SY2]
+  | [_,x:obj ⊢ conv SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in
+    [_ ⊢ conv SY2]
   | [_,x:obj ⊢ I① E] ⇒
-      let [_,x:obj ⊢ exh/c _ T[]] = [_,x:obj ⊢ E] in
-      impossible [ ⊢ T]
-  | [_,x:obj ⊢ E① SY1 CH1 (mg/c M1 MLT[])] ⇒
+      let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E] in
+      impossible [ ⊢ H]
+  | [_,x:obj ⊢ E① SY1 CH1 (mg/c M1 T[])] ⇒
     %{
     In the E① case, we get
       Δ₁, x :α₁ A ⊢ s' ⇒ ①
@@ -294,12 +347,13 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       Δ₁₂ ⋈ Δ₃ = Δ
 
     - Δ₁,Δ₂ don't depend on x by `prune_merge`
-    - α₁ ∙ α₂ = 𝟙 by definition, i.e. x : A appears with multiplicity 𝟙 in either Δ₁ or Δ₂,
-    and with multiplicity 𝟘 in the other.
+    - α₁ • α₂ = 𝟙 by definition, i.e. x : A appears with multiplicity 𝟙 in
+      either Δ₁ or Δ₂, and with multiplicity 𝟘 in the other.
     Consider the case where α₁ = 𝟘 and α₂ = 𝟙 (the other case is similar)
 
     - Δ₁ ⊢ s' ⇒ ① by `syn_str`
-    - s' doesn't depend on x by `prune_syn` (using fact that Δ₁ doesn't depend on x)
+    - s' doesn't depend on x by `prune_syn`
+      (using fact that Δ₁ doesn't depend on x)
     - Δ₂ ⋈ Δ₃ = Δ₂₃ and Δ₁ ⋈ Δ₂₃ = Δ for some Δ₂₃ by the associativity of ⋈
     - e[..,s] ⇐ C by the induction hypothesis using
         Δ₂, x :¹ A ⊢ e ⇐ C
@@ -312,58 +366,61 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
         Δ₁ ⋈ Δ₂₃ = Δ
     }%
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
       let [_,x:obj ⊢ CH2'] = chk_str [_ ⊢ CH1] in
       let Prune-Chk [_ ⊢ CH2] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2'] in
-      let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH3] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       [_ ⊢ E① CH3 CH2 M4]
     | [ ⊢ •/01] ⇒
       let [_,x:obj ⊢ SY2'] = syn_str [_ ⊢ SY1] in
       let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY2'] in
-      let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH2] = subst_chk [_,x:obj ⊢ CH1] sy2 [_ ⊢ M3] in
       [_ ⊢ E① SY2 CH2 M4]
     )
-  | [_,x:obj ⊢ I⊗ CH1a CH1b (mg/c M1 MLT[])] ⇒
+  | [_,x:obj ⊢ I⊗ CH1a CH1b (mg/c M1 T[])] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
       let [_,x:obj ⊢ CH2b'] = chk_str [_ ⊢ CH1b] in
       let Prune-Chk [_ ⊢ CH2b] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2b'] in
-      let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH3] = subst_chk [_,x:obj ⊢ CH1a] sy2 [_ ⊢ M3] in
       [_ ⊢ I⊗ CH3 CH2b M4]
     | [ ⊢ •/01] ⇒
       let [_,x:obj ⊢ CH2a'] = chk_str [_ ⊢ CH1a] in
       let Prune-Chk [_ ⊢ CH2a] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2a'] in
-      let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH2b] = subst_chk [_,x:obj ⊢ CH1b] sy2 [_ ⊢ M3] in
       [_ ⊢ I⊗ CH2a CH2b M4]
     )
-  | [_,x:obj ⊢ E⊗ SY1 (\y.\z.CH1) (mg/c M1 MLT[])] ⇒
+  | [_,x:obj ⊢ E⊗ SY1 (\y.\z.CH1) (mg/c M1 T[])] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     let CH1' = chk_exch_top2 [_,y:obj,z:obj,x:obj ⊢ CH1[..,x,y,z]] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       let [_,x:obj,y:obj,z:obj ⊢ CH2'] = chk_str CH1' in
-      let Prune-Chk [_,x:obj,y:obj ⊢ CH2] [_,x:obj,y:obj,z:obj ⊢ _] = prune_chk [_,y:obj,x:obj,z:obj ⊢ CH2'] in
+      let Prune-Chk [_,x:obj,y:obj ⊢ CH2] [_,x:obj,y:obj,z:obj ⊢ _] =
+        prune_chk [_,y:obj,x:obj,z:obj ⊢ CH2'] in
       [_ ⊢ E⊗ SY2 (\x.\y.CH2) M4]
     | [ ⊢ •/01] ⇒
-      let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let [_,x:obj ⊢ SY2'] = syn_str [_ ⊢ SY1] in
       let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY2'] in
       let [_,x:obj,y:obj ⊢ CH2] = subst_chk CH1'
-        (syn_weak ((syn_weak ([_,x:obj,y:obj ⊢ SY[..]]) [_,x:obj,y:obj ⊢ _] [ ⊢ _])) [_,x:obj,y:obj ⊢ _] [ ⊢ _])
+        (syn_weak ((syn_weak ([_,x:obj,y:obj ⊢ SY[..]]) [_,x:obj,y:obj ⊢ _]
+          [ ⊢ _])) [_,x:obj,y:obj ⊢ _] [ ⊢ _])
         [_,x:obj,y:obj ⊢ mg/c (mg/c M3[..] •/10) •/10] in
       [_ ⊢ E⊗ SY2 (\y.\z.CH2) M4]
     )
   | [_,x:obj ⊢ I-o \y.CH1] ⇒
     let [_,x:obj ⊢ CH3] = subst_chk (chk_exch_top [_,y:obj,x:obj ⊢ CH1[..,x,y]])
-      (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _]) [_,x:obj ⊢ mg/c M[..] •/10] in
+      (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _])
+        [_,x:obj ⊢ mg/c M[..] •/10] in
     [_ ⊢ I-o \x.CH3]
   | [_,x:obj ⊢ I& CH1a CH1b] ⇒
     let [_ ⊢ CH3] = subst_chk [_,x:obj ⊢ CH1a] sy2 mg in
@@ -375,32 +432,44 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_,x:obj ⊢ I⊕2 CH1] ⇒
     let [_ ⊢ CH3] = subst_chk [_,x:obj ⊢ CH1] sy2 mg in
     [_ ⊢ I⊕2 CH3]
-  | [_,x:obj ⊢ E⊕ SY1 (\y.CH1a) (\y.CH1b) (mg/c M1 MLT[])] ⇒
+  | [_,x:obj ⊢ E⊕ SY1 (\y.CH1a) (\y.CH1b) (mg/c M1 T[])] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M] [_ ⊢ M2] in
-      let [_,x:obj,y:obj ⊢ CH2a'] = chk_str (chk_exch_top [_,y:obj,x:obj ⊢ CH1a[..,x,y]]) in
-      let [_,x:obj,y:obj ⊢ CH2b'] = chk_str (chk_exch_top [_,y:obj,x:obj ⊢ CH1b[..,x,y]]) in
-      let Prune-Chk [_,y:obj ⊢ CH2a] [_,y:obj,x:obj ⊢ _] = prune_chk [_,y:obj,x:obj ⊢ CH2a'] in
-      let Prune-Chk [_,y:obj ⊢ CH2b] [_,y:obj,x:obj ⊢ _] = prune_chk [_,y:obj,x:obj ⊢ CH2b'] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_,x:obj,y:obj ⊢ CH2a'] =
+        chk_str (chk_exch_top [_,y:obj,x:obj ⊢ CH1a[..,x,y]]) in
+      let [_,x:obj,y:obj ⊢ CH2b'] =
+        chk_str (chk_exch_top [_,y:obj,x:obj ⊢ CH1b[..,x,y]]) in
+      let Prune-Chk [_,y:obj ⊢ CH2a] [_,y:obj,x:obj ⊢ _] =
+        prune_chk [_,y:obj,x:obj ⊢ CH2a'] in
+      let Prune-Chk [_,y:obj ⊢ CH2b] [_,y:obj,x:obj ⊢ _] =
+        prune_chk [_,y:obj,x:obj ⊢ CH2b'] in
       let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       [_ ⊢ E⊕ SY2 (\x.CH2a) (\x.CH2b) M4]
     | [ ⊢ •/01] ⇒
-      let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let [_,x:obj ⊢ SY2'] = syn_str [_ ⊢ SY1] in
       let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY2'] in
-      let [_,x:obj ⊢ CH3] = subst_chk (chk_exch_top [_,y:obj,x:obj ⊢ CH1a[..,x,y]])
-        (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _]) [_,x:obj ⊢ mg/c M3[..] •/10] in
-      let [_,x:obj ⊢ CH4] = subst_chk (chk_exch_top [_,y:obj,x:obj ⊢ CH1b[..,x,y]])
-        (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _]) [_,x:obj ⊢ mg/c M3[..] •/10] in
+      let [_,x:obj ⊢ CH3] = subst_chk
+        (chk_exch_top [_,y:obj,x:obj ⊢ CH1a[..,x,y]])
+        (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _])
+          [_,x:obj ⊢ mg/c M3[..] •/10] in
+      let [_,x:obj ⊢ CH4] = subst_chk
+        (chk_exch_top [_,y:obj,x:obj ⊢ CH1b[..,x,y]])
+        (syn_weak [_,x:obj ⊢ SY[..]] [_,x:obj ⊢ x] [ ⊢ _])
+          [_,x:obj ⊢ mg/c M3[..] •/10] in
       [_ ⊢ E⊕ SY2 (\x.CH3) (\x.CH4) M4]
     )
 
 and rec subst_syn : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-[Ψ,x:obj ⊢ syn (cons Δ₁[..] x A[] 𝟙) e C[]] → [Ψ ⊢ syn Δ₂ s A[]] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ syn Δ e[..,s] C[]] =
+  [Ψ,x:obj ⊢ syn (cons Δ₁[..] x A[] 𝟙) e C[]]
+  → [Ψ ⊢ syn Δ₂ s A[]]
+  → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ syn Δ e[..,s] C[]] =
   fn sy1, sy2, mg ⇒ case sy1 of
-  | [_,x:obj ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = subst_chk [_ ⊢ CH1] sy2 mg in [_ ⊢ coe CH2]
+  | [_,x:obj ⊢ coe CH1] ⇒ let [_ ⊢ CH2] = subst_chk [_ ⊢ CH1] sy2 mg in
+    [_ ⊢ coe CH2]
   | [_,x:obj ⊢ init U1 E1] ⇒
     %{
     Here we have
@@ -417,29 +486,32 @@ and rec subst_syn : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     (case [_,x:obj ⊢ U1] of
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_,x:obj ⊢ exh/c E2 _] = [_,x:obj ⊢ E1] in
-      let [_ ⊢ cx/refl] = merge_id mg (prune_exh [_,x:obj ⊢ E2]) in
+      let [_ ⊢ ctx/refl] =
+        merge_id mult_halident mg (prune_exh [_,x:obj ⊢ E2]) in
       sy2
     | [_,x:obj ⊢ upd/n _] ⇒
-      let [_,x:obj ⊢ exh/c _ T[]] = [_,x:obj ⊢ E1] in
-      impossible [ ⊢ T]
+      let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E1] in
+      impossible [ ⊢ H]
     )
-  | [_,x:obj ⊢ E-o SY1 CH1 (mg/c M1 MLT[])] ⇒
+  | [_,x:obj ⊢ E-o SY1 CH1 (mg/c M1 T[])] ⇒
     let [_ ⊢ M] = mg in
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ mg-assoc2 M3 M4 _ _] = merge_assoc_2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       let [_,x:obj ⊢ CH2'] = chk_str [_,x:obj ⊢ CH1] in
       let Prune-Chk [_ ⊢ CH2] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2'] in
       [_ ⊢ E-o SY2 CH2 M4]
     | [ ⊢ •/01] ⇒
-      let [_ ⊢ mg-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let [_,x:obj ⊢ SY2'] = syn_str [_ ⊢ SY1] in
       let Prune-Syn [_ ⊢ SY2] [_,x:obj ⊢ _] = prune_syn [_,x:obj ⊢ SY2'] in
       let [_ ⊢ CH2] = subst_chk [_,x:obj ⊢ CH1] sy2 [_ ⊢ M3] in
       [_ ⊢ E-o SY2 CH2 M4]
     )
-  | [_,x:obj ⊢ E&1 SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in [_ ⊢ E&1 SY2]
-  | [_,x:obj ⊢ E&2 SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in [_ ⊢ E&2 SY2]
+  | [_,x:obj ⊢ E&1 SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in
+    [_ ⊢ E&1 SY2]
+  | [_,x:obj ⊢ E&2 SY1] ⇒ let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 mg in
+    [_ ⊢ E&2 SY2]
   ;

@@ -12,28 +12,37 @@ rec relus_exh : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
   / total 1 /
   fn ru ⇒ case ru of
   | relUsed/n ⇒ [ ⊢ exh/n]
-  | relUsed/c ru1 ⇒ let [_ ⊢ EXH] = relus_exh ru1 in [_,x:obj ⊢ exh/c EXH[..] hal/0]
+  | relUsed/c ru1 ⇒ let [_ ⊢ E] = relus_exh ru1 in
+    [_,x:obj ⊢ exh/c E[..] hal/0]
   ;
 
-% If RelName [Ψ ⊢ x] [Ψ ⊢ Δ] [Φ ⊢ σ] and (x : A) ∈ Φ, then x is the unique linear element of Δ
+% If RelName [Ψ ⊢ x] [Ψ ⊢ Δ] [Φ ⊢ σ] and (x : A) ∈ Φ, then x is the unique
+% linear element of Δ
 
-LF unqlin : obj → tp → lctx _ → type = unql : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ' → unqlin X A Δ;
+LF unqlin : obj → tp → lctx _ → type = unql : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ'
+  → unqlin X A Δ;
 
-rec relnm_unqlin : RelName [Ψ ⊢ X] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ hyp X[$σ[..]] A[]] → [Ψ ⊢ unqlin X A[] Δ] =
+rec relnm_unqlin :
+  RelName [Ψ ⊢ X] [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Φ ⊢ hyp X[$σ[..]] A[]]
+  → [Ψ ⊢ unqlin X A[] Δ] =
   / total 1 /
   fn rn, hp ⇒ case rn of
   | relName/t ru ⇒
-    let [_ ⊢ EXH] = relus_exh ru in
+    let [_ ⊢ E] = relus_exh ru in
     let [_,b:block x:obj,h:hyp _ _ ⊢ b.2] = hp in
-    [_,x:obj ⊢ unql (upd/t _) (exh/c EXH[..] hal/0)]
+    [_,x:obj ⊢ unql (upd/t _) (exh/c E[..] hal/0)]
   | relName/n rn ⇒
-    let [_ ⊢ unql U1 EXH] = relnm_unqlin rn (prune_hyp hp) in
-    [_,x:obj ⊢ unql (upd/n U1[..]) (exh/c EXH[..] hal/0)]
+    let [_ ⊢ unql U1 E] = relnm_unqlin rn (prune_hyp hp) in
+    [_,x:obj ⊢ unql (upd/n U1[..]) (exh/c E[..] hal/0)]
   ;
 
 % Given Dec relation, obtain hyp judgment from look-up in explicit context
 
-rec relus_lookup_hyp : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _] → [Φ ⊢ hyp X[$σ[..]] A[]] =
+rec relus_lookup_hyp :
+  RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _]
+  → [Φ ⊢ hyp X[$σ[..]] A[]] =
   / total 1 /
   fn ru, u ⇒ case u of
   | [_ ⊢ upd/t _] ⇒ let relUsed/c _ = ru in [_,b:block x:obj,h:hyp _ _ ⊢ b.2]
@@ -45,7 +54,10 @@ rec relus_lookup_hyp : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ upd Δ _ X 
     [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]]
   ;
 
-rec relnm_lookup_hyp : RelName [Ψ ⊢ _] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _] → [Φ ⊢ hyp X[$σ[..]] A[]] =
+rec relnm_lookup_hyp :
+  RelName [Ψ ⊢ _] [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _]
+  → [Φ ⊢ hyp X[$σ[..]] A[]] =
   / total 1 /
   fn rn, u ⇒ case u of
   | [_ ⊢ upd/t _] ⇒
@@ -66,34 +78,38 @@ rec relnm_lookup_hyp : RelName [Ψ ⊢ _] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ 
       [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]]
   ;
 
-rec dec_lookup_hyp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ[..]] → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _] → [Φ ⊢ hyp X[$σ[..]] A[]] =
+rec dec_lookup_hyp :
+  Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ[..]]
+  → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _]
+  → [Φ ⊢ hyp X[$σ[..]] A[]] =
   / total 1 /
   fn dc, u ⇒ case dc of
   | Dec/fwd u1 rn ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     relnm_lookup_hyp rn [_ ⊢ U2]
   | Dec/close rn ⇒ relnm_lookup_hyp rn u
   | Dec/wait u1 dc1 ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     dec_lookup_hyp dc1 [_ ⊢ U2]
   | Dec/out _ m dc1 dc2 ⇒
     let ([_ ⊢ U'],[_ ⊢ MG']) = (u,m) in
-    let [_ ⊢ merge-look U2 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
+    let [_ ⊢ merge-lookup U2 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U2[..]])
   | Dec/inp u1 dc1 ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
-    prune_hyp (prune_hyp (dec_lookup_hyp dc1 [_,x:obj,y:obj ⊢ upd/n (upd/n U2[..])] ))
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
+    prune_hyp
+      (prune_hyp (dec_lookup_hyp dc1 [_,x:obj,y:obj ⊢ upd/n (upd/n U2[..])]))
   | Dec/pcomp m _ dc1 dc2 ⇒
     let ([_ ⊢ U'],[_ ⊢ MG']) = (u,m) in
-    let [_ ⊢ merge-look U1 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
+    let [_ ⊢ merge-lookup U1 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U1[..]])
   | Dec/inl u1 dc1 ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U2[..]])
   | Dec/inr u1 dc1 ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U2[..]])
   | Dec/choice u1 dc1 dc2 ⇒
-    let [_ ⊢ lookint U2] = lookup_changelab u1 u in
+    let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U2[..]])
   ;

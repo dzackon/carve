@@ -1,0 +1,116 @@
+%======================================================%
+% Properties of same_elts judgment
+%======================================================%
+
+% Reflexivity: Δ ≈ Δ
+
+rec same_elts_refl : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ same_elts Δ Δ] =
+  / total 1 /
+  mlam Δ ⇒ case [_ ⊢ Δ] of
+  | [_ ⊢ nil] ⇒ [_ ⊢ se/n]
+  | [_ ⊢ cons Δ' _ _ _] ⇒
+    let [_ ⊢ SE] = same_elts_refl [_ ⊢ Δ'] in [_ ⊢ se/c SE]
+  ;
+
+% Symmetry: If Δ ≈ Δ', then Δ' ≈ Δ
+
+rec same_elts_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ same_elts Δ Δ']
+  → [Ψ ⊢ same_elts Δ' Δ] =
+  / total 1 /
+  fn se ⇒ case se of
+  | [_ ⊢ se/n] ⇒ [_ ⊢ se/n]
+  | [_ ⊢ se/c SE1] ⇒ let [_ ⊢ SE2] = same_elts_symm [_ ⊢ SE1] in [_ ⊢ se/c SE2]
+  ;
+
+% Transitivity: If Δ ≈ Δ' and Δ' ≈ Δ'', then Δ ≈ Δ''
+
+rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ same_elts Δ Δ']
+  → [Ψ ⊢ same_elts Δ' Δ'']
+  → [Ψ ⊢ same_elts Δ Δ''] =
+  / total d (same_elts_trans d) /
+  fn s1, s2 ⇒ case (s1, s2) of
+  | ([_ ⊢ se/n],[_ ⊢ se/n]) ⇒ [_ ⊢ se/n]
+  | ([_ ⊢ se/c SE1'],[_ ⊢ se/c SE2']) ⇒
+    let [_ ⊢ SE3] = same_elts_trans [_ ⊢ SE1'] [_ ⊢ SE2'] in
+    [_ ⊢ se/c SE3]
+  ;
+
+% Mergeable contexts contain the same elements:
+% (1) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ (and so Δ₂ ≈ Δ by commutativity of merge)
+% (2) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ₂ [corollary of (1) using merge_comm,
+%     same_elts_symm, same_elts_trans]
+
+rec merge_same_elts : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ same_elts Δ₁ Δ] =
+  / total 1 /
+  fn m ⇒ case m of
+  | [_ ⊢ mg/n] ⇒ [_ ⊢ se/n]
+  | [_ ⊢ mg/c M1 _] ⇒ let [_ ⊢ SE] = merge_same_elts [_ ⊢ M1] in [_ ⊢ se/c SE]
+  ;
+
+rec merge_same_elts_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ same_elts Δ₁ Δ₂] =
+  / total /
+  fn m ⇒ same_elts_trans (merge_same_elts m)
+    (same_elts_symm (merge_same_elts (merge_comm m)))
+  ;
+
+%------------------------------------------------------%
+% Preservation across same_elts
+%------------------------------------------------------%
+
+% Preserve lookup by position, name, and type
+
+rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_int n X A Δ]
+  → [Ψ ⊢ lookup_int n X A Δ'] =
+  / total 1 /
+  fn se, l ⇒
+  let [_ ⊢ lookint U] = l in
+  case se of
+  | [_ ⊢ se/n] ⇒ impossible [_ ⊢ U]
+  | [_ ⊢ se/c SE] ⇒ case [_ ⊢ U] of
+    | [_ ⊢ upd/t _] ⇒ [_ ⊢ lookint (upd/t _)]
+    | [_ ⊢ upd/n U1] ⇒
+      let [_ ⊢ lookint U2] = same_elts_lookup_int [_ ⊢ SE] [_ ⊢ lookint U1] in
+      [_ ⊢ lookint (upd/n U2)]
+  ;
+
+% Preserve name membership
+
+rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_n X Δ]
+  → [Ψ ⊢ lookup_n X Δ'] =
+  / total /
+  fn se, l ⇒
+  let [_ ⊢ lookn U] = l in
+  let [_ ⊢ U1] = upd_refl [_ ⊢ U] in
+  let [_ ⊢ lookint U2] = same_elts_lookup_int se [_ ⊢ lookint U1] in
+  [_ ⊢ lookn U2]
+  ;
+
+% Preserve VarCtx across changes of multiplicity
+
+rec varctx_same_elts : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ']
+  → VarCtx [Ψ ⊢ Δ'] =
+  / total 1 /
+  fn vc, se ⇒ case vc of
+  | VarCtx-Nil ⇒ let [_ ⊢ se/n] = se in VarCtx-Nil
+  | VarCtx-Cons vc1 ⇒ let [_ ⊢ se/c SE] = se in
+    VarCtx-Cons (varctx_same_elts vc1 [_ ⊢ SE])
+  ;
+
+% Preserve well-formedness
+
+rec wf_same_elts : Wf [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ'] → Wf [Ψ ⊢ Δ'] =
+  / total 1 /
+  fn wf, se ⇒ case wf of
+  | Wf-Nil ⇒ let [_ ⊢ se/n] = se in Wf-Nil
+  | Wf-Cons wf1 nin ⇒ let [_ ⊢ se/c SE] = se in
+    Wf-Cons (wf_same_elts wf1 [_ ⊢ SE])
+      (fn l ⇒ nin (same_elts_lookup_n (same_elts_symm [_ ⊢ SE]) l))
+  ;

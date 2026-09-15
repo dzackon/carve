@@ -24,4 +24,4 @@ LF eval : venv _ → obj → val → type =
 | eval/var : lookup_venv n W η → eval η (var n) W
 | eval/abs : eval η (abs M) (closure η (abs M))
 | eval/app : eval η M (closure η' (abs M')) → eval η N W'
-	→ eval (vcons η' W') M' W → eval η (app M N) W;
+  → eval (vcons η' W') M' W → eval η (app M N) W;

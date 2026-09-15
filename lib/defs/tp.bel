@@ -1,0 +1,10 @@
+%======================================================%
+% General definition of types
+%======================================================%
+
+tp : type.
+
+% Type equality
+
+LF tp_eq : tp → tp → type =
+| tp/refl : tp_eq A A;

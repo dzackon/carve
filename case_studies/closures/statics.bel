@@ -7,18 +7,15 @@
 LF oft : lctx _ → obj → tp → type =
 | oft/var : upd Δ n _ _ A A 𝟙 𝟘 Δ' → exh Δ' → oft Δ (var n) A
 | oft/abs : oft (cons Δ _ A 𝟙) M B → oft Δ (abs M) (A -o B)
-| oft/app : oft Δ₁ M (A -o B) → oft Δ₂ N A → merge Δ₁ Δ₂ Δ
-    → oft Δ (app M N) B;
+| oft/app : oft Δ₁ M (A -o B) → oft Δ₂ N A → merge Δ₁ Δ₂ Δ → oft Δ (app M N) B;
 
 % Environment η has domain Δ
 
 LF hasty_env : venv N → lctx N → type =
 | hasty_env/n : hasty_env empty nil
-| hasty_env/c : hasty_env η Δ → hasty W A
-    → hasty_env (vcons η W) (cons Δ _ A _)
+| hasty_env/c : hasty_env η Δ → hasty W A → hasty_env (vcons η W) (cons Δ _ A _)
 
 % Value v has type A
 
 and LF hasty : val → tp → type =
-| hasty_closure : oft Δ (abs M) A → hasty_env η Δ
-    → hasty (closure η (abs M)) A;
+| hasty_closure : oft Δ (abs M) A → hasty_env η Δ → hasty (closure η (abs M)) A;

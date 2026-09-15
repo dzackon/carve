@@ -1,0 +1,16 @@
+%======================================================%
+% Multiplicities (graded systems)
+%======================================================%
+
+LF mult : type =
+| num : nat → mult; % available to be used exactly n times
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/plus : plus n m k → • (num n) (num m) (num k);
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/z : hal (num zero);

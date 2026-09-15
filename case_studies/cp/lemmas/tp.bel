@@ -8,56 +8,56 @@
 
 % Duality is symmetric
 
-rec dual_sym : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
+rec dual_symm : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
   / total 1 /
   fn d ⇒ case d of
   | [ ⊢ D1] ⇒ [ ⊢ D⊥]
   | [ ⊢ D⊥] ⇒ [ ⊢ D1]
   | [ ⊢ D⊗ Dl Dr] ⇒
-    let [ ⊢ l] = dual_sym [ ⊢ Dl] in
-    let [ ⊢ r] = dual_sym [ ⊢ Dr] in
+    let [ ⊢ l] = dual_symm [ ⊢ Dl] in
+    let [ ⊢ r] = dual_symm [ ⊢ Dr] in
     [ ⊢ D⅋ l r]
   | [ ⊢ D⅋ Dl Dr] ⇒
-    let [ ⊢ l] = dual_sym [ ⊢ Dl] in
-    let [ ⊢ r] = dual_sym [ ⊢ Dr] in
+    let [ ⊢ l] = dual_symm [ ⊢ Dl] in
+    let [ ⊢ r] = dual_symm [ ⊢ Dr] in
     [ ⊢ D⊗ l r]
   | [ ⊢ D⊕ Dl Dr] ⇒
-    let [ ⊢ l] = dual_sym [ ⊢ Dl] in
-    let [ ⊢ r] = dual_sym [ ⊢ Dr] in
+    let [ ⊢ l] = dual_symm [ ⊢ Dl] in
+    let [ ⊢ r] = dual_symm [ ⊢ Dr] in
     [ ⊢ D& l r]
   | [ ⊢ D& Dl Dr] ⇒
-    let [ ⊢ l] = dual_sym [ ⊢ Dl] in
-    let [ ⊢ r] = dual_sym [ ⊢ Dr] in
+    let [ ⊢ l] = dual_symm [ ⊢ Dl] in
+    let [ ⊢ r] = dual_symm [ ⊢ Dr] in
     [ ⊢ D⊕ l r]
   ;
 
 % Session types have a unique dual
 
-rec dual_uniq : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ eq A' A''] =
+rec dual_uniq : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ tp_eq A' A''] =
   / total 1 /
   fn d1, d2 ⇒ case d1 of
-  | [ ⊢ D1] ⇒ let [ ⊢ D1] = d2 in [ ⊢ refl]
-  | [ ⊢ D⊥] ⇒ let [ ⊢ D⊥] = d2 in [ ⊢ refl]
+  | [ ⊢ D1] ⇒ let [ ⊢ D1] = d2 in [ ⊢ tp/refl]
+  | [ ⊢ D⊥] ⇒ let [ ⊢ D⊥] = d2 in [ ⊢ tp/refl]
   | [ ⊢ D⊗ DU1l DU1r] ⇒
     let [ ⊢ D⊗ DU2l DU2r] = d2 in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
-    [ ⊢ refl]
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    [ ⊢ tp/refl]
   | [ ⊢ D⅋ DU1l DU1r] ⇒
     let [ ⊢ D⅋ DU2l DU2r] = d2 in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
-    [ ⊢ refl]
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    [ ⊢ tp/refl]
   | [ ⊢ D& DU1l DU1r] ⇒
     let [ ⊢ D& DU2l DU2r] = d2 in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
-    [ ⊢ refl]
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    [ ⊢ tp/refl]
   | [ ⊢ D⊕ DU1l DU1r] ⇒
     let [ ⊢ D⊕ DU2l DU2r] = d2 in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
-    [ ⊢ refl]
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    [ ⊢ tp/refl]
   ;
 
 % For any types A,B, either A = B or A ≠ B
@@ -69,33 +69,31 @@ LF subtp_pair : (tp → tp) → (tp → tp) → type =
   | comp_tp/⅋2 : subtp_pair (\t._ ⅋ t) (\t._ ⅋ t)
   | comp_tp/&1 : subtp_pair (\t.t & _) (\t.t & _)
   | comp_tp/&2 : subtp_pair (\t._ & t) (\t._ & t)
-  | comp_tp/-o1 : subtp_pair (\t.t -o _) (\t.t -o _)
-  | comp_tp/-o2 : subtp_pair (\t._ -o t) (\t._ -o t)
   | comp_tp/⊕1 : subtp_pair (\t.t ⊕ _) (\t.t ⊕ _)
   | comp_tp/⊕2 : subtp_pair (\t._ ⊕ t) (\t._ ⊕ t)
   ;
 
-rec comp_subtp : ([ ⊢ eq A A'] → [ ⊢ false])
-→ [ ⊢ subtp_pair (\x.B) (\x.B')] → ([ ⊢ eq B[A] B'[A']] → [ ⊢ false]) =
+rec comp_subtp : ([ ⊢ tp_eq A A'] → [ ⊢ false])
+  → [ ⊢ subtp_pair (\x.B) (\x.B')]
+  → ([ ⊢ tp_eq B[A] B'[A']] → [ ⊢ false]) =
   / total /
   fn n, SPR, e ⇒ case SPR of
-  | [ ⊢ comp_tp/⊗1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/⊗2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/⅋1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/⅋2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/&1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/&2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/-o1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/-o2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/⊕1] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
-  | [ ⊢ comp_tp/⊕2] ⇒ let [ ⊢ refl] = e in n [ ⊢ refl]
+  | [ ⊢ comp_tp/⊗1] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/⊗2] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/⅋1] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/⅋2] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/&1] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/&2] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/⊕1] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
+  | [ ⊢ comp_tp/⊕2] ⇒ let [ ⊢ tp/refl] = e in n [ ⊢ tp/refl]
   ;
 
 inductive CompareTp : {A:[ ⊢ tp]} {B:[ ⊢ tp]} ctype =
   | Tp-Eq : CompareTp [ ⊢ A] [ ⊢ A]
-  | Tp-Neq : ([ ⊢ eq A B] → [ ⊢ false]) → CompareTp [ ⊢ A] [ ⊢ B];
+  | Tp-Neq : ([ ⊢ tp_eq A B] → [ ⊢ false]) → CompareTp [ ⊢ A] [ ⊢ B];
 
 rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
+  / total 1 /
   mlam A, B ⇒ case [ ⊢ A] of
   | [ ⊢ ①] ⇒
     (case [ ⊢ B] of
@@ -104,7 +102,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
     | [ ⊢ B₁ ⊗ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⅋ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     )
   | [ ⊢ ⊥] ⇒
@@ -114,7 +111,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
     | [ ⊢ B₁ ⊗ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⅋ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     )
   | [ ⊢ A₁ ⊗ A₂] ⇒
@@ -132,7 +128,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
       )
     | [ ⊢ B₁ ⅋ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     )
   | [ ⊢ A₁ ⅋ A₂] ⇒
@@ -150,7 +145,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
       | Tp-Neq n ⇒ Tp-Neq (comp_subtp n [ ⊢ comp_tp/⅋1])
       )
     | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     )
   | [ ⊢ A₁ & A₂] ⇒
@@ -168,25 +162,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
         )
       | Tp-Neq n ⇒ Tp-Neq (comp_subtp n [ ⊢ comp_tp/&1])
       )
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    )
-  | [ ⊢ A₁ -o A₂] ⇒
-    (case [ ⊢ B] of
-    | [ ⊢ ①] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ ⊥] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ ⊗ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ ⅋ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒
-      (case comp_tps [ ⊢ A₁] [ ⊢ B₁] of
-      | Tp-Eq ⇒
-        (case comp_tps [ ⊢ A₂] [ ⊢ B₂] of
-        | Tp-Eq ⇒ Tp-Eq
-        | Tp-Neq n ⇒ Tp-Neq (comp_subtp n [ ⊢ comp_tp/-o2])
-        )
-      | Tp-Neq n ⇒ Tp-Neq (comp_subtp n [ ⊢ comp_tp/-o1])
-      )
     | [ ⊢ B₁ ⊕ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     )
   | [ ⊢ A₁ ⊕ A₂] ⇒
@@ -196,7 +171,6 @@ rec comp_tps : {A:[ ⊢ tp]} {B:[ ⊢ tp]} CompareTp [ ⊢ A] [ ⊢ B] =
     | [ ⊢ B₁ ⊗ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⅋ B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ & B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
-    | [ ⊢ B₁ -o B₂] ⇒ Tp-Neq (fn e ⇒ impossible e)
     | [ ⊢ B₁ ⊕ B₂] ⇒
       (case comp_tps [ ⊢ A₁] [ ⊢ B₁] of
       | Tp-Eq ⇒

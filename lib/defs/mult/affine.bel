@@ -1,0 +1,25 @@
+%======================================================%
+% Multiplicities (affine systems)
+%
+% This structure shares its operation with lin; the difference is that
+% both multiplicities are harmless, so an unused affine resource may be
+% discarded. One may alternatively simply use lin and omit
+% exhaustedness checks from the leaves of proof derivations.
+%======================================================%
+
+LF mult : type =
+| 𝟘 : mult  % used
+| 𝟙 : mult; % available at most once
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/00 : • 𝟘 𝟘 𝟘
+| •/10 : • 𝟙 𝟘 𝟙
+| •/01 : • 𝟘 𝟙 𝟙;
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/0 : hal 𝟘
+| hal/1 : hal 𝟙;

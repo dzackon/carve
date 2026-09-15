@@ -1,0 +1,108 @@
+%======================================================%
+% Properties of merge that only hold under additional
+% assumptions about harmless elements
+%======================================================%
+
+% Identity properties:
+
+% (1) If Δ₁ ⋈ Δ₂ = Δ, then exh(Δ₁) iff Δ₂ = Δ
+
+rec merge_id : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdent
+  → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ exh Δ₁]
+  → [Ψ ⊢ ctx_eq Δ₂ Δ] =
+  / total 2 /
+  fn hi, m, e ⇒ case m of
+  | [_ ⊢ mg/n] ⇒ [_ ⊢ ctx/refl]
+  | [_ ⊢ mg/c M1 T1[]] ⇒
+    let [_ ⊢ exh/c E1 H1[]] = e in
+    let [_ ⊢ ctx/refl] = merge_id hi [_ ⊢ M1] [_ ⊢ E1] in
+    let [ ⊢ mult/refl] = mult_id_hal hi [ ⊢ H1] [ ⊢ T1] in
+    [_ ⊢ ctx/refl]
+  ;
+
+rec merge_isid : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) UnitHal
+  → [Ψ ⊢ merge Δ' Δ Δ]
+  → [Ψ ⊢ exh Δ'] =
+  / total 2 /
+  fn uh, m ⇒ case m of
+  | [_ ⊢ mg/n] ⇒ [_ ⊢ exh/n]
+  | [_ ⊢ mg/c M T[]] ⇒
+    let [_ ⊢ E] = merge_isid uh [_ ⊢ M] in
+    let Unit-Hal f = uh in
+    let [ ⊢ H] = f [ ⊢ _] [ ⊢ _] [ ⊢ T] in
+    [_ ⊢ exh/c E H[]]
+  ;
+
+% Corollaries of (1) using commutativity
+
+rec merge_id_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdent
+  → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → [Ψ ⊢ exh Δ₂]
+  → [Ψ ⊢ ctx_eq Δ₁ Δ] =
+  / total /
+  fn hi, m, e ⇒ merge_id hi (merge_comm m) e
+  ;
+
+rec merge_isid_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) UnitHal
+  → [Ψ ⊢ merge Δ Δ' Δ]
+  → [Ψ ⊢ exh Δ'] =
+  / total /
+  fn uh, m ⇒ merge_isid uh (merge_comm m)
+  ;
+
+% (2) If exh(Δ), then Δ₁ ⋈ Δ₂ = Δ iff Δ₁ = Δ₂ = Δ
+
+LF merge_ident : merge _ _ _ → type =
+| mg_ident : {M:merge Δ Δ Δ} merge_ident M;
+
+rec merge_zsfree : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) ZsFree
+  → [Ψ ⊢ exh Δ]
+  → {M:[Ψ ⊢ merge Δ₁ Δ₂ Δ]} [Ψ ⊢ merge_ident M] =
+  / total 3 /
+  fn zs, e ⇒ mlam M ⇒ case [_ ⊢ M] of
+  | [_ ⊢ mg/n] ⇒ [_ ⊢ mg_ident _]
+  | [_ ⊢ mg/c M1 T1[]] ⇒
+    let [_ ⊢ exh/c E1 H1[]] = e in
+    let [ ⊢ mult/refl] = mult_zsfree_gen zs [ ⊢ T1] [ ⊢ H1] in
+    let [ ⊢ mult/refl] = mult_zsfree_gen zs (mult_comm [ ⊢ T1]) [ ⊢ H1] in
+    let [_ ⊢ mg_ident _] = merge_zsfree zs [_ ⊢ E1] [_ ⊢ M1] in
+    [_ ⊢ mg_ident _]
+  ;
+
+rec merge_id_from_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdem
+  → [Ψ ⊢ exh Δ] → [Ψ ⊢ merge Δ Δ Δ] =
+  / total 2 /
+  fn hi, e ⇒ case e of
+  | [_ ⊢ exh/n] ⇒ [_ ⊢ mg/n]
+  | [_ ⊢ exh/c E H[]] ⇒
+    let [_ ⊢ M] = merge_id_from_exh hi [_ ⊢ E] in
+    let [ ⊢ T] = mult_halidem_gen hi [ ⊢ H] in
+    [_ ⊢ mg/c M T[]]
+  ;
+
+% (3) For any Δ, there exists a Δ' such that exh(Δ') and Δ' ⋈ Δ = Δ ⋈ Δ' = Δ
+
+LF get_id_mg : lctx _ → type =
+| get-id-mg : exh Δ' → merge Δ' Δ Δ → get_id_mg Δ;
+
+rec merge_get_id : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ get_id_mg Δ] =
+  / total 1 /
+  mlam Δ ⇒ case [_ ⊢ Δ] of
+  | [_ ⊢ nil] ⇒ [_ ⊢ get-id-mg exh/n mg/n]
+  | [_ ⊢ cons Δ' X A[] α[]] ⇒
+    let [_ ⊢ get-id-mg E M] = merge_get_id [_ ⊢ Δ'] in
+    let [ ⊢ get-unit I T] = mult_get_id [ ⊢ α] in
+    [_ ⊢ get-id-mg (exh/c E I[]) (mg/c M T[])]
+  ;
+
+LF get_id_mg_r : lctx _ → type =
+| get-id-mg-r : exh Δ' → merge Δ Δ' Δ → get_id_mg_r Δ;
+
+rec merge_get_id_r : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ get_id_mg_r Δ] =
+  / total 1 /
+  mlam Δ ⇒
+  let [_ ⊢ get-id-mg E M] = merge_get_id [_ ⊢ Δ] in
+  let [_ ⊢ M'] = merge_comm [_ ⊢ M] in
+  [_ ⊢ get-id-mg-r E M']
+  ;

@@ -32,7 +32,8 @@ LF linear : (obj → obj) → type =
 | l_pcomp2 : ({x:obj} linear \z.Q x z) → linear \z.pcomp _ P (\x.Q x z)
 | l_inl2 : ({x':obj} linear \z.P z x') → linear \z.inl X (P z)
 | l_inr2 : ({x':obj} linear \z.P z x') → linear \z.inr X (P z)
-| l_choice2 : ({x':obj} linear \z.P z x') → ({x':obj} linear \z.Q z x') → linear \z.choice X (P z) (Q z);
+| l_choice2 : ({x':obj} linear \z.P z x') → ({x':obj} linear \z.Q z x')
+  → linear \z.choice X (P z) (Q z);
 
 %------------------------------------------------------%
 % Statics of SCP

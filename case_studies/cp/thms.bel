@@ -4,26 +4,33 @@
 
 % Subject reduction for CP
 
-rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ P ⇛ P'] → [Ψ ⊢ oft P Δ] → [Ψ ⊢ oft P' Δ] =
+rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ P ⇛ P']
+  → [Ψ ⊢ oft P Δ]
+  → [Ψ ⊢ oft P' Δ] =
   / total 1 /
   fn rd, d ⇒ case rd of
   % Principal cut reductions
   | [_ ⊢ βfwd] ⇒
-    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/fwd DU'[] (upd/n U1') U2 E1) (\x.O2)] = d in
+    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/fwd DU'[] (upd/n U1') U2 E1) (\x.O2)] =
+      d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
-    let [ ⊢ refl] = dual_uniq [ ⊢ DU] [ ⊢ DU'] in
-    let [_ ⊢ merge-upd2 U1a U1b •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U1a] in
+    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU] [ ⊢ DU'] in
+    let [_ ⊢ merge-upd2 U1a U1b •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U1a] in
     let [_,x:obj ⊢ exh/c E2 _] = [_ ⊢ E1] in
-    let [_ ⊢ cx/refl] = merge_id [_ ⊢ M2] (prune_exh [_,x:obj ⊢ E2]) in
+    let [_ ⊢ ctx/refl] =
+      merge_id mult_halident [_ ⊢ M2] (prune_exh [_,x:obj ⊢ E2]) in
     oft_rename [_,x:obj ⊢ O2] (upd_symm [_ ⊢ U1b])
   | [_ ⊢ β1⊥] ⇒
     let [_ ⊢ oft/pcomp D1 M (\x.oft/close U1 E) (\x.oft/wait U2 O2)] = d in
     (case [_,x:obj ⊢ U1] of
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_,x:obj ⊢ exh/c E1 _] = [_,y:obj ⊢ E] in
-      let [_ ⊢ cx/refl] = merge_id [_ ⊢ M] (prune_exh [_ ⊢ E1]) in
+      let [_ ⊢ ctx/refl] =
+        merge_id mult_halident [_ ⊢ M] (prune_exh [_ ⊢ E1]) in
       (case [_,x:obj ⊢ U2] of
       | [_,x:obj ⊢ upd/t _] ⇒
         let [_,x:obj ⊢ O2'] = (oft_str [_,x:obj ⊢ O2]) in
@@ -32,33 +39,41 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ P ⇛ P'] → [Ψ ⊢ oft P Δ
       | [_,x:obj ⊢ upd/n U2] ⇒ impossible upd_contra [_,x:obj ⊢ U2]
       )
     | [_,x:obj ⊢ upd/n U1] ⇒
-      let [_,x:obj ⊢ exh/c _ T[]] = [_,x:obj ⊢ E] in
-      impossible [ ⊢ T]
+      let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E] in
+      impossible [ ⊢ H]
     )
   | [_ ⊢ β⊗⅋] ⇒
-    let [_ ⊢ oft/pcomp (D⊗ DU1[] DU2[]) M1 (\x.oft/out U1 (mg/c M2' MLT1[]) (\y.O1) (\y.O2)) (\x.oft/inp U2 \y.\z.O3)] = d in
+    let [_ ⊢ oft/pcomp (D⊗ DU1[] DU2[]) M1 (\x.oft/out U1 (mg/c M2' T1[])
+      (\y.O1) (\y.O2)) (\x.oft/inp U2 \y.\z.O3)] = d in
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U1] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
-    let [ ⊢ •/01] = [ ⊢ MLT1] in
-    let [_ ⊢ mg-assoc M3 M _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
+    let [ ⊢ •/01] = [ ⊢ T1] in
+    let [_ ⊢ merge-assoc M3 M _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
     % Typing judgments
     let [ ⊢ _]:[ ⊢ dual A A'] = [ ⊢ DU1] in
     let [_,x:obj ⊢ O1'] = oft_str_cor [_,x:obj,y:obj ⊢ O1] in
     let [_,x:obj ⊢ O2''] = oft_str_cor [_,x:obj,y:obj ⊢ O2] in
-    let [_,x:obj,y:obj ⊢ O2'[..,y,x]] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O2''[..,x]] [_,x:obj,y:obj ⊢ y] [ ⊢ A']) in
-    let [_,x:obj,y:obj,z:obj ⊢ O3''] = oft_exch_top (oft_str (oft_exch_top2 [_,y:obj,z:obj,x:obj ⊢ O3[..,x,y,z]])) in
-    let Prune-Oft [_,x:obj,y:obj ⊢ O3'[..,y,x]] [_,x:obj,y:obj,z:obj ⊢ _] = prune_oft [_,x:obj,y:obj,z:obj ⊢ O3''] in
-    [_ ⊢ oft/pcomp DU1[] M (\x.O1') (\x.oft/pcomp DU2[] (mg/c M3[..] •/01) (\y.O2') (\y.O3'))]
+    let [_,x:obj,y:obj ⊢ O2'[..,y,x]] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O2''[..,x]] [_,x:obj,y:obj ⊢ y] [ ⊢ A']) in
+    let [_,x:obj,y:obj,z:obj ⊢ O3''] = oft_exch_top
+      (oft_str (oft_exch_top2 [_,y:obj,z:obj,x:obj ⊢ O3[..,x,y,z]])) in
+    let Prune-Oft [_,x:obj,y:obj ⊢ O3'[..,y,x]] [_,x:obj,y:obj,z:obj ⊢ _] =
+      prune_oft [_,x:obj,y:obj,z:obj ⊢ O3''] in
+    [_ ⊢ oft/pcomp DU1[] M (\x.O1') (\x.oft/pcomp DU2[] (mg/c M3[..] •/01)
+      (\y.O2') (\y.O3'))]
   | [_ ⊢ β⊕&1] ⇒
-    let [_ ⊢ oft/pcomp (D⊕ DU1[] _) M1 (\x.oft/inl U1 (\z.O1)) (\x.oft/choice U2 (\y.O2) (\y.O3))] = d in
+    let [_ ⊢ oft/pcomp (D⊕ DU1[] _) M1 (\x.oft/inl U1 (\z.O1))
+      (\x.oft/choice U2 (\y.O2) (\y.O3))] = d in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U1] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
     let [_,x:obj ⊢ O1'] = oft_str_cor [_,x:obj,y:obj ⊢ O1] in
     let [_,x:obj ⊢ O2'] = oft_str_cor [_,x:obj,y:obj ⊢ O2] in
     [_ ⊢ oft/pcomp DU1[] M1 (\x.O1') (\x.O2')]
   | [_ ⊢ β⊕&2] ⇒
-    let [_ ⊢ oft/pcomp (D⊕ _ DU2[]) M1 (\x.oft/inr U1 (\z.O1)) (\x.oft/choice U2 (\y.O2) (\y.O3))] = d in
+    let
+      [_ ⊢ oft/pcomp (D⊕ _ DU2[]) M1 (\x.oft/inr U1 (\z.O1)) (\x.oft/choice U2
+      (\y.O2) (\y.O3))] = d in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U1] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
     let [_,x:obj ⊢ O1'] = oft_str_cor [_,x:obj,y:obj ⊢ O1] in
@@ -68,100 +83,134 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ P ⇛ P'] → [Ψ ⊢ oft P Δ
   | [_ ⊢ κ⊥] ⇒
     let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/wait (upd/n U1') O1) (\x.O2)] = d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     [_ ⊢ oft/wait U (oft/pcomp DU[] M2 (\x.O1) (\x.O2))]
   | [_ ⊢ κ⊗1] ⇒
-    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/out (upd/n U1') (mg/c M2' MLT[]) (\y.O1) (\y.O2)) (\y.O3)] = d in
+    let
+      [_ ⊢ oft/pcomp DU[] M1 (\x.oft/out (upd/n U1') (mg/c M2' T[]) (\y.O1)
+      (\y.O2)) (\y.O3)] = d in
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
       let [_ ⊢ M2_comm] = merge_comm [_ ⊢ M2] in
-      let [_ ⊢ mg-assoc M3 M_comm _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2_comm] in
+      let [_ ⊢ merge-assoc M3 M_comm _ _] =
+        merge_assoc [_ ⊢ M1] [_ ⊢ M2_comm] in
       let [_ ⊢ M] = merge_comm [_ ⊢ M_comm] in
       % Typing judgments
       let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (B1[] ⊗ _) _ _ _ _] = [_ ⊢ U1] in
       let [_,x:obj,y:obj ⊢ O1'[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in
       let [_,x:obj ⊢ O2'] = oft_str_cor [_,x:obj,y:obj ⊢ O2] in
-      let [_,x:obj,y:obj ⊢ O3'] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
+      let [_,x:obj,y:obj ⊢ O3'] = oft_exch_top
+        (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
       % Conclusion
-      [_ ⊢ oft/out U1 M (\x.oft/pcomp DU[] (mg/c M3[..] •/10) (\y.O1') (\y.O3')) (\x.O2')]
+      [_ ⊢ oft/out U1 M (\x.oft/pcomp DU[] (mg/c M3[..] •/10) (\y.O1') (\y.O3'))
+        (\x.O2')]
     | [ ⊢ •/01] ⇒
-      let [_,x:obj,y:obj ⊢ _]:[_,x:obj,y:obj ⊢ oft _ (cons (cons Δ₂'[..] _ A[] _) _ _ _)] = [_,x:obj,y:obj ⊢ O2] in
-      let [_,x:obj ⊢ LK] = refl_top [_,x:obj ⊢ Δ₂'[..]] [_,x:obj ⊢ x] [ ⊢ A] [ ⊢ 𝟙] in
-      let [_,x:obj,y:obj ⊢ INP] = oft_lin_in [_,x:obj,y:obj ⊢ O2] [_,x:obj,y:obj ⊢ upd/n LK[..,x]] in
+      let [_,x:obj,y:obj ⊢ _]:
+        [_,x:obj,y:obj ⊢ oft _ (cons (cons Δ₂'[..] _ A[] _) _ _ _)] =
+        [_,x:obj,y:obj ⊢ O2] in
+      let [_,x:obj ⊢ LK] =
+        upd_refl_top [_,x:obj ⊢ Δ₂'[..]] [_,x:obj ⊢ x] [ ⊢ A] [ ⊢ 𝟙] in
+      let [_,x:obj,y:obj ⊢ INP] =
+        oft_lin_in [_,x:obj,y:obj ⊢ O2] [_,x:obj,y:obj ⊢ upd/n LK[..,x]] in
       impossible in_proc_lemma [_,x:obj,y:obj ⊢ INP[..,y,x]]
     )
   | [_ ⊢ κ⊗2] ⇒
-    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/out (upd/n U1') (mg/c M2' MLT[]) (\y.O1) (\y.O2)) (\x.O3)] = d in
+    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/out (upd/n U1') (mg/c M2' T[]) (\y.O1)
+      (\y.O2)) (\x.O3)] = d in
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    (case [ ⊢ MLT] of
+    (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_,x:obj,y:obj ⊢ _]:[_,x:obj,y:obj ⊢ oft _ (cons (cons Δ₁[..] _ A[] _) _ _ _)] = [_,x:obj,y:obj ⊢ O1] in
-      let [_,x:obj ⊢ LK] = refl_top [_,x:obj ⊢ Δ₁[..]] [_,x:obj ⊢ x] [ ⊢ A] [ ⊢ 𝟙] in
-      let [_,x:obj,y:obj ⊢ INP] = oft_lin_in [_,x:obj,y:obj ⊢ O1] [_,x:obj,y:obj ⊢ upd/n LK[..,x]] in
+      let [_,x:obj,y:obj ⊢ _]:
+        [_,x:obj,y:obj ⊢ oft _ (cons (cons Δ₁[..] _ A[] _) _ _ _)] =
+        [_,x:obj,y:obj ⊢ O1] in
+      let [_,x:obj ⊢ LK] =
+        upd_refl_top [_,x:obj ⊢ Δ₁[..]] [_,x:obj ⊢ x] [ ⊢ A] [ ⊢ 𝟙] in
+      let [_,x:obj,y:obj ⊢ INP] =
+        oft_lin_in [_,x:obj,y:obj ⊢ O1] [_,x:obj,y:obj ⊢ upd/n LK[..,x]] in
       impossible in_proc_lemma [_,x:obj,y:obj ⊢ INP[..,y,x]]
     | [ ⊢ •/01] ⇒
-      let [_ ⊢ mg-assoc M3 M _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
-      let [_ ⊢ merge-upd2 U2 U3 •/10 M3' _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M3] [ ⊢ •/00] in
-      let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+      let [_ ⊢ merge-assoc M3 M _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
+      let [_ ⊢ merge-upd2 U2 U3 •/10 M3' _ _ _] =
+        merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M3] [ ⊢ •/00] in
+      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
       % Typing judgments
       let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (_ ⊗ B2[]) _ _ _ _] = [_ ⊢ U1] in
       let [_,x:obj ⊢ O1'] = oft_str_cor [_,x:obj,y:obj ⊢ O1] in
       let [_,x:obj,y:obj ⊢ O2'[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O2] in
-      let [_,x:obj,y:obj ⊢ O3'] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
+      let [_,x:obj,y:obj ⊢ O3'] = oft_exch_top
+        (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
       % Conclusion
-      [_ ⊢ oft/out U3 M (\x.O1') (\x.oft/pcomp DU[] (mg/c M3'[..] •/10) (\y.O2') (\y.O3'))]
+      [_ ⊢ oft/out U3 M (\x.O1') (\x.oft/pcomp DU[] (mg/c M3'[..] •/10) (\y.O2')
+        (\y.O3'))]
     )
   | [_ ⊢ κ⅋] ⇒
     let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/inp (upd/n U1') \y.\z.O1) (\x.O2)] = d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     % O1, O2
-    let [_,x:obj,y:obj,z:obj ⊢ O1']:[_,x:obj,y:obj,z:obj ⊢ oft _ (cons (cons (cons _ _ B2[] _) _ B1[] _) _ _ _)] =
+    let [_,x:obj,y:obj,z:obj ⊢ O1']:
+      [_,x:obj,y:obj,z:obj ⊢
+      oft _ (cons (cons (cons _ _ B2[] _) _ B1[] _) _ _ _)] =
       oft_exch_top2 [_,y:obj,z:obj,x:obj ⊢ O1[..,x,y,z]] in
-    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
-    let [_,x:obj,y:obj,z:obj ⊢ O2''[..,y,x,z]] = oft_exch_top (oft_weak [_,x:obj,y:obj,z:obj ⊢ O2'[..,y,z]] [_,x:obj,y:obj,z:obj ⊢ x] [ ⊢ B1]) in
-    [_ ⊢ oft/inp U \x.\y.oft/pcomp DU[] (mg/c (mg/c M2[..] •/10) •/10) (\z.O1') (\z.O2'')]
+    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
+    let [_,x:obj,y:obj,z:obj ⊢ O2''[..,y,x,z]] =
+      oft_exch_top (oft_weak [_,x:obj,y:obj,z:obj ⊢ O2'[..,y,z]]
+      [_,x:obj,y:obj,z:obj ⊢ x] [ ⊢ B1]) in
+    [_ ⊢ oft/inp U \x.\y.oft/pcomp DU[] (mg/c (mg/c M2[..] •/10) •/10) (\z.O1')
+      (\z.O2'')]
   | [_ ⊢ κ⊕1] ⇒
     let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/inl (upd/n U1') \y.O1) (\x.O2)] = d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (B1[] ⊕ _) _ _ _ _] = [_ ⊢ U1] in
-    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     % Typing judgments
     let [_,x:obj,y:obj ⊢ O1'[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in
-    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
+    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
     % Conclusion
     [_ ⊢ oft/inl U \x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O1') (\y.O2')]
   | [_ ⊢ κ⊕2] ⇒
     let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/inr (upd/n U1') \y.O1) (\x.O2)] = d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (_ ⊕ B2[]) _ _ _ _] = [_ ⊢ U1] in
-    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     % Typing judgments
     let [_,x:obj,y:obj ⊢ O1'[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in
-    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
+    let [_,x:obj,y:obj ⊢ O2'] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O2[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
     % Conclusion
     [_ ⊢ oft/inr U \x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O1') (\y.O2')]
   | [_ ⊢ κ&] ⇒
-    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/choice (upd/n U1') (\y.O1) (\y.O2)) (\x.O3)] = d in
+    let [_ ⊢ oft/pcomp DU[] M1 (\x.oft/choice (upd/n U1') (\y.O1) (\y.O2))
+      (\x.O3)] = d in
     % Get `update` and `merge` judgments
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (B1[] & B2[]) _ _ _ _] = [_ ⊢ U1] in
-    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] = merge_upd_cor2 [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
-    let [_ ⊢ cx/refl] = upd_refl2 [_ ⊢ U2] in
+    let [_ ⊢ merge-upd2 U2 U •/10 M2 _ _ _] =
+      merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
+    let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     % Typing judgments
     let [_,x:obj,y:obj ⊢ O1_sw[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in
     let [_,x:obj,y:obj ⊢ O2_sw[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O2] in
-    let [_,x:obj,y:obj ⊢ O3a] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
-    let [_,x:obj,y:obj ⊢ O3b] = oft_exch_top (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
+    let [_,x:obj,y:obj ⊢ O3a] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B1]) in
+    let [_,x:obj,y:obj ⊢ O3b] = oft_exch_top
+      (oft_weak [_,x:obj,y:obj ⊢ O3[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ B2]) in
     % Conclusion
-    [_ ⊢ oft/choice U (\x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O1_sw) (\y.O3a)) (\x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O2_sw) (\y.O3b))]
+    [_ ⊢ oft/choice U (\x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O1_sw) (\y.O3a))
+      (\x.oft/pcomp DU[] (mg/c M2[..] •/10) (\y.O2_sw) (\y.O3b))]
   % Reduction under cut
   | [_ ⊢ β∥1 \x.RD1] ⇒
     let [_ ⊢ oft/pcomp DU[] M (\x.O1') (\x.O2)] = d in
@@ -172,7 +221,8 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ P ⇛ P'] → [Ψ ⊢ oft P Δ
     let [_,x:obj ⊢ O2] = tps [_,x:obj ⊢ RD1] [_,x:obj ⊢ O2'] in
     [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)]
   % Reductions commute with equivalences
-  | [_ ⊢ β≡ CG1 RD1 CG2] ⇒ oft_cong (tps [_ ⊢ RD1] (oft_cong d [_ ⊢ CG1])) [_ ⊢ CG2]
+  | [_ ⊢ β≡ CG1 RD1 CG2] ⇒ oft_cong (tps [_ ⊢ RD1] (oft_cong d [_ ⊢ CG1]))
+    [_ ⊢ CG2]
   ;
 
 % Equivalence of CP and SCP
@@ -183,7 +233,8 @@ rec cp2scp : Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ oft P Δ] → [Φ ⊢ wtp
   let _ : Enc [_ ⊢ _] $[_ ⊢ $σ] = ec in
   case d of
   | [_ ⊢ oft/fwd DU[] U1 U2 E] ⇒
-    let [_ ⊢ lookintm U3] = lookup_upd (upd_symm [_ ⊢ U1]) [_ ⊢ U2] (lookup_lab_neq_2 (upd_symm [_ ⊢ U1]) [_ ⊢ U2]) in
+    let [_ ⊢ lookintm U3] = lookup_upd (upd_symm [_ ⊢ U1]) [_ ⊢ U2]
+      (lookup_mult_neq_r (upd_symm [_ ⊢ U1]) [_ ⊢ U2]) in
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U3] in
     let [_ ⊢ hy] = lookup_to_hyp ec [_ ⊢ U1] in
     [_ ⊢ wtp_fwd DU[] _ hx _ hy]
@@ -196,38 +247,52 @@ rec cp2scp : Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ oft P Δ] → [Φ ⊢ wtp
     [_ ⊢ wtp_wait _ hx W]
   | [_ ⊢ oft/out U1 M (\x.O1) (\x.O2)] ⇒
     let [_ ⊢ M_comm] = merge_comm [_ ⊢ M] in
-    let [_ ⊢ merge-look2 _ U2 •/10 _ _] = merge_lookup2 [_ ⊢ U1] [_ ⊢ M_comm] in
+    let [_ ⊢ merge-lookup2 _ U2 •/10 _ _] =
+      merge_lookup2 [_ ⊢ U1] [_ ⊢ M_comm] in
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U2] in
-    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] = cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
     let [_,b:block x:obj,h:hyp _ _ ⊢ W2] =
-      cp2scp (Enc/c (encctx_upd (encctx_merge ec (merge_comm [_ ⊢ M])) [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
+      cp2scp
+        (Enc/c (encctx_upd (encctx_merge ec (merge_comm [_ ⊢ M])) [_ ⊢ U1])
+        [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
     let [_ ⊢ LN] = oft_linear [_,x:obj ⊢ O1] in
     [_ ⊢ wtp_out LN[$σ] _ hx (\y.\hy.W1[..,<y;hy>]) (\y.\hy.W2[..,<y;hy>])]
   | [_ ⊢ oft/inp U1 \x.\y.O1] ⇒
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U1] in
     let [_,b1:block (x:obj,hx:hyp _ _),b2:block (y:obj,hy:hyp _ _) ⊢ W] =
-      cp2scp (Enc/c (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _] [ ⊢ _]) [_,x:obj,y:obj ⊢ O1] in
+      cp2scp
+        (Enc/c (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _] [ ⊢ _])
+        [_,x:obj,y:obj ⊢ O1] in
     let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (A[] ⅋ _) _ _ _ _] = [_ ⊢ U1] in
     let [_,x:obj ⊢ LN] = oft_linear [_,x:obj,y:obj ⊢ O1] in
     [_ ⊢ wtp_inp (\x.LN[$σ[..],x]) _ hx (\y.\hy.\z.\hz.W[..,<y;hy>,<z;hz>])]
   | [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] ⇒
-    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] = cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
-    let [_,b:block x:obj,h:hyp _ _ ⊢ W2] = cp2scp (Enc/c (encctx_merge ec (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W2] = cp2scp
+      (Enc/c (encctx_merge ec (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _])
+      [_,x:obj ⊢ O2] in
     let [_ ⊢ LN1] = oft_linear [_,x:obj ⊢ O1] in
     let [_ ⊢ LN2] = oft_linear [_,x:obj ⊢ O2] in
-    [_ ⊢ wtp_pcomp DU[] (\x.\hx.W1[..,<x;hx>]) (\x.\hx.W2[..,<x;hx>]) LN1[$σ] LN2[$σ]]
+    [_ ⊢ wtp_pcomp DU[] (\x.\hx.W1[..,<x;hx>]) (\x.\hx.W2[..,<x;hx>])
+      LN1[$σ] LN2[$σ]]
   | [_ ⊢ oft/inl U1 \x.O1] ⇒
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U1] in
-    let [_,b:block x:obj,h:hyp _ _ ⊢ W] = cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
     [_ ⊢ wtp_inl _ hx (\y.\hy.W[..,<y;hy>])]
   | [_ ⊢ oft/inr U1 \x.O1] ⇒
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U1] in
-    let [_,b:block x:obj,h:hyp _ _ ⊢ W] = cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
     [_ ⊢ wtp_inr _ hx (\y.\hy.W[..,<y;hy>])]
   | [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)] ⇒
     let [_ ⊢ hx] = lookup_to_hyp ec [_ ⊢ U1] in
-    let [_,b:block x:obj,hx:hyp x _ ⊢ W1] = cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
-    let [_,b:block x:obj,hx:hyp x _ ⊢ W2] = cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
+    let [_,b:block x:obj,hx:hyp x _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,hx:hyp x _ ⊢ W2] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
     [_ ⊢ wtp_choice _ hx (\y.\hy.W1[..,<y;hy>]) (\y.\hy.W2[..,<y;hy>])]
   ;
 
@@ -238,7 +303,7 @@ rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] �
     let [_ ⊢ U1'] = U1 in
     let [_ ⊢ wtp_fwd DU[] _ hx _ hy] = w in
     let [_ ⊢ unql U2 E] = relnm_unqlin RN [_ ⊢ hx] in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hy] (dec_lookup_hyp dc U1) in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hy] (dec_lookup_hyp dc U1) in
     [_ ⊢ oft/fwd DU[] U1' U2 E]
   | Dec/close RN ⇒
     let [_ ⊢ wtp_close _ hx] = w in
@@ -252,80 +317,111 @@ rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] �
   | Dec/out U1 M DC1 DC2 ⇒
     let ([_ ⊢ U1'],[_ ⊢ M'],[_ ⊢ M_comm]) = (U1,M,merge_comm M) in
     let [_ ⊢ wtp_out _ _ hx (\y.\hy.W1) (\y.\hy.W2)] = w in
-    let [_ ⊢ merge-look2 _ U2 •/10 _ _] = merge_lookup2 [_ ⊢ U1'] [_ ⊢ M_comm] in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc [_ ⊢ U2]) in
-    let [_,x:obj ⊢ O1] = scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
-    let [_,x:obj ⊢ O2] = scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    let [_ ⊢ merge-lookup2 _ U2 •/10 _ _] =
+      merge_lookup2 [_ ⊢ U1'] [_ ⊢ M_comm] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc [_ ⊢ U2]) in
+    let [_,x:obj ⊢ O1] =
+      scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
     [_ ⊢ oft/out U1' M' (\x.O1) (\x.O2)]
   | Dec/inp U1 DC1 ⇒
     let [_ ⊢ U1'] = U1 in
     let [_ ⊢ wtp_inp (\y._) _ hx \y.\hy.\z.\hz.W1] = w in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
-    let [_,x:obj,y:obj ⊢ O1] = scp2cp DC1 [_,b1:block (y:obj,hy:hyp _ _),b2:block (z:obj,hz:hyp _ _) ⊢ W1[..,b1.1,b1.2,b2.1,b2.2]] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
+    let [_,x:obj,y:obj ⊢ O1] = scp2cp DC1
+      [_,b1:block (y:obj,hy:hyp _ _),b2:block (z:obj,hz:hyp _ _) ⊢
+      W1[..,b1.1,b1.2,b2.1,b2.2]] in
     [_ ⊢ oft/inp U1' \x.\y.O1]
   | Dec/pcomp M DU1 DC1 DC2 ⇒
     let [_ ⊢ M'] = M in
     let [_ ⊢ wtp_pcomp DU2[] (\y.\hy.W1) (\y.\hy.W2) _ _] = w in
-    let [_,x:obj ⊢ O1] = scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
-    let [ ⊢ refl] = dual_uniq DU1 [ ⊢ DU2] in
-    let [_,x:obj ⊢ O2] = scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    let [_,x:obj ⊢ O1] =
+      scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [ ⊢ tp/refl] = dual_uniq DU1 [ ⊢ DU2] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
     [_ ⊢ oft/pcomp DU2[] M' (\x.O1) (\x.O2)]
   | Dec/inl U1 DC1 ⇒
     let [_ ⊢ U1'] = U1 in
     let [_ ⊢ wtp_inl _ hx \y.\hy.W1] = w in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
-    let [_,x:obj ⊢ O] = scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
+    let [_,x:obj ⊢ O] =
+      scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
     [_ ⊢ oft/inl U1' \x.O]
   | Dec/inr U1 DC1 ⇒
     let [_ ⊢ U1'] = U1 in
     let [_ ⊢ wtp_inr _ hx \y.\hy.W1] = w in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
-    let [_,x:obj ⊢ O] = scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
+    let [_,x:obj ⊢ O] =
+      scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
     [_ ⊢ oft/inr U1' \x.O]
   | Dec/choice U1 DC1 DC2 ⇒
     let [_ ⊢ U1'] = U1 in
     let [_ ⊢ wtp_choice _ hx (\y.\hy.W1) (\y.\hy.W2)] = w in
-    let [ ⊢ refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
-    let [_,x:obj ⊢ O1] = scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
-    let [_,x:obj ⊢ O2] = scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ hx] (dec_lookup_hyp dc U1) in
+    let [_,x:obj ⊢ O1] =
+      scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
     [_ ⊢ oft/choice U1' (\x.O1) (\x.O2)]
   ;
 
 % Invertibility of translation
 
-rec enc2dec : Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ oft P Δ] → Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
+rec enc2dec :
+  Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Ψ ⊢ oft P Δ]
+  → Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
   / total 2 /
   fn e, d ⇒ case d of
-  | [_ ⊢ oft/fwd DU[] U1 U2 E] ⇒ Dec/fwd [_ ⊢ U1] (unqlin_to_relnm (encctx_upd e [_ ⊢ U1]) [_ ⊢ U2] [_ ⊢ E])
+  | [_ ⊢ oft/fwd DU[] U1 U2 E] ⇒ Dec/fwd [_ ⊢ U1]
+    (unqlin_to_relnm (encctx_upd e [_ ⊢ U1]) [_ ⊢ U2] [_ ⊢ E])
   | [_ ⊢ oft/close U1 E] ⇒ Dec/close (unqlin_to_relnm e [_ ⊢ U1] [_ ⊢ E])
-  | [_ ⊢ oft/wait U1 O1] ⇒ Dec/wait [_ ⊢ U1] (enc2dec (encctx_upd e [_ ⊢ U1]) [_ ⊢ O1])
+  | [_ ⊢ oft/wait U1 O1] ⇒ Dec/wait [_ ⊢ U1]
+    (enc2dec (encctx_upd e [_ ⊢ U1]) [_ ⊢ O1])
   | [_ ⊢ oft/out U1 M (\x.O1) (\x.O2)] ⇒
-    Dec/out [_ ⊢ U1] [_ ⊢ M] (enc2dec (Enc/c (encctx_merge e [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
-      (enc2dec (Enc/c (encctx_upd (encctx_merge e (merge_comm [_ ⊢ M])) [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
+    Dec/out [_ ⊢ U1] [_ ⊢ M]
+      (enc2dec (Enc/c (encctx_merge e [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+      (enc2dec (Enc/c (encctx_upd (encctx_merge e (merge_comm [_ ⊢ M]))
+        [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
   | [_ ⊢ oft/inp U1 (\x.\y.O1)] ⇒
-    Dec/inp [_ ⊢ U1] (enc2dec (Enc/c (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _] [ ⊢ _]) [_,x:obj,y:obj ⊢ O1])
+    Dec/inp [_ ⊢ U1]
+      (enc2dec (Enc/c (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _]
+      [ ⊢ _]) [_,x:obj,y:obj ⊢ O1])
   | [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] ⇒
-    Dec/pcomp [_ ⊢ M] [ ⊢ DU] (enc2dec (Enc/c (encctx_merge e [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
-      (enc2dec (Enc/c (encctx_merge e (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
-  | [_ ⊢ oft/inl U1 (\x.O1)] ⇒ Dec/inl [_ ⊢ U1] (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
-  | [_ ⊢ oft/inr U1 (\x.O1)] ⇒ Dec/inr [_ ⊢ U1] (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+    Dec/pcomp [_ ⊢ M] [ ⊢ DU]
+      (enc2dec (Enc/c (encctx_merge e [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+      (enc2dec (Enc/c (encctx_merge e (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _])
+        [_,x:obj ⊢ O2])
+  | [_ ⊢ oft/inl U1 (\x.O1)] ⇒ Dec/inl [_ ⊢ U1]
+    (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+  | [_ ⊢ oft/inr U1 (\x.O1)] ⇒ Dec/inr [_ ⊢ U1]
+    (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
   | [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)] ⇒
-    Dec/choice [_ ⊢ U1] (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+    Dec/choice [_ ⊢ U1]
+      (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
       (enc2dec (Enc/c (encctx_upd e [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
   ;
 
 rec dec2enc : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
   % Remark: Beluga's totality checker cannot check coverage in this case
+  / trust /
   fn d ⇒ case d of
   | Dec/fwd U1 RN ⇒ encctx_upd (relnm_to_encctx RN) (upd_symm U1)
   | Dec/close RN ⇒ relnm_to_encctx RN
   | Dec/wait U1 DC1 ⇒ encctx_upd (dec2enc DC1) (upd_symm U1)
-  | Dec/out _ M DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_merge_l EC1 M
+  | Dec/out _ M DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in
+    encctx_merge_l EC1 M
   | Dec/inp U1 DC1 ⇒
     let Enc/c (Enc/c EC1 [ ⊢ _] [ ⊢ _]) [ ⊢ _] [ ⊢ _] = dec2enc DC1 in
     encctx_upd EC1 (upd_symm U1)
-  | Dec/pcomp M _ DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_merge_l EC1 M
-  | Dec/inl U1 DC1 ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_upd EC1 (upd_symm U1)
-  | Dec/inr U1 DC1 ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_upd EC1 (upd_symm U1)
-  | Dec/choice U1 DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_upd EC1 (upd_symm U1)
+  | Dec/pcomp M _ DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in
+    encctx_merge_l EC1 M
+  | Dec/inl U1 DC1 ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_upd EC1
+    (upd_symm U1)
+  | Dec/inr U1 DC1 ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in encctx_upd EC1
+    (upd_symm U1)
+  | Dec/choice U1 DC1 _ ⇒ let Enc/c EC1 [ ⊢ _] [ ⊢ _] = dec2enc DC1 in
+    encctx_upd EC1 (upd_symm U1)
   ;

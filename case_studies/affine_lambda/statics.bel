@@ -1,0 +1,10 @@
+%======================================================%
+% Statics of affine λ-calculus
+%======================================================%
+
+LF oft : lctx _ → obj → tp → type =
+| oft/var : upd Δ _ X _ A _ 𝟙 _ _ → oft Δ X A
+| oft/lam : ({x:obj} oft (cons Δ x A 𝟙) (M x) B)
+  → oft Δ (lam M) (A -o B)
+| oft/app : oft Δ₁ M (A -o B) → oft Δ₂ N A → merge Δ₁ Δ₂ Δ
+  → oft Δ (app M N) B;

@@ -1,0 +1,27 @@
+%======================================================%
+% Multiplicities (strict systems) – second approach
+%
+% Unlike common/defs/mult/strict.bel, which tracks strictness by demoting a
+% used assumption to ω, this structure keeps the two-element carrier of
+% lin and instead adds 𝟙 • 𝟙 = 𝟙. The operation is then Boolean
+% disjunction: 𝟘 records "unavailable", 𝟙 records "must still be used at
+% least once", and splitting a 𝟙 assumption sends it to either or both
+% branches.
+%======================================================%
+
+LF mult : type =
+| 𝟘 : mult  % used
+| 𝟙 : mult; % must be used at least once
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/00 : • 𝟘 𝟘 𝟘
+| •/10 : • 𝟙 𝟘 𝟙
+| •/01 : • 𝟘 𝟙 𝟙
+| •/11 : • 𝟙 𝟙 𝟙;
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/0 : hal 𝟘;

@@ -1,0 +1,19 @@
+%======================================================%
+% Multiplicities (linear systems)
+%======================================================%
+
+LF mult : type =
+| 𝟘 : mult  % used
+| 𝟙 : mult; % available once
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/00 : • 𝟘 𝟘 𝟘
+| •/10 : • 𝟙 𝟘 𝟙
+| •/01 : • 𝟘 𝟙 𝟙;
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/0 : hal 𝟘;

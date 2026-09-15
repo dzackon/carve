@@ -1,0 +1,55 @@
+%======================================================%
+% Properties of VarCtx predicate
+%======================================================%
+
+% If VarCtx [Ψ ⊢ Δ] and x ∈ Δ, then x is a parameter variable from Ψ
+
+rec varctx_isvar :
+  VarCtx [Ψ ⊢ Δ]
+  → [Ψ ⊢ upd Δ n[] X X' A A' α α' Δ']
+  → IsVar [Ψ ⊢ X] =
+  / total 2 /
+  fn vc, u ⇒ case u of
+  | [_ ⊢ upd/t _] ⇒ let VarCtx-Cons _ = vc in Is-Var
+  | [_ ⊢ upd/n U1] ⇒ let VarCtx-Cons vcc1 = vc in varctx_isvar vcc1 [_ ⊢ U1]
+  ;
+
+% Extend VarCtx judgment with new variable of type obj
+
+rec varctx_ext : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ Δ[..]] =
+  / total 1 /
+  fn vc ⇒ case vc of
+  | VarCtx-Nil ⇒ VarCtx-Nil
+  | VarCtx-Cons vc ⇒ VarCtx-Cons (varctx_ext vc)
+  ;
+
+% Extending a context with a fresh variable preserves VarCtx predicate
+
+rec varctx_extcons : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ cons Δ[..] x _ _] =
+  / total /
+  fn vc ⇒ VarCtx-Cons (varctx_ext vc)
+  ;
+
+% Well-formed contexts contain only parameter variables
+
+rec wf_varctx : Wf [Ψ ⊢ Δ] → VarCtx [Ψ ⊢ Δ] =
+  / total 1 /
+  fn wf ⇒ case wf of
+  | Wf-Nil ⇒ VarCtx-Nil
+  | Wf-Cons wf1 _ ⇒ VarCtx-Cons (wf_varctx wf1)
+  ;
+
+% If VarCtx [Ψ ⊢ Δ] and Δ₁ ⋈ Δ₂ = Δ, then VarCtx [Ψ ⊢ Δ₁] and VarCtx [Ψ ⊢ Δ₂]
+
+rec varctx_split : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → VarCtx [Ψ ⊢ Δ₁] =
+  / total d (varctx_split d) /
+  fn wf, m ⇒ case wf of
+  | VarCtx-Nil ⇒ let [_ ⊢ mg/n] = m in VarCtx-Nil
+  | VarCtx-Cons vc ⇒ let [_ ⊢ mg/c M1 _] = m in VarCtx-Cons
+    (varctx_split vc [_ ⊢ M1])
+  ;
+
+rec varctx_split_r : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → VarCtx [Ψ ⊢ Δ₂] =
+  / total /
+  fn vc, m ⇒ varctx_split vc (merge_comm m)
+  ;

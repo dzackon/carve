@@ -1,0 +1,30 @@
+%======================================================%
+% Object-related definitions
+% (independent of how obj is defined)
+%======================================================%
+
+% Ambient context schema
+
+schema ctx = obj;
+
+% Object equality
+
+LF obj_eq : obj → obj → type = obj/refl : obj_eq X X;
+
+% IsVar [Ψ ⊢ X]: X is a parameter variable under the LF context Ψ
+
+inductive IsVar : (Ψ:ctx) [Ψ ⊢ obj] → ctype =
+| Is-Var : IsVar [Ψ ⊢ #p];
+
+% PruneObj: witnesses that an object in an extended context Ψ,x:obj
+% does not depend on the fresh variable x
+
+inductive PruneObj : (Ψ:ctx) {M:[Ψ,x:obj ⊢ obj]} ctype =
+| Prune-Obj : PruneObj [Ψ,x:obj ⊢ M[..]];
+
+% CompareObjs [Ψ ⊢ M] [Ψ ⊢ N]: M and N are either equal or provably distinct
+% (used to decide equality of LF objects; see comp_obj in common/lemmas/obj2.bel)
+
+inductive CompareObjs : (Ψ:ctx) {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]} ctype =
+| Obj-Eq : CompareObjs [Ψ ⊢ M] [Ψ ⊢ M]
+| Obj-Neq : ([Ψ ⊢ obj_eq M N] → [ ⊢ false]) → CompareObjs [Ψ ⊢ M] [Ψ ⊢ N];

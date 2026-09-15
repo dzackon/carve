@@ -1,0 +1,49 @@
+%======================================================%
+% General properties of objects
+%======================================================%
+
+% Prune equality judgment
+
+rec prune_obj_eq : (Ψ:ctx) [Ψ,x:obj ⊢ obj_eq X[..] Y[..]] → [Ψ ⊢ obj_eq X Y] =
+  / total /
+  fn e ⇒ let [_,x:obj ⊢ obj/refl] = e in [_ ⊢ obj/refl]
+  ;
+
+rec prune_obj_eq2 : (Ψ:ctx) [Ψ,x:obj ⊢ obj_eq X[..] Y] → PruneObj [Ψ,x:obj ⊢ Y] =
+  / total /
+  fn e ⇒ let [_,x:obj ⊢ obj/refl] = e in Prune-Obj
+  ;
+
+% If Ψ ⊢ σ : Φ and Φ,x ⊢ x = #p[σ[..], x], then Ψ, x ⊢ #p = x
+
+rec obj_eq_sub : (Ψ:ctx) (Φ:ctx) {$σ:$[Φ ⊢ Ψ]} {#p:#[Ψ,x:obj ⊢ obj]}
+[Φ, x:obj ⊢ obj_eq x #p[$σ[..], x]] → [Ψ, x:obj ⊢ obj_eq x #p] =
+  / total /
+  mlam $σ, #p ⇒ fn e ⇒
+  case [_,x:obj ⊢ #p] of
+  | [_,x:obj ⊢ x] ⇒ [_,x:obj ⊢ obj/refl]
+  | [_,x:obj ⊢ #q[..]] ⇒ impossible e
+  ;
+
+% If a variable X does not depend on x, then X ≠ x
+
+rec neq_top : (Ψ:ctx) [Ψ,x:obj ⊢ obj_eq X[..] x] → [ ⊢ false] =
+  / total /
+  fn e ⇒ impossible e
+  ;
+
+% Weaken object inequality judgment
+
+rec obj_neq_weak : (Ψ:ctx) ([Ψ ⊢ obj_eq X Y] → [ ⊢ false])
+  → ([Ψ,x:obj ⊢ obj_eq X[..] Y[..]] → [ ⊢ false]) =
+  / total /
+  fn n, e ⇒ let [_,x:obj ⊢ obj/refl] = e in impossible n [_ ⊢ obj/refl]
+  ;
+
+% Object inequality is symmetric
+
+rec obj_neq_symm : (Ψ:ctx) ([Ψ ⊢ obj_eq X Y] → [ ⊢ false])
+  → ([Ψ ⊢ obj_eq Y X] → [ ⊢ false]) =
+  / total /
+  fn n, e ⇒ let [_ ⊢ obj/refl] = e in impossible n [_ ⊢ obj/refl]
+  ;

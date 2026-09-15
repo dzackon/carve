@@ -1,0 +1,113 @@
+%======================================================%
+% Explicit contexts
+%======================================================%
+
+%------------------------------------------------------%
+% Length-indexed typing contexts
+%------------------------------------------------------%
+
+LF lctx : nat → type =
+| nil : lctx zero
+| cons : lctx N → obj → tp → mult → lctx (suc N);
+
+% Typing context equality
+
+LF ctx_eq : lctx N → lctx N → type =
+| ctx/refl : ctx_eq Δ Δ;
+
+%------------------------------------------------------%
+% Main operations on typing contexts
+%------------------------------------------------------%
+
+% Context split / merge: Δ₁ ⋈ Δ₂ = Δ
+
+LF merge : lctx N → lctx N → lctx N → type =
+| mg/n : merge nil nil nil
+| mg/c : merge Δ₁ Δ₂ Δ → • α₁ α₂ α
+  → merge (cons Δ₁ X A α₁) (cons Δ₂ X A α₂) (cons Δ X A α);
+
+% Context update: Δ[x :α A ↦ₙ y :β B] = Δ'
+% i.e., x appears in Δ at position n with type A and multiplicity α, and
+% Δ' is the result of changing that entry to y :β B
+
+LF upd : lctx N → nat → obj → obj → tp → tp → mult → mult → lctx N → type =
+| upd/t : {Δ:lctx N}
+  upd (cons Δ X A α) (suc N) X X' A A' α α' (cons Δ X' A' α')
+| upd/n : upd Δ n X X' A A' α α' Δ'
+  → upd (cons Δ Y B β) n X X' A A' α α' (cons Δ' Y B β);
+
+% Exhaustedness: every assumption in Δ has harmless multiplicity.
+% "hal α" is the predicate for harmless multiplicities (e.g. α = 𝟘 in linear
+% systems).
+
+LF exh : lctx _ → type =
+| exh/n : exh nil
+| exh/c : exh Δ → hal α → exh (cons Δ _ _ α);
+
+% Element equality: Δ ≈ Δ' holds when Δ and Δ' have the same names and types
+% in the same order (but possibly differ in multiplicities).
+
+LF same_elts: lctx N → lctx N → type =
+| se/n : same_elts nil nil
+| se/c : same_elts Δ Δ' → same_elts (cons Δ X A _) (cons Δ' X A _);
+
+%------------------------------------------------------%
+% Derived exchange predicate
+%------------------------------------------------------%
+
+% Exchange: permute two distinct entries of a context
+
+LF exch : lctx N → nat → obj → nat → obj → lctx N → type =
+| exch/u : neq n m
+  → upd Δ n X Y A B α β Δ''
+  → upd Δ'' m Y X B A β α Δ'
+  → exch Δ n X m Y Δ';
+
+%------------------------------------------------------%
+% Look-up variants
+%------------------------------------------------------%
+
+% By name, type, and multiplicity
+LF lookup : obj → tp → mult → lctx _ → type =
+| look : upd Δ _ X X A A α α Δ → lookup X A α Δ;
+
+% By name only
+LF lookup_n : obj → lctx _ → type =
+| lookn : upd Δ _ X _ _ _ _ _ _ → lookup_n X Δ;
+
+% By index and name
+LF lookup_in : nat → obj → lctx _ → type =
+| lookin : upd Δ n X X A A α α Δ → lookup_in n X Δ;
+
+% By index, name, and type
+LF lookup_int : nat → obj → tp → lctx _ → type =
+| lookint : upd Δ n X X A A α α Δ → lookup_int n X A Δ;
+
+% By index, name, type, and multiplicity
+LF lookup_intm : nat → obj → tp → mult → lctx _ → type =
+| lookintm : upd Δ n X X A A α α Δ → lookup_intm n X A α Δ;
+
+%------------------------------------------------------%
+% Well-formedness conditions
+%------------------------------------------------------%
+
+% Wf [Ψ ⊢ Δ]: Δ has no duplicate names and all elements are parameter variables
+% from Ψ
+
+inductive Wf : (Ψ:ctx) {Δ:[Ψ ⊢ lctx k]} ctype =
+| Wf-Nil : Wf [_ ⊢ nil]
+| Wf-Cons : Wf [_ ⊢ Δ]
+  → ([_ ⊢ lookup_n #p Δ] → [ ⊢ false])
+  → Wf [_ ⊢ cons Δ #p _ _];
+
+% Explicit and LF contexts contain the same elements, in the same order
+
+inductive Wf' : (Ψ:ctx) [Ψ ⊢ lctx K] → ctype =
+| Wf'-Nil : Wf' [ ⊢ nil]
+| Wf'-Cons : Wf' [Ψ ⊢ Δ] → Wf' [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]];
+
+% VarCtx Δ: every name in Δ is a parameter variable from Ψ
+
+inductive VarCtx : (Ψ:ctx) [Ψ ⊢ lctx K] → ctype =
+| VarCtx-Nil : VarCtx [_ ⊢ nil]
+| VarCtx-Cons : VarCtx [_ ⊢ Δ] → VarCtx [_ ⊢ cons Δ #p _ _];

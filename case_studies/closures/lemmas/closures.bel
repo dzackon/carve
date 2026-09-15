@@ -4,7 +4,9 @@
 
 % If W ∈ₙ η, then n < |η| + 1
 
-rec len_vlook_lt : (η:[ ⊢ venv N]) [ ⊢ lookup_venv n[] W η] → [ ⊢ lt n (suc N)] =
+rec len_vlook_lt : (η:[ ⊢ venv N])
+  [ ⊢ lookup_venv n[] W η]
+  → [ ⊢ lt n (suc N)] =
   / total 1 /
   fn l ⇒ case l of
   | [ ⊢ vlook/t _] ⇒ lt_suc [ ⊢ _]
@@ -14,8 +16,11 @@ rec len_vlook_lt : (η:[ ⊢ venv N]) [ ⊢ lookup_venv n[] W η] → [ ⊢ lt n
 % Determine a value's type by performing a look-up in the linear context:
 % If η : Δ, A¹ ∈ₙ Δ, and W ∈ₙ η, then W : A
 
-rec lookup_hasty : [ ⊢ hasty_env η Δ] → [ ⊢ upd Δ n _ _ A _ 𝟙 _ _] → [ ⊢ lookup_venv n W η]
-→ [ ⊢ hasty W A] =
+rec lookup_hasty :
+  [ ⊢ hasty_env η Δ]
+  → [ ⊢ upd Δ n _ _ A _ 𝟙 _ _]
+  → [ ⊢ lookup_venv n W η]
+  → [ ⊢ hasty W A] =
   / total 3 /
   fn e, u, l ⇒ case l of
   | [ ⊢ vlook/t _] ⇒
@@ -35,7 +40,10 @@ rec lookup_hasty : [ ⊢ hasty_env η Δ] → [ ⊢ upd Δ n _ _ A _ 𝟙 _ _] �
 % Preservation of context relation under merge:
 % If η : Δ and Δ₁ ⋈ Δ₂ = Δ, then η : Δ₁ (and Δ₂ by commutativity)
 
-rec pres_hasty_env : [ ⊢ hasty_env η Δ] → [ ⊢ merge Δ₁ Δ₂ Δ] → [ ⊢ hasty_env η Δ₁] =
+rec pres_hasty_env :
+  [ ⊢ hasty_env η Δ]
+  → [ ⊢ merge Δ₁ Δ₂ Δ]
+  → [ ⊢ hasty_env η Δ₁] =
   / total 1 /
   fn d, m ⇒ case d of
   | [ ⊢ hasty_env/n] ⇒ let [ ⊢ mg/n] = m in [ ⊢ hasty_env/n]
@@ -45,7 +53,10 @@ rec pres_hasty_env : [ ⊢ hasty_env η Δ] → [ ⊢ merge Δ₁ Δ₂ Δ] → 
     [ ⊢ hasty_env/c D2 Dw]
   ;
 
-rec pres_hasty_env_r : [ ⊢ hasty_env η Δ] → [ ⊢ merge Δ₁ Δ₂ Δ] → [ ⊢ hasty_env η Δ₂] =
+rec pres_hasty_env_r :
+  [ ⊢ hasty_env η Δ]
+  → [ ⊢ merge Δ₁ Δ₂ Δ]
+  → [ ⊢ hasty_env η Δ₂] =
   / total /
   fn d, m ⇒ pres_hasty_env d (merge_comm m)
   ;

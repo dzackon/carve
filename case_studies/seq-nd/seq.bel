@@ -7,7 +7,7 @@ LF seq : lctx _ → tp → type =
 % Hypotheses
 
 | hyp :
-   upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ'
+    upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ'
   → seq Δ A
 
 % Multiplicatives
@@ -23,8 +23,8 @@ LF seq : lctx _ → tp → type =
 
 | R⊗ :
     seq Δ₁ A → seq Δ₂ B
-    → merge Δ₁ Δ₂ Δ
-    → seq Δ (A ⊗ B)
+  → merge Δ₁ Δ₂ Δ
+  → seq Δ (A ⊗ B)
 
 | L⊗ :
     upd Δ _ X X (A ⊗ B) (A ⊗ B) 𝟙 𝟘 Δ'
@@ -105,8 +105,8 @@ LF seq_cf : lctx _ → tp → type =
 
 | R⊗_cf :
     seq_cf Δ₁ A → seq_cf Δ₂ B
-    → merge Δ₁ Δ₂ Δ
-    → seq_cf Δ (A ⊗ B)
+  → merge Δ₁ Δ₂ Δ
+  → seq_cf Δ (A ⊗ B)
 
 | L⊗_cf :
     upd Δ _ X X (A ⊗ B) (A ⊗ B) 𝟙 𝟘 Δ'

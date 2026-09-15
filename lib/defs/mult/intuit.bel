@@ -1,0 +1,16 @@
+%======================================================%
+% Multiplicities (fully intuitionistic systems)
+%======================================================%
+
+LF mult : type =
+| ω : mult; % unrestricted
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/ωω : • ω ω ω;
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/ω : hal ω;

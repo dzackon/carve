@@ -1,0 +1,149 @@
+%======================================================%
+% Algebraic properties of multiplicities
+% (strict systems)
+%======================================================%
+
+% Remark: • is not total since 𝟙 • 𝟙 is undefined
+
+% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
+
+rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
+  / total /
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
+  ;
+
+% Identity elements:
+% (1) ω is an identity element
+% (2) every harmless element is an identity element
+
+rec ident_w_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • ω m m2]
+                → [ ⊢ mult_eq m m2] =
+  / total /
+  mlam m, m2 ⇒ fn d ⇒ case d of
+  | [ ⊢ •/ω1] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ [ ⊢ mult/refl]
+  ;
+
+rec mult_ident_w : Ident [ ⊢ ω] =
+  / total /
+  Is-Id ident_w_prf
+  ;
+
+rec halident_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → Ident [ ⊢ α] =
+  / total /
+  mlam α ⇒ fn h ⇒ let [ ⊢ hal/ω] = h in mult_ident_w
+  ;
+
+rec mult_halident : HalIdent =
+  / total /
+  Hal-Ident halident_prf
+  ;
+
+% Every unit element is harmless
+
+rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
+  / total /
+  mlam _, _ ⇒ fn d ⇒ case d of
+  | [ ⊢ •/ω1] ⇒ [ ⊢ hal/ω]
+  | [ ⊢ •/ωω] ⇒ [ ⊢ hal/ω]
+  ;
+
+rec mult_unithal : UnitHal =
+  / total /
+  Unit-Hal unithal_prf
+  ;
+
+% For any α, obtain a harmless identity element β such that β • α = α
+
+rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
+  / total /
+  mlam α ⇒ case [ ⊢ α] of
+  | [ ⊢ 𝟙] ⇒ [ ⊢ get-unit hal/ω •/ω1]
+  | [ ⊢ ω] ⇒ [ ⊢ get-unit hal/ω •/ωω]
+  ;
+
+% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
+
+rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total /
+  fn m, u ⇒
+  let [ ⊢ hal/ω] = u in
+  let [ ⊢ •/ωω] = m in
+  [ ⊢ mult/refl]
+  ;
+
+rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total /
+  mlam _, _, _ ⇒ fn m, u ⇒ mult_zsfree m u
+  ;
+
+rec mult_zsfree_rec : ZsFree =
+  / total /
+  Is-ZsFree zsfree_prf
+  ;
+
+% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
+
+rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
+  / total /
+  fn m ⇒ case m of
+  | [ ⊢ •/1ω] ⇒ [ ⊢ •/ω1]
+  | [ ⊢ •/ω1] ⇒ [ ⊢ •/1ω]
+  | [ ⊢ •/ωω] ⇒ m
+  ;
+
+% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
+
+rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
+                 [ ⊢ mult_assoc_res M1 M2] =
+  / total /
+  mlam M1, M2 ⇒
+  case [ ⊢ M1] of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = [ ⊢ M2] in [ ⊢ mult-assoc •/ωω •/1ω _ _]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/1ω] = [ ⊢ M2] in [ ⊢ mult-assoc •/1ω •/ω1 _ _]
+  | [ ⊢ •/ωω] ⇒
+    case [ ⊢ M2] of
+    | [ ⊢ •/ω1] ⇒ [ ⊢ mult-assoc •/ω1 •/ω1 _ _]
+    | [ ⊢ •/ωω] ⇒ [ ⊢ mult-assoc •/ωω •/ωω _ _]
+  ;
+
+% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
+
+rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total /
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
+  ;
+
+rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
+               [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total /
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_canc m1 m2
+  ;
+
+rec mult_cancl : Cancl =
+  / total /
+  Is-Cancl canc_prf
+  ;
+
+%------------------------------------------------------%
+% Properties of harmless elements
+%------------------------------------------------------%
+
+% Harmless elements are idempotent
+
+rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
+  / total /
+  mlam _ ⇒ fn h ⇒ let [ ⊢ hal/ω] = h in [ ⊢ •/ωω]
+  ;
+
+rec mult_halidem_rec : HalIdem =
+  / total /
+  Is-HalIdem halidem_prf
+  ;

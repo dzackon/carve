@@ -1,0 +1,24 @@
+%======================================================%
+% Multiplicities
+% (linear / affine systems with exponentials)
+%======================================================%
+
+LF mult : type =
+| 𝟘 : mult  % used
+| 𝟙 : mult  % available linearly
+| ω : mult; % available unrestrictedly
+
+% α₁ • α₂ = α
+
+LF • : mult → mult → mult → type =
+| •/0a : • 𝟘 α α
+| •/a0 : • α 𝟘 α
+| •/11 : • 𝟙 𝟙 ω
+| •/ωa : • ω _ ω
+| •/aω : • _ ω ω;
+
+% α is harmless
+
+LF hal : mult → type =
+| hal/0 : hal 𝟘
+| hal/ω : hal ω;

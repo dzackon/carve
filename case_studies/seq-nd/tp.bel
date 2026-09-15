@@ -15,4 +15,4 @@ LF tp : type =
 
 % Type equality
 
-LF eq : tp → tp → type = refl : eq A A;
+LF tp_eq : tp → tp → type = tp/refl : tp_eq A A;

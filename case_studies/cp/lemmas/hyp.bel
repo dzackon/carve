@@ -4,14 +4,16 @@
 
 % Strengthen LF context in hyp judgment
 
-rec prune_hyp : (Φ:hctx) [Φ,b:block y:obj,h:hyp y B[] ⊢ hyp X[..] A[]] → [Φ ⊢ hyp X A[]] =
+rec prune_hyp : (Φ:hctx)
+  [Φ,b:block y:obj,h:hyp y B[] ⊢ hyp X[..] A[]]
+  → [Φ ⊢ hyp X A[]] =
   / total /
   fn hp ⇒ let [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]] = hp in [_ ⊢ hy]
   ;
 
 % Names are assigned unique types
 
-rec hyp_unq : (Φ:hctx) [Φ ⊢ hyp x A[]] → [Φ ⊢ hyp x B[]] → [ ⊢ eq A B] =
+rec hyp_unq : (Φ:hctx) [Φ ⊢ hyp x A[]] → [Φ ⊢ hyp x B[]] → [ ⊢ tp_eq A B] =
   / total /
-  fn hp1, hp2 ⇒ let ([_ ⊢ #p.2],[_ ⊢ #p.2]) = (hp1,hp2) in [ ⊢ refl]
+  fn hp1, hp2 ⇒ let ([_ ⊢ #p.2],[_ ⊢ #p.2]) = (hp1,hp2) in [ ⊢ tp/refl]
   ;

@@ -8,18 +8,16 @@ LF tp : type =
 | ⊗  : tp → tp → tp
 | ⅋  : tp → tp → tp
 | &  : tp → tp → tp
-| -o : tp → tp → tp
 | ⊕  : tp → tp → tp;
 --infix ⊗ 5 left.
 --infix ⅋ 5 left.
 --infix ⊕ 4 left.
 --infix & 4 left.
---infix -o 5 right.
 
 % Type equality
 
-LF eq : tp → tp → type =
-| refl : eq A A;
+LF tp_eq : tp → tp → type =
+| tp/refl : tp_eq A A;
 
 % Duality condition for CP
 
