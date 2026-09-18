@@ -114,7 +114,7 @@ LF merge_assoc_res2 : merge _ _ _ → merge _ _ _ → type =
   merge-assoc2 : merge Δ₁ Δ₃ Δ₁₃ → merge Δ₁₃ Δ₂ Δ
   → {M1:merge Δ₁₂ Δ₃ Δ} {M2:merge Δ₁ Δ₂ Δ₁₂} merge_assoc_res2 M1 M2;
 
-rec merge_assoc2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {M1:[Ψ ⊢ merge Δ₁₂ Δ₃ Δ]}
+rec merge_assoc_swap : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {M1:[Ψ ⊢ merge Δ₁₂ Δ₃ Δ]}
   {M2:[Ψ ⊢ merge Δ₁ Δ₂ Δ₁₂]}
   [Ψ ⊢ merge_assoc_res2 M1 M2] =
   / total /

@@ -291,12 +291,12 @@ rec oft_weak_env : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 % (2) Intuitionistic cut:  If (a) Δ₁, x :ω A ⊢ M : C, (b) Δ₂ ⊢ N : A, (c)
 % exh(Δ₂), and (d) Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C
 
-rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
+rec substitution : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x A[] 𝟙) M C[]]
   → [Ψ ⊢ oft Δ₂ N A[]]
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ oft Δ M[..,N] C[]] =
-  / total d (sub_lem d) /
+  / total d (substitution d) /
   fn d1, d2, m ⇒
   let [_ ⊢ M] = m in
   case d1 of
@@ -313,7 +313,7 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
   | [_,x:obj ⊢ oft/vari (upd/n _) (exh/c _ UN[])] ⇒ impossible [ ⊢ UN]
   | [_,x:obj ⊢ oft/lam \y.D1] ⇒
     let [_,y:obj,x:obj ⊢ D1'[..,x,y]] = oft_exch_top [_,x:obj,y:obj ⊢ D1] in
-    let [_,x:obj ⊢ D2] = sub_lem [_,x:obj,y:obj ⊢ D1']
+    let [_,x:obj ⊢ D2] = substitution [_,x:obj,y:obj ⊢ D1']
       (oft_weak d2 [ ⊢ _] [ ⊢ hal/0]) [_,x:obj ⊢ mg/c M[..] •/10] in
     [_ ⊢ oft/lam \x.D2]
   | [_,x:obj ⊢ oft/app D1 D2 (mg/c M1 T[])] ⇒
@@ -322,7 +322,7 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
     | [ ⊢ •/01] ⇒
       let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let Str-Top [_ ⊢ D1'] [_,x:obj ⊢ _] = oft_str_0 [_,x:obj ⊢ D1] in
-      let [_ ⊢ D2'] = sub_lem [_,x:obj ⊢ D2] d2 [_ ⊢ M3] in
+      let [_ ⊢ D2'] = substitution [_,x:obj ⊢ D2] d2 [_ ⊢ M3] in
       [_ ⊢ oft/app D1' D2' M4]
     | [ ⊢ •/10] ⇒
       let [_ ⊢ M2_comm] = merge_comm [_ ⊢ M2] in
@@ -330,7 +330,7 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
         merge_assoc [_ ⊢ M] [_ ⊢ M2_comm] in
       let [_ ⊢ M4] = merge_comm [_ ⊢ M4_comm] in
       let Str-Top [_ ⊢ D2'] [_,x:obj ⊢ _] = oft_str_0 [_,x:obj ⊢ D2] in
-      let [_ ⊢ D1'] = sub_lem [_,x:obj ⊢ D1] d2 [_ ⊢ M3] in
+      let [_ ⊢ D1'] = substitution [_,x:obj ⊢ D1] d2 [_ ⊢ M3] in
       [_ ⊢ oft/app D1' D2' M4]
     )
   | [_,x:obj ⊢ oft/bang (exh/c _ UN[]) _] ⇒ impossible [ ⊢ UN]
@@ -341,7 +341,7 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
     | [ ⊢ •/01] ⇒
       let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2] in
       let Str-Top [_ ⊢ D1'] [_,x:obj ⊢ _] = oft_str_0 [_,x:obj ⊢ D1] in
-      let [_,x:obj ⊢ D2'] = sub_lem [_,x:obj,y:obj ⊢ D2'']
+      let [_,x:obj ⊢ D2'] = substitution [_,x:obj,y:obj ⊢ D2'']
         (oft_weak d2 [ ⊢ _] [ ⊢ hal/ω]) [_,x:obj ⊢ mg/c M3[..] •/ωω] in
       [_ ⊢ oft/letbang D1' (\x.D2') M4]
     | [ ⊢ •/10] ⇒
@@ -349,20 +349,20 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
       let [_ ⊢ merge-assoc M3 M4_comm _ _] =
         merge_assoc [_ ⊢ M] [_ ⊢ M2_comm] in
       let [_ ⊢ M4] = merge_comm [_ ⊢ M4_comm] in
-      let [_ ⊢ D1'] = sub_lem [_,x:obj ⊢ D1] d2 [_ ⊢ M3] in
+      let [_ ⊢ D1'] = substitution [_,x:obj ⊢ D1] d2 [_ ⊢ M3] in
       let Str-Top [_,x:obj ⊢ D2'] [_,x:obj,y:obj ⊢ _] =
         oft_str_0 [_,x:obj,y:obj ⊢ D2''] in
       [_ ⊢ oft/letbang D1' (\x.D2') M4]
     )
   ;
 
-rec sub_lem_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
+rec substitution_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x A[] ω) M C[]]
   → [Ψ ⊢ oft Δ₂ N A[]]
   → [Ψ ⊢ exh Δ₂]
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ oft Δ M[..,N] C[]] =
-  / total d (sub_lem_w d) /
+  / total d (substitution_w d) /
   fn d1, d2, e, m ⇒
   let [_ ⊢ M] = m in
   let [_ ⊢ E] = e in
@@ -387,7 +387,7 @@ rec sub_lem_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
     )
   | [_,x:obj ⊢ oft/lam \y.D1] ⇒
     let [_,y:obj,x:obj ⊢ D1'[..,x,y]] = oft_exch_top [_,x:obj,y:obj ⊢ D1] in
-    let [_,x:obj ⊢ D2] = sub_lem_w [_,x:obj,y:obj ⊢ D1']
+    let [_,x:obj ⊢ D2] = substitution_w [_,x:obj,y:obj ⊢ D1']
       (oft_weak d2 [ ⊢ _] [ ⊢ hal/0]) [_,x:obj ⊢ exh/c E[..] hal/0]
       [_,x:obj ⊢ mg/c M[..] •/10] in
     [_ ⊢ oft/lam \x.D2]
@@ -398,12 +398,12 @@ rec sub_lem_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
     let [_ ⊢ merge-assoc M5 _ _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2_comm] in
     let [_ ⊢ ctx/refl] = merge_id mult_halident (merge_comm [_ ⊢ M5]) e in
     let [_ ⊢ ctx/refl] = merge_id mult_halident (merge_comm [_ ⊢ M3]) e in
-    let [_ ⊢ D1'] = sub_lem_w [_,x:obj ⊢ D1] d2 e [_ ⊢ M5] in
-    let [_ ⊢ D2'] = sub_lem_w [_,x:obj ⊢ D2] d2 e [_ ⊢ M3] in
+    let [_ ⊢ D1'] = substitution_w [_,x:obj ⊢ D1] d2 e [_ ⊢ M5] in
+    let [_ ⊢ D2'] = substitution_w [_,x:obj ⊢ D2] d2 e [_ ⊢ M3] in
     [_ ⊢ oft/app D1' D2' M2]
   | [_,x:obj ⊢ oft/bang (exh/c E1 _) D1] ⇒
     let [_ ⊢ E2] = prune_exh [_ ⊢ E1] in
-    let [_ ⊢ D2] = sub_lem_w [_,x:obj ⊢ D1] d2 e m in
+    let [_ ⊢ D2] = substitution_w [_,x:obj ⊢ D1] d2 e m in
     [_ ⊢ oft/bang E2 D2]
   | [_,x:obj ⊢ oft/letbang D1 (\y.D2) (mg/c M1 •/ωω)] ⇒
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
@@ -412,9 +412,9 @@ rec sub_lem_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
     let [_ ⊢ merge-assoc M5 _ _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M2_comm] in
     let [_ ⊢ ctx/refl] = merge_id mult_halident (merge_comm [_ ⊢ M5]) e in
     let [_ ⊢ ctx/refl] = merge_id mult_halident (merge_comm [_ ⊢ M3]) e in
-    let [_ ⊢ D1'] = sub_lem_w [_,x:obj ⊢ D1] d2 e [_ ⊢ M5] in
+    let [_ ⊢ D1'] = substitution_w [_,x:obj ⊢ D1] d2 e [_ ⊢ M5] in
     let [_,y:obj,x:obj ⊢ D2''[..,x,y]] = oft_exch_top [_,x:obj,y:obj ⊢ D2] in
-    let [_,x:obj ⊢ D2'] = sub_lem_w [_,x:obj,y:obj ⊢ D2'']
+    let [_,x:obj ⊢ D2'] = substitution_w [_,x:obj,y:obj ⊢ D2'']
       (oft_weak d2 [ ⊢ _] [ ⊢ hal/ω]) [_,x:obj ⊢ exh/c E[..] hal/ω]
       [_,x:obj ⊢ mg/c M3[..] •/ωω] in
     [_ ⊢ oft/letbang D1' (\x.D2') M2]

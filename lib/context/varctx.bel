@@ -42,7 +42,7 @@ rec wf_varctx : Wf [Ψ ⊢ Δ] → VarCtx [Ψ ⊢ Δ] =
 % If VarCtx [Ψ ⊢ Δ] and Δ₁ ⋈ Δ₂ = Δ, then VarCtx [Ψ ⊢ Δ₁] and VarCtx [Ψ ⊢ Δ₂]
 
 rec varctx_split : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → VarCtx [Ψ ⊢ Δ₁] =
-  / total d (varctx_split d) /
+  / total 1 /
   fn wf, m ⇒ case wf of
   | VarCtx-Nil ⇒ let [_ ⊢ mg/n] = m in VarCtx-Nil
   | VarCtx-Cons vc ⇒ let [_ ⊢ mg/c M1 _] = m in VarCtx-Cons

@@ -17,7 +17,7 @@ rec lookup_mult_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   let [_ ⊢ _]:[_ ⊢ upd _ n[] _ _ _ _ _ _ _] = u1 in
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = u2 in
   case comp_nats [ ⊢ n] [ ⊢ m] of
-  | [ ⊢ comp_nats/eq] ⇒ impossible lookup_unq u1 u2
+  | [ ⊢ comp_nats/eq] ⇒ impossible lookup_unique u1 u2
   | [ ⊢ comp_nats/neq NEQ] ⇒ [ ⊢ NEQ]
   ;
 

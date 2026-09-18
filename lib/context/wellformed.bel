@@ -1,0 +1,137 @@
+%======================================================%
+% Properties of the well-formedness predicates
+%======================================================%
+
+%------------------------------------------------------%
+% Main properties of context well-formedness
+%------------------------------------------------------%
+
+% If Wf [Ψ ⊢ Δ] and x ∈ Δ, then x is a parameter variable from Ψ
+
+rec wf_isvar : Wf [Ψ ⊢ Δ] → [Ψ ⊢ upd Δ n[] X X' A A' α α' Δ'] → IsVar [Ψ ⊢ X] =
+  / total 2 /
+  fn wf, u ⇒ case u of
+  | [_ ⊢ upd/t _] ⇒ let Wf-Cons _ _ = wf in Is-Var
+  | [_ ⊢ upd/n U1] ⇒ let Wf-Cons wf1 _ = wf in wf_isvar wf1 [_ ⊢ U1]
+  ;
+
+% Extend Wf judgment with new variable of type obj
+
+rec wf_ext : Wf [Ψ ⊢ Δ] → Wf [Ψ,x:obj ⊢ Δ[..]] =
+  / total 1 /
+  fn wf ⇒ case wf of
+  | Wf-Nil ⇒ Wf-Nil
+  | Wf-Cons wf1 nin ⇒ let wf2 = wf_ext wf1 in Wf-Cons wf2 (notin_ext nin)
+  ;
+
+% Strengthen LF context in Wf judgment
+
+rec wf_prune : Wf [Ψ,x:obj ⊢ Δ[..]] → Wf [Ψ ⊢ Δ] =
+  / total 1 /
+  fn wf ⇒ case wf of
+  | Wf-Nil ⇒ Wf-Nil
+  | Wf-Cons wf1 nin ⇒ let wf2 = wf_prune wf1 in Wf-Cons wf2 (notin_str nin)
+  ;
+
+% Extending a context with a fresh variable preserves well-formedness predicate
+
+rec wf_extcons : Wf [Ψ ⊢ Δ] → Wf [Ψ,x:obj ⊢ cons Δ[..] x _ _] =
+  / total /
+  fn wf ⇒ case wf of
+  | Wf-Nil ⇒ Wf-Cons Wf-Nil notin_nil
+  | Wf-Cons wf1 nin ⇒ Wf-Cons (wf_ext wf) notin_contra
+  ;
+
+% Swapping LF context elements preserves well-formedness predicate
+
+rec wf_swap : Wf [Ψ,x:obj,y:obj ⊢ Δ] → Wf [Ψ,y:obj,x:obj ⊢ Δ[..,x,y]] =
+  / total 1 /
+  fn wf ⇒ case wf of
+  | Wf-Nil ⇒ Wf-Nil
+  | Wf-Cons wf1 nin ⇒ Wf-Cons (wf_swap wf1) (notin_swap nin)
+  ;
+
+% Updating a variable's type and/or multiplicity preserves well-formedness
+
+rec wf_upd : Wf [Ψ ⊢ Δ] → [Ψ ⊢ upd Δ _ X X _ _ _ _ Δ'] → Wf [Ψ ⊢ Δ'] =
+  / total g (wf_upd g _ _ _) /
+  fn wf, u ⇒ case wf of
+  | Wf-Nil ⇒ impossible u
+  | Wf-Cons wf1 nin ⇒
+    case u of
+    | [_ ⊢ upd/t _] ⇒ Wf-Cons wf1 nin
+    | [_ ⊢ upd/n U1] ⇒
+      let wf2 = wf_upd wf1 [_ ⊢ U1] in
+      Wf-Cons wf2 (notin_upd nin [_ ⊢ U1])
+ ;
+
+% Well-formedness is preserved under merges and splits
+
+rec wf_split : Wf [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ₁] =
+  / total 1 /
+  fn wf, m ⇒ case wf of
+  | Wf-Nil ⇒ let [_ ⊢ mg/n] = m in Wf-Nil
+  | Wf-Cons wf1 nin ⇒
+    let [_ ⊢ mg/c M1 _] = m in
+    Wf-Cons (wf_split wf1 [_ ⊢ M1]) (notin_merge nin [_ ⊢ M1])
+  ;
+
+rec wf_split_r : Wf [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ₂] =
+  / total /
+  fn wf, m ⇒ wf_split wf (merge_comm m)
+  ;
+
+rec wf_merge : Wf [Ψ ⊢ Δ₁] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ] =
+  / total 1 /
+  fn wf, m ⇒
+  case wf of
+  | Wf-Nil ⇒ let [_ ⊢ mg/n] = m in Wf-Nil
+  | Wf-Cons wf1 nin ⇒
+    let [_ ⊢ mg/c M1 _] = m in
+    Wf-Cons (wf_merge wf1 [_ ⊢ M1]) (notin_merge_l nin [_ ⊢ M1])
+  ;
+
+rec wf_merge_r : Wf [Ψ ⊢ Δ₂] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ] =
+  / total /
+  fn w, m ⇒ wf_merge w (merge_comm m)
+  ;
+
+%======================================================%
+% Properties of Wf' predicate
+%======================================================%
+
+% If Wf' [Ψ ⊢ Δ], then Wf [Ψ ⊢ Δ]
+
+rec wf_wf' : Wf' [Ψ ⊢ Δ] → Wf [Ψ ⊢ Δ] =
+  / total 1 /
+  fn w ⇒ case w of
+  | Wf'-Nil ⇒ Wf-Nil
+  | Wf'-Cons w' ⇒ wf_extcons (wf_wf' w')
+  ;
+
+% Wf' is preserved under merges
+
+rec wf_merge_l' : Wf' [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf' [Ψ ⊢ Δ₁] =
+  / total 1 /
+  fn w, m ⇒ case w of
+  | Wf'-Nil ⇒ let [ ⊢ mg/n] = m in Wf'-Nil
+  | Wf'-Cons w ⇒
+    let [_,x:obj ⊢ mg/c MG M[]] = m in
+    let Prune-Merge m' [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ MG] in
+    Wf'-Cons (wf_merge_l' w m')
+  ;
+
+rec wf_split_r' : Wf' [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf' [Ψ ⊢ Δ₂] =
+  / total /
+  fn w, m ⇒ wf_merge_l' w (merge_comm m)
+  ;
+
+rec wf_merge' : Wf' [Ψ ⊢ Δ₁] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf' [Ψ ⊢ Δ] =
+  / total 1 /
+  fn w, m ⇒ case w of
+  | Wf'-Nil ⇒ let [ ⊢ mg/n] = m in Wf'-Nil
+  | Wf'-Cons w1 ⇒
+    let [_,x:obj ⊢ mg/c M1 _] = m in
+    let Prune-Merge m2 [_,x:obj ⊢ _] = prune_merge_l [_,x:obj ⊢ M1] in
+    Wf'-Cons (wf_merge' w1 m2)
+  ;

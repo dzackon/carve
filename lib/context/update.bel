@@ -1,5 +1,5 @@
 %======================================================%
-% Properties of context update
+% Properties of context update and look-up
 %======================================================%
 
 %------------------------------------------------------%
@@ -134,7 +134,7 @@ rec upd_var_istop : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 LF obj_tp_mult_eq : obj → obj → tp → tp → mult → mult → type =
 | obj-tp-mult-refl : obj_tp_mult_eq X X A A α α;
 
-rec lookup_unq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+rec lookup_unique : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X Y A B α β Δ']
   → [Ψ ⊢ upd Δ n[] X' Y' A' B' α' β' Δ'']
   → [Ψ ⊢ obj_tp_mult_eq X X' A A' α α'] =
@@ -147,13 +147,13 @@ rec lookup_unq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ upd/n U1'] ⇒
     (case u2 of
     | [_ ⊢ upd/t _] ⇒ impossible len_upd_contra [_ ⊢ U1']
-    | [_ ⊢ upd/n U2'] ⇒ lookup_unq [_ ⊢ U1'] [_ ⊢ U2'])
+    | [_ ⊢ upd/n U2'] ⇒ lookup_unique [_ ⊢ U1'] [_ ⊢ U2'])
   ;
 
 LF nat_tp_mult_eq : nat → nat → tp → tp → mult → mult → type =
 | nat-tp-mult-refl : nat_tp_mult_eq n n A A α α;
 
-rec lookup_unq_obj :
+rec lookup_unique_obj :
   [Ψ ⊢ upd Δ n[] X Y₁ A₁[] B₁ α₁[] β₁ Δ₁]
   → [Ψ ⊢ upd Δ n'[] X Y₂ A₂[] B₂ α₂[] β₂ Δ₂]
   → Wf [Ψ ⊢ Δ]
@@ -170,7 +170,7 @@ rec lookup_unq_obj :
     | [_ ⊢ upd/n U1] ⇒
       (case u2 of
       | [_ ⊢ upd/t _] ⇒ impossible n
-      | [_ ⊢ upd/n U2] ⇒ lookup_unq_obj [_ ⊢ U1] [_ ⊢ U2] wf1)
+      | [_ ⊢ upd/n U2] ⇒ lookup_unique_obj [_ ⊢ U1] [_ ⊢ U2] wf1)
     )
   ;
 
@@ -185,7 +185,7 @@ rec lookup_neq_nat2var : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   / total /
   fn u1, u2, n, wf, e ⇒
   let [_ ⊢ obj/refl] = e in
-  let [ ⊢ nat-tp-mult-refl] = lookup_unq_obj u1 u2 wf in
+  let [ ⊢ nat-tp-mult-refl] = lookup_unique_obj u1 u2 wf in
   neq_irreflex n
   ;
 
@@ -218,7 +218,7 @@ rec lookup_neq_var2nat : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Functionality (or right-uniqueness):
 % (1) If Δ[x :α A ↦ₙ y :β B] = Δ' and Δ[x :α A ↦ₙ y :β B] = Δ'', then Δ' = Δ''
 % (2) If Δ[x :α A ↦ₙ y :β B] = Δ', Δ[x :α A ↦ₘ y :β B] = Δ'', and Δ is
-%     well-formed, then Δ' = Δ'' [corollary of (1) using lookup_unq_obj]
+%     well-formed, then Δ' = Δ'' [corollary of (1) using lookup_unique_obj]
 
 rec upd_func : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n X Y A B α β Δ']
@@ -247,7 +247,7 @@ rec upd_func_obj :
   → [Ψ ⊢ ctx_eq Δ' Δ''] =
   / total 1 /
   fn u1, u2, wf ⇒
-  let [ ⊢ nat-tp-mult-refl] = lookup_unq_obj u1 u2 wf in
+  let [ ⊢ nat-tp-mult-refl] = lookup_unique_obj u1 u2 wf in
   upd_func u1 u2
   ;
 
@@ -285,7 +285,7 @@ rec upd_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 %     Δ[x₁ :α₁ A₁ ↦ₙ x₃ :α₃ A₃]
 % (2) Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂][x₂ :α₂ A₂ ↦ₘ x₃ :α₃ A₃] =
 %     Δ[x₁ :α₁ A₁ ↦ₙ x₃ :α₃ A₃] if the "intermediate context" is well-formed
-%     [corollary of (1) using lookup_unq_obj]
+%     [corollary of (1) using lookup_unique_obj]
 
 rec upd_trans : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ₁ n X₁ X₂ A₁ A₂ α₁ α₂ Δ₂]
@@ -311,7 +311,7 @@ rec upd_trans_obj :
   → [Ψ ⊢ upd Δ₁ n[] X₁ X₃ A₁[] A₃[] α₁[] α₃[] Δ₃] =
   / total 1 /
   fn u1, u2, wf ⇒
-  let [ ⊢ nat-tp-mult-refl] = lookup_unq_obj (upd_symm u1) u2 wf in
+  let [ ⊢ nat-tp-mult-refl] = lookup_unique_obj (upd_symm u1) u2 wf in
   upd_trans u1 u2
   ;
 
@@ -556,7 +556,7 @@ rec lookup_upd_tpmult : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = u2 in
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_nats/eq] ⇒
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq u1 u2 in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique u1 u2 in
     let [_ ⊢ U2] = upd_refl [_ ⊢ U1_symm] in
     [_ ⊢ lookin U2]
   | [ ⊢ comp_nats/neq NEQ] ⇒
@@ -574,7 +574,7 @@ rec lookup_upd_mult : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = u2 in
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_nats/eq] ⇒
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq u1 u2 in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique u1 u2 in
     let [_ ⊢ U2] = upd_refl [_ ⊢ U1_symm] in
     [_ ⊢ lookint U2]
   | [ ⊢ comp_nats/neq NEQ] ⇒
@@ -602,7 +602,7 @@ rec comp_look : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = [_ ⊢ U2] in
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_nats/eq] ⇒
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq [_ ⊢ U1] [_ ⊢ U2] in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique [_ ⊢ U1] [_ ⊢ U2] in
     [_ ⊢ look-eq _ _]
   | [ ⊢ comp_nats/neq NEQ] ⇒ [_ ⊢ look-neq NEQ[] _ _]
   ;

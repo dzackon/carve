@@ -5,7 +5,7 @@
 
 % Cancellativity: If Δ₁ ⋈ Δ₂ = Δ₁ ⋈ Δ₂', then Δ₂ = Δ₂'
 
-rec merge_cancl : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
+rec merge_cancel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ merge Δ₁ Δ₂' Δ]
   → [Ψ ⊢ ctx_eq Δ₂ Δ₂'] =
@@ -14,15 +14,15 @@ rec merge_cancl : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   | [_ ⊢ mg/n] ⇒ let [_ ⊢ mg/n] = m2 in [_ ⊢ ctx/refl]
   | [_ ⊢ mg/c M1 T1[]] ⇒
     let [_ ⊢ mg/c M2 T2[]] = m2 in
-    let [_ ⊢ ctx/refl] = merge_cancl c [_ ⊢ M1] [_ ⊢ M2] in
+    let [_ ⊢ ctx/refl] = merge_cancel c [_ ⊢ M1] [_ ⊢ M2] in
     let [ ⊢ mult/refl] = mult_canc_gen c [ ⊢ T1] [ ⊢ T2] in
     [_ ⊢ ctx/refl]
   ;
 
-rec merge_cancl_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
+rec merge_cancel_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ merge Δ₁' Δ₂ Δ]
   → [Ψ ⊢ ctx_eq Δ₁ Δ₁'] =
   / total /
-  fn c, m1, m2 ⇒ merge_cancl c (merge_comm m1) (merge_comm m2)
+  fn c, m1, m2 ⇒ merge_cancel c (merge_comm m1) (merge_comm m2)
   ;

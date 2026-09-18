@@ -31,11 +31,11 @@ rec plus_func : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂ n'] → [ ⊢ n
 % Addition is cancellative (the case for n₁ can be obtained through
 % commutativity, see plus_comm below)
 
-rec plus_canc : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂' n] → [ ⊢ nat_eq n₂ n₂'] =
+rec plus_cancel : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂' n] → [ ⊢ nat_eq n₂ n₂'] =
   / total 1 /
   fn p1, p2 ⇒ case p1 of
   | [ ⊢ pl/z] ⇒ let [ ⊢ pl/z] = p2 in [ ⊢ nat/refl]
-  | [ ⊢ pl/s P1] ⇒ let [ ⊢ pl/s P2] = p2 in plus_canc [ ⊢ P1] [ ⊢ P2]
+  | [ ⊢ pl/s P1] ⇒ let [ ⊢ pl/s P2] = p2 in plus_cancel [ ⊢ P1] [ ⊢ P2]
   ;
 
 % Symmetric case for pl/z: n + 0 = n

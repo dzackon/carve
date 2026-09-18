@@ -81,7 +81,7 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
   let [_ ⊢ _]:[_ ⊢ upd _ k[] Z _ _ C'[] _ γ'[] _] = [_ ⊢ U] in
   case comp_nats [ ⊢ n] [ ⊢ k] of
   | [ ⊢ comp_nats/eq] ⇒
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq [_ ⊢ U] [_ ⊢ E1] in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique [_ ⊢ U] [_ ⊢ E1] in
     (case comp_nats [ ⊢ m] [ ⊢ k] of
     | [ ⊢ comp_nats/eq] ⇒ impossible neq_irreflex nq
     | [ ⊢ comp_nats/neq NEQ2] ⇒
@@ -95,7 +95,7 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
     let [_ ⊢ upd-pushout U' E1' _ _] = upd_pushout [_ ⊢ E1] [_ ⊢ U] [ ⊢ NEQ1] in
     (case comp_nats [ ⊢ m] [ ⊢ k] of
     | [ ⊢ comp_nats/eq] ⇒
-      let [_ ⊢ obj-tp-mult-refl] = lookup_unq [_ ⊢ U'] [_ ⊢ E2] in
+      let [_ ⊢ obj-tp-mult-refl] = lookup_unique [_ ⊢ U'] [_ ⊢ E2] in
       let [_ ⊢ upd-changeorder E3 E4 _ _] =
         upd_changeorder [_ ⊢ E1] [_ ⊢ E2] nq in
       let [_ ⊢ get-upd U'''] =
@@ -156,8 +156,8 @@ rec exch_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       upd_changeorder [_ ⊢ U1a] [_ ⊢ U2a] [ ⊢ NEQ] in
     let [_ ⊢ upd-changeorder U3b _ _ _] =
       upd_changeorder [_ ⊢ U1b] [_ ⊢ U2b] [ ⊢ NEQ] in
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq [_ ⊢ U3a] [_ ⊢ U3a'] in
-    let [_ ⊢ obj-tp-mult-refl] = lookup_unq [_ ⊢ U3b] [_ ⊢ U3b'] in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique [_ ⊢ U3a] [_ ⊢ U3a'] in
+    let [_ ⊢ obj-tp-mult-refl] = lookup_unique [_ ⊢ U3b] [_ ⊢ U3b'] in
     [_ ⊢ exch-merge U1a U2a U1b U2b M2 M3 Ta[] Tb[] _ _ _]
   ;
 

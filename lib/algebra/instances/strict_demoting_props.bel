@@ -1,31 +1,18 @@
 %======================================================%
 % Algebraic properties of multiplicities
-% (fully intuitionistic systems)
+% (strict systems)
 %======================================================%
 
-% Totality: For any α₁, α₂, there exists an α such that α₁ • α₂ = α
-
-rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂] =
-  / total /
-  mlam α₁, α₂ ⇒
-  let [ ⊢ ω] = [ ⊢ α₁] in
-  let [ ⊢ ω] = [ ⊢ α₂] in
-  [ ⊢ get-mult •/ωω]
-  ;
-
-rec mult_total_rec : Total =
-  / total /
-  Is-Total mult_total
-  ;
+% Remark: • is not total since 𝟙 • 𝟙 is undefined
 
 % Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
   / total /
-  fn m1, m2 ⇒
-  let [ ⊢ •/ωω] = m1 in
-  let [ ⊢ •/ωω] = m2 in
-  [ ⊢ mult/refl]
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
 % Identity elements:
@@ -35,7 +22,9 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
 rec ident_w_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • ω m m2]
                 → [ ⊢ mult_eq m m2] =
   / total /
-  mlam m, m2 ⇒ fn d ⇒ let [ ⊢ •/ωω] = d in [ ⊢ mult/refl]
+  mlam m, m2 ⇒ fn d ⇒ case d of
+  | [ ⊢ •/ω1] ⇒ [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ [ ⊢ mult/refl]
   ;
 
 rec mult_ident_w : Ident [ ⊢ ω] =
@@ -57,7 +46,9 @@ rec mult_halident : HalIdent =
 
 rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
   / total /
-  mlam _, _ ⇒ fn d ⇒ let [ ⊢ •/ωω] = d in [ ⊢ hal/ω]
+  mlam _, _ ⇒ fn d ⇒ case d of
+  | [ ⊢ •/ω1] ⇒ [ ⊢ hal/ω]
+  | [ ⊢ •/ωω] ⇒ [ ⊢ hal/ω]
   ;
 
 rec mult_unithal : UnitHal =
@@ -69,14 +60,19 @@ rec mult_unithal : UnitHal =
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
   / total /
-  mlam α ⇒ let [ ⊢ ω] = [ ⊢ α] in [ ⊢ get-unit hal/ω •/ωω]
+  mlam α ⇒ case [ ⊢ α] of
+  | [ ⊢ 𝟙] ⇒ [ ⊢ get-unit hal/ω •/ω1]
+  | [ ⊢ ω] ⇒ [ ⊢ get-unit hal/ω •/ωω]
   ;
 
 % Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
 
 rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
   / total /
-  fn m, u ⇒ let [ ⊢ •/ωω] = m in [ ⊢ mult/refl]
+  fn m, u ⇒
+  let [ ⊢ hal/ω] = u in
+  let [ ⊢ •/ωω] = m in
+  [ ⊢ mult/refl]
   ;
 
 rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
@@ -94,7 +90,10 @@ rec mult_zsfree_rec : ZsFree =
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total /
-  fn M ⇒ let [ ⊢ •/ωω] = M in [ ⊢ •/ωω]
+  fn m ⇒ case m of
+  | [ ⊢ •/1ω] ⇒ [ ⊢ •/ω1]
+  | [ ⊢ •/ω1] ⇒ [ ⊢ •/1ω]
+  | [ ⊢ •/ωω] ⇒ m
   ;
 
 % Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
@@ -103,28 +102,32 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
                  [ ⊢ mult_assoc_res M1 M2] =
   / total /
   mlam M1, M2 ⇒
-  let [ ⊢ •/ωω] = [ ⊢ M1] in
-  let [ ⊢ •/ωω] = [ ⊢ M2] in
-  [ ⊢ mult-assoc •/ωω •/ωω _ _]
+  case [ ⊢ M1] of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = [ ⊢ M2] in [ ⊢ mult-assoc •/ωω •/1ω _ _]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/1ω] = [ ⊢ M2] in [ ⊢ mult-assoc •/1ω •/ω1 _ _]
+  | [ ⊢ •/ωω] ⇒
+    case [ ⊢ M2] of
+    | [ ⊢ •/ω1] ⇒ [ ⊢ mult-assoc •/ω1 •/ω1 _ _]
+    | [ ⊢ •/ωω] ⇒ [ ⊢ mult-assoc •/ωω •/ωω _ _]
   ;
 
 % Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
 
-rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+rec mult_cancel : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
-  fn m1, m2 ⇒
-  let [ ⊢ •/ωω] = m1 in
-  let [ ⊢ •/ωω] = m2 in
-  [ ⊢ mult/refl]
+  fn m1, m2 ⇒ case m1 of
+  | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
+  | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
 rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
                [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
-  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_canc m1 m2
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_cancel m1 m2
   ;
 
-rec mult_cancl : Cancl =
+rec mult_cancel : Cancl =
   / total /
   Is-Cancl canc_prf
   ;

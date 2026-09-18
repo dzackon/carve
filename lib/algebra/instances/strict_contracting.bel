@@ -1,7 +1,7 @@
 %======================================================%
 % Multiplicities (strict systems) – second approach
 %
-% Unlike common/defs/mult/strict.bel, which tracks strictness by demoting a
+% Unlike common/defs/mult/strict_demoting.bel, which tracks strictness by demoting a
 % used assumption to ω, this structure keeps the two-element carrier of
 % lin and instead adds 𝟙 • 𝟙 = 𝟙. The operation is then Boolean
 % disjunction: 𝟘 records "unavailable", 𝟙 records "must still be used at

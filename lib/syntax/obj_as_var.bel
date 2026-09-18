@@ -8,11 +8,12 @@
 
 % Decidable equality of objects: for any M, N drawn from Ψ, either M = N or M ≠ N
 
-rec comp_obj : (Ψ:ctx) {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]} CompareObjs [Ψ ⊢ M] [Ψ ⊢ N] =
-  / total p (comp_obj p) /
-  mlam M, N ⇒
+rec comp_obj : {Ψ:ctx} {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]}
+  CompareObjs [Ψ ⊢ M] [Ψ ⊢ N] =
+  / total 1 /
+  mlam Ψ, M, N ⇒
   let [_ ⊢ #p] = [_ ⊢ M] in
-  let [Ψ ⊢ #q] = [_ ⊢ N] in
+  let [_ ⊢ #q] = [_ ⊢ N] in
   case [Ψ] of
   | [ ] ⇒ impossible [ ⊢ M]
   | [_,x:obj] ⇒
@@ -25,7 +26,7 @@ rec comp_obj : (Ψ:ctx) {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]} CompareObjs [Ψ ⊢ M]
     | [_,x:obj ⊢ #p[..]] ⇒
       case [_,x:obj ⊢ N] of
       | [_,x:obj ⊢ x] ⇒ Obj-Neq (fn e ⇒ impossible e)
-      | [_,x:obj ⊢ #q[..]] ⇒ (case comp_obj [_ ⊢ #p] [_ ⊢ #q] of
+      | [_,x:obj ⊢ #q[..]] ⇒ (case comp_obj [_] [_ ⊢ #p] [_ ⊢ #q] of
         | Obj-Eq ⇒ Obj-Eq
         | Obj-Neq n ⇒ Obj-Neq (obj_neq_weak n))
   ;

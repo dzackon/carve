@@ -33,30 +33,30 @@ rec dual_symm : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
 
 % Session types have a unique dual
 
-rec dual_uniq : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ tp_eq A' A''] =
+rec dual_unique : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ tp_eq A' A''] =
   / total 1 /
   fn d1, d2 ⇒ case d1 of
   | [ ⊢ D1] ⇒ let [ ⊢ D1] = d2 in [ ⊢ tp/refl]
   | [ ⊢ D⊥] ⇒ let [ ⊢ D⊥] = d2 in [ ⊢ tp/refl]
   | [ ⊢ D⊗ DU1l DU1r] ⇒
     let [ ⊢ D⊗ DU2l DU2r] = d2 in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ tp/refl]
   | [ ⊢ D⅋ DU1l DU1r] ⇒
     let [ ⊢ D⅋ DU2l DU2r] = d2 in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ tp/refl]
   | [ ⊢ D& DU1l DU1r] ⇒
     let [ ⊢ D& DU2l DU2r] = d2 in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ tp/refl]
   | [ ⊢ D⊕ DU1l DU1r] ⇒
     let [ ⊢ D⊕ DU2l DU2r] = d2 in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1l] [ ⊢ DU2l] in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU1r] [ ⊢ DU2r] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1l] [ ⊢ DU2l] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU1r] [ ⊢ DU2r] in
     [ ⊢ tp/refl]
   ;
 

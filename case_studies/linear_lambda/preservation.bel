@@ -4,7 +4,7 @@
 
 % Type preservation for the linear λ-calculus
 
-rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
+rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M C]
   → [Ψ ⊢ step M M']
   → VarCtx [Ψ ⊢ Δ]
@@ -16,15 +16,15 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   | [_ ⊢ oft/lam \x.D1] ⇒
     let [_ ⊢ s/lam \x.S1] = st in
     let [_,x:obj ⊢ D1'] =
-      tps [_,x:obj ⊢ D1] [_,x:obj ⊢ S1] (varctx_extcons vc) in
+      preservation [_,x:obj ⊢ D1] [_,x:obj ⊢ S1] (varctx_extcons vc) in
     [_ ⊢ oft/lam \x.D1']
   | [_ ⊢ oft/app D1 D2 M1] ⇒
     (case st of
     | [_ ⊢ s/app1 S1] ⇒
-      let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
+      let [_ ⊢ D1'] = preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
       [_ ⊢ oft/app D1' D2 M1]
     | [_ ⊢ s/app2 S2] ⇒
-      let [_ ⊢ D2'] = tps [_ ⊢ D2] [_ ⊢ S2] (varctx_split_r vc [_ ⊢ M1]) in
+      let [_ ⊢ D2'] = preservation [_ ⊢ D2] [_ ⊢ S2] (varctx_split_r vc [_ ⊢ M1]) in
       [_ ⊢ oft/app D1 D2' M1]
     | [_ ⊢ s/red] ⇒
       (case [_ ⊢ D1] of
@@ -32,20 +32,20 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
         impossible varctx_isvar (varctx_split vc [_ ⊢ M1]) [_ ⊢ U]
       | [_ ⊢ oft/vari U _] ⇒
         impossible varctx_isvar (varctx_split vc [_ ⊢ M1]) [_ ⊢ U]
-      | [_ ⊢ oft/lam \x.D1'] ⇒ sub_lem [_,x:obj ⊢ D1'] [_ ⊢ D2] [_ ⊢ M1]
+      | [_ ⊢ oft/lam \x.D1'] ⇒ substitution [_,x:obj ⊢ D1'] [_ ⊢ D2] [_ ⊢ M1]
       )
     )
   | [_ ⊢ oft/bang E1 D1] ⇒
     let [_ ⊢ s/bang S1] = st in
-    let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] vc in
+    let [_ ⊢ D1'] = preservation [_ ⊢ D1] [_ ⊢ S1] vc in
     [_ ⊢ oft/bang E1 D1']
   | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
     (case st of
     | [_ ⊢ s/letbang1 S1] ⇒
-      let [_ ⊢ D1'] = tps [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
+      let [_ ⊢ D1'] = preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
       [_ ⊢ oft/letbang D1' (\x.D2) M1]
     | [_ ⊢ s/letbang2 \x.S2] ⇒
-      let [_,x:obj ⊢ D2'] = tps [_,x:obj ⊢ D2] [_,x:obj ⊢ S2]
+      let [_,x:obj ⊢ D2'] = preservation [_,x:obj ⊢ D2] [_,x:obj ⊢ S2]
         (varctx_extcons (varctx_split_r vc [_ ⊢ M1])) in
       [_ ⊢ oft/letbang D1 (\x.D2') M1]
     | [_ ⊢ s/red!] ⇒
@@ -55,7 +55,7 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
       | [_ ⊢ oft/vari U _] ⇒
         impossible varctx_isvar (varctx_split vc [_ ⊢ M1]) [_ ⊢ U]
       | [_ ⊢ oft/bang E1 D1'] ⇒
-        sub_lem_w [_,x:obj ⊢ D2] [_ ⊢ D1'] [_ ⊢ E1] (merge_comm [_ ⊢ M1])
+        substitution_w [_,x:obj ⊢ D2] [_ ⊢ D1'] [_ ⊢ E1] (merge_comm [_ ⊢ M1])
       )
     )
   ;

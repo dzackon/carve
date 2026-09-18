@@ -1,6 +1,9 @@
 %======================================================%
-% Object-related definitions
-% (independent of how obj is defined)
+% Object infrastructure, independent of how obj is defined
+%
+% Everything here works for any obj, so every configuration loads it, including
+% case studies that supply their own object syntax and therefore do not load
+% lib/syntax/obj.bel.
 %======================================================%
 
 % Ambient context schema
@@ -23,7 +26,7 @@ inductive PruneObj : (Ψ:ctx) {M:[Ψ,x:obj ⊢ obj]} ctype =
 | Prune-Obj : PruneObj [Ψ,x:obj ⊢ M[..]];
 
 % CompareObjs [Ψ ⊢ M] [Ψ ⊢ N]: M and N are either equal or provably distinct
-% (used to decide equality of LF objects; see comp_obj in common/lemmas/obj2.bel)
+% (used to decide equality of LF objects; see comp_obj in common/lemmas/obj_base.bel)
 
 inductive CompareObjs : (Ψ:ctx) {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]} ctype =
 | Obj-Eq : CompareObjs [Ψ ⊢ M] [Ψ ⊢ M]

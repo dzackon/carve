@@ -30,7 +30,7 @@ rec oft_lin_in : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P Δ]
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] 𝟙 α[] Δ']
   → [Ψ ⊢ in_proc X P] =
-  / total d (oft_lin_in d) /
+  / total 1 /
   fn d1, u ⇒
   let [_ ⊢ U_ub] = u in
   case d1 of
@@ -401,7 +401,7 @@ rec oft_cong : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   fn d, c ⇒ case c of
   | [_ ⊢ ≡comm DU[]] ⇒
     let [_ ⊢ oft/pcomp DU1[] M1 (\x.O1) (\x.O2)] = d in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU] [ ⊢ DU1] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU] [ ⊢ DU1] in
     let [_ ⊢ M2] = merge_comm [_ ⊢ M1] in
     let [ ⊢ DU2] = dual_symm [ ⊢ DU] in
     [_ ⊢ oft/pcomp DU2[] M2 (\x.O2) (\x.O1)]
@@ -437,6 +437,7 @@ rec oft_rename : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ oft P (cons Δ[..] x A[] 𝟙)]
   → [Ψ ⊢ upd Δ n[] X X A[] A[] 𝟘 𝟙 Δ']
   → [Ψ ⊢ oft P[..,X] Δ'] =
+  / total d (oft_rename d) /
   fn d, u ⇒
   let ([_ ⊢ U_ub],[_ ⊢ U_sym]) = (u,upd_symm u) in
   case d of

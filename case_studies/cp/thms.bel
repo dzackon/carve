@@ -4,7 +4,7 @@
 
 % Subject reduction for CP
 
-rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ P ⇛ P']
   → [Ψ ⊢ oft P Δ]
   → [Ψ ⊢ oft P' Δ] =
@@ -16,7 +16,7 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       d in
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
-    let [ ⊢ tp/refl] = dual_uniq [ ⊢ DU] [ ⊢ DU'] in
+    let [ ⊢ tp/refl] = dual_unique [ ⊢ DU] [ ⊢ DU'] in
     let [_ ⊢ merge-upd2 U1a U1b •/10 M2 _ _ _] =
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M1] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U1a] in
@@ -214,14 +214,14 @@ rec tps : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   % Reduction under cut
   | [_ ⊢ β∥1 \x.RD1] ⇒
     let [_ ⊢ oft/pcomp DU[] M (\x.O1') (\x.O2)] = d in
-    let [_,x:obj ⊢ O1] = tps [_,x:obj ⊢ RD1] [_,x:obj ⊢ O1'] in
+    let [_,x:obj ⊢ O1] = preservation [_,x:obj ⊢ RD1] [_,x:obj ⊢ O1'] in
     [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)]
   | [_ ⊢ β∥2 \x.RD1] ⇒
     let [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2')] = d in
-    let [_,x:obj ⊢ O2] = tps [_,x:obj ⊢ RD1] [_,x:obj ⊢ O2'] in
+    let [_,x:obj ⊢ O2] = preservation [_,x:obj ⊢ RD1] [_,x:obj ⊢ O2'] in
     [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)]
   % Reductions commute with equivalences
-  | [_ ⊢ β≡ CG1 RD1 CG2] ⇒ oft_cong (tps [_ ⊢ RD1] (oft_cong d [_ ⊢ CG1]))
+  | [_ ⊢ β≡ CG1 RD1 CG2] ⇒ oft_cong (preservation [_ ⊢ RD1] (oft_cong d [_ ⊢ CG1]))
     [_ ⊢ CG2]
   ;
 
@@ -338,7 +338,7 @@ rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] �
     let [_ ⊢ wtp_pcomp DU2[] (\y.\hy.W1) (\y.\hy.W2) _ _] = w in
     let [_,x:obj ⊢ O1] =
       scp2cp DC1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
-    let [ ⊢ tp/refl] = dual_uniq DU1 [ ⊢ DU2] in
+    let [ ⊢ tp/refl] = dual_unique DU1 [ ⊢ DU2] in
     let [_,x:obj ⊢ O2] =
       scp2cp DC2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
     [_ ⊢ oft/pcomp DU2[] M' (\x.O1) (\x.O2)]

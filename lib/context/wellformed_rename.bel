@@ -1,0 +1,31 @@
+%======================================================%
+% Well-formedness under renaming update
+%
+% wf_upd_neq is separated from wellformed.bel because it calls comp_obj, which
+% requires `obj` to have no constructors (see lib/syntax/obj_as_var.bel).
+%======================================================%
+
+% Updating to a fresh name preserves well-formedness
+
+rec wf_upd_neq :
+  Wf [Ψ ⊢ Δ]
+  → [Ψ ⊢ upd Δ n[] X #q A B α β Δ']
+  → ([Ψ ⊢ lookup_n #q Δ] → [ ⊢ false])
+  → Wf [Ψ ⊢ Δ'] =
+  / total 2 /
+  fn wf, u, nin ⇒
+  case wf of
+  | Wf-Nil ⇒ impossible u
+  | Wf-Cons wf1 nin1 ⇒
+    case u of
+    | [_ ⊢ upd/t _] ⇒ Wf-Cons wf1 (notin_peel nin)
+    | [_ ⊢ upd/n U1] ⇒
+      let [_ ⊢ U]:[Ψ ⊢ upd (cons _ Z4 _ _) _ W X4 _ _ _ _ _] = u in
+      case comp_obj [_] [_ ⊢ W] [_ ⊢ X4] of
+      | Obj-Eq ⇒ Wf-Cons (wf_upd wf1 [_ ⊢ U1]) (notin_upd nin1 [_ ⊢ U1])
+      | Obj-Neq NEQ1 ⇒
+        case comp_obj [_] [_ ⊢ X4] [_ ⊢ Z4] of
+        | Obj-Eq ⇒ impossible nin (lookup_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
+        | Obj-Neq NEQ2 ⇒ Wf-Cons (wf_upd_neq wf1 [_ ⊢ U1] (notin_peel nin))
+          (notin_upd_neq nin1 [_ ⊢ U1] NEQ2)
+  ;

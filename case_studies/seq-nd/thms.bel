@@ -116,7 +116,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M1_comm] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M1_comm] [_ ⊢ M2] in
       let [_ ⊢ SQ3] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ2]) in
       let [_ ⊢ SQ4] = cut_admis s1 [_,x:obj ⊢ SQ1] (merge_comm [_ ⊢ M3]) in
       [_ ⊢ R⊗_cf SQ4 SQ3 M4]
@@ -183,7 +183,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_,x:obj ⊢ mg/c M2'' •/00] = [_,x:obj ⊢ M2] in
       let Prune-Merge [_ ⊢ M2'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2''] in
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M1_comm] [_ ⊢ M2'] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M1_comm] [_ ⊢ M2'] in
       let [_ ⊢ R-o_cf \x.SQ3] = s1 in
         % left and hyp rules already covered, others impossible
       let SQ4 = cut_admis (prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]))
@@ -200,7 +200,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       let Prune-Merge [_ ⊢ M2'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2''] in
       (case [ ⊢ T] of
       | [ ⊢ •/10] ⇒
-        let [_ ⊢ merge-assoc2 M4 M5 _ _] = merge_assoc2 [_ ⊢ M3] [_ ⊢ M2'] in
+        let [_ ⊢ merge-assoc2 M4 M5 _ _] = merge_assoc_swap [_ ⊢ M3] [_ ⊢ M2'] in
         let [_,x:obj ⊢ SQ2'] = prune_seq_cf
           (seqcf_str (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ2[..,y,x]])) in
         let [_ ⊢ SQ3] = cut_admis s1 [_,x:obj ⊢ SQ1] (merge_comm [_ ⊢ M4]) in

@@ -370,7 +370,7 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     | [ ⊢ •/10] ⇒
       let [_,x:obj ⊢ CH2'] = chk_str [_ ⊢ CH1] in
       let Prune-Chk [_ ⊢ CH2] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2'] in
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH3] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       [_ ⊢ E① CH3 CH2 M4]
     | [ ⊢ •/01] ⇒
@@ -386,7 +386,7 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     | [ ⊢ •/10] ⇒
       let [_,x:obj ⊢ CH2b'] = chk_str [_ ⊢ CH1b] in
       let Prune-Chk [_ ⊢ CH2b] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2b'] in
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ CH3] = subst_chk [_,x:obj ⊢ CH1a] sy2 [_ ⊢ M3] in
       [_ ⊢ I⊗ CH3 CH2b M4]
     | [ ⊢ •/01] ⇒
@@ -401,7 +401,7 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let CH1' = chk_exch_top2 [_,y:obj,z:obj,x:obj ⊢ CH1[..,x,y,z]] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       let [_,x:obj,y:obj,z:obj ⊢ CH2'] = chk_str CH1' in
       let Prune-Chk [_,x:obj,y:obj ⊢ CH2] [_,x:obj,y:obj,z:obj ⊢ _] =
@@ -436,7 +436,7 @@ rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M] [_ ⊢ M2] in
       let [_,x:obj,y:obj ⊢ CH2a'] =
         chk_str (chk_exch_top [_,y:obj,x:obj ⊢ CH1a[..,x,y]]) in
       let [_,x:obj,y:obj ⊢ CH2b'] =
@@ -498,7 +498,7 @@ and rec subst_syn : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M] [_ ⊢ M2] in
       let [_ ⊢ SY2] = subst_syn [_,x:obj ⊢ SY1] sy2 [_ ⊢ M3] in
       let [_,x:obj ⊢ CH2'] = chk_str [_,x:obj ⊢ CH1] in
       let Prune-Chk [_ ⊢ CH2] [_,x:obj ⊢ _] = prune_chk [_,x:obj ⊢ CH2'] in

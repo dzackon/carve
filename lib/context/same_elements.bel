@@ -29,10 +29,11 @@ rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ']
   → [Ψ ⊢ same_elts Δ' Δ'']
   → [Ψ ⊢ same_elts Δ Δ''] =
-  / total d (same_elts_trans d) /
-  fn s1, s2 ⇒ case (s1, s2) of
-  | ([_ ⊢ se/n],[_ ⊢ se/n]) ⇒ [_ ⊢ se/n]
-  | ([_ ⊢ se/c SE1'],[_ ⊢ se/c SE2']) ⇒
+  / total 1 /
+  fn s1, s2 ⇒ case s1 of
+  | [_ ⊢ se/n] ⇒ let [_ ⊢ se/n] = s2 in [_ ⊢ se/n]
+  | [_ ⊢ se/c SE1'] ⇒
+    let [_ ⊢ se/c SE2'] = s2 in
     let [_ ⊢ SE3] = same_elts_trans [_ ⊢ SE1'] [_ ⊢ SE2'] in
     [_ ⊢ se/c SE3]
   ;

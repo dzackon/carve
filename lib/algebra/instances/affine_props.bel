@@ -89,7 +89,7 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
 
 % Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
 
-rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+rec mult_cancel : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
   fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
@@ -100,10 +100,10 @@ rec mult_canc : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ �
 rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
                [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
   / total /
-  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_canc m1 m2
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_cancel m1 m2
   ;
 
-rec mult_cancl : Cancl =
+rec mult_cancel : Cancl =
   / total /
   Is-Cancl canc_prf
   ;

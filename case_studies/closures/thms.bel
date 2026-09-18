@@ -4,7 +4,7 @@
 
 % Subject reduction
 
-rec tps :
+rec preservation :
   [ ⊢ eval η M W]
   → [ ⊢ hasty_env η Δ]
   → [ ⊢ oft Δ M T]
@@ -20,8 +20,8 @@ rec tps :
     [ ⊢ hasty_closure D F1]
   | [ ⊢ eval/app E1 E2 E3] ⇒
     let [ ⊢ oft/app D D2 M] = d in
-    let [ ⊢ D2'] = tps [ ⊢ E2] (pres_hasty_env_r f [ ⊢ M]) [ ⊢ D2] in
+    let [ ⊢ D2'] = preservation [ ⊢ E2] (pres_hasty_env_r f [ ⊢ M]) [ ⊢ D2] in
     let [ ⊢ hasty_closure (oft/abs Dabs) Denv] =
-      tps [ ⊢ E1] (pres_hasty_env f [ ⊢ M]) [ ⊢ D] in
-    tps [ ⊢ E3] [ ⊢ hasty_env/c Denv D2'] [ ⊢ Dabs]
+      preservation [ ⊢ E1] (pres_hasty_env f [ ⊢ M]) [ ⊢ D] in
+    preservation [ ⊢ E3] [ ⊢ hasty_env/c Denv D2'] [ ⊢ Dabs]
   ;

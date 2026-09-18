@@ -118,12 +118,12 @@ rec oft_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 % If (1) Δ₁, x :¹ B ⊢ M : A, (2) Δ₂ ⊢ N : B, and (3) Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢
 % [N/x]M : A
 
-rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
+rec substitution : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x B[] 𝟙) M A[]]
   → [Ψ ⊢ oft Δ₂ N B[]]
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ oft Δ M[..,N] A[]] =
-  / total d (sub_lem d) /
+  / total d (substitution d) /
   fn d1, d2, mg ⇒
   let [_ ⊢ M1] = mg in
   case d1 of
@@ -138,7 +138,7 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     )
   | [_,x:obj ⊢ oft/lam \y.O1] ⇒
     let [_,y:obj,x:obj ⊢ O1'[..,x,y]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in
-    let [_,x:obj ⊢ O2] = sub_lem [_,x:obj,y:obj ⊢ O1'] (oft_weak d2 [ ⊢ _])
+    let [_,x:obj ⊢ O2] = substitution [_,x:obj,y:obj ⊢ O1'] (oft_weak d2 [ ⊢ _])
       [_,x:obj ⊢ mg/c M1[..] •/10] in
     [_ ⊢ oft/lam \x.O2]
   | [_,x:obj ⊢ oft/app O1 O2 (mg/c M2' T[])] ⇒
@@ -150,11 +150,11 @@ rec sub_lem : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
         merge_assoc [_ ⊢ M1] [_ ⊢ M2_comm] in
       let [_ ⊢ M4] = merge_comm [_ ⊢ M4_comm] in
       let Str-Top [_ ⊢ O2'] [_,x:obj ⊢ _] = oft_str [_,x:obj ⊢ O2] in
-      let [_ ⊢ O1'] = sub_lem [_,x:obj ⊢ O1] d2 [_ ⊢ M3] in
+      let [_ ⊢ O1'] = substitution [_,x:obj ⊢ O1] d2 [_ ⊢ M3] in
       [_ ⊢ oft/app O1' O2' M4]
     | [ ⊢ •/01] ⇒
       let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
       let Str-Top [_ ⊢ O1'] [_,x:obj ⊢ _] = oft_str [_,x:obj ⊢ O1] in
-      let [_ ⊢ O2'] = sub_lem [_,x:obj ⊢ O2] d2 [_ ⊢ M3] in
+      let [_ ⊢ O2'] = substitution [_,x:obj ⊢ O2] d2 [_ ⊢ M3] in
       [_ ⊢ oft/app O1' O2' M4]
   ;

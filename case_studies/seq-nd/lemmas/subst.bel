@@ -42,7 +42,7 @@ rec subst_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
     let [_ ⊢ sub-mg SUB2 SUB3 M2 _ _] = subst_merge [_ ⊢ SUB1] [_ ⊢ M'] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M1] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M1] [_ ⊢ M2] in
       let [_ ⊢ SE] = same_elts_trans (merge_same_elts (merge_comm [_ ⊢ M2]))
         (merge_same_elts_cor [_ ⊢ M1]) in
       [_ ⊢ sub-mg (wf_subst_cons1 SUB2 CH1 M3)
@@ -84,7 +84,7 @@ rec subst_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
       [_ ⊢ sub-up (wf_subst_cons0 SUB1 CH1 SE) CH1 M1 _ _]
     | [_ ⊢ upd/n U1] ⇒
       let [_ ⊢ sub-up SUB2 CH2 M2 _ _] = subst_upd [_ ⊢ SUB1] [_ ⊢ U1] in
-      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc2 [_ ⊢ M1] [_ ⊢ M2] in
+      let [_ ⊢ merge-assoc2 M3 M4 _ _] = merge_assoc_swap [_ ⊢ M1] [_ ⊢ M2] in
       [_ ⊢ sub-up (wf_subst_cons1 SUB2 CH1 M3) CH2 M4 _ _]
     )
   | [_ ⊢ wf_subst_cons0 SUB1 CH1 SE1] ⇒
