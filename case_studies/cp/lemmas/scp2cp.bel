@@ -12,15 +12,16 @@ rec relus_exh : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
   / total 1 /
   fn ru ⇒ case ru of
   | relUsed/n ⇒ [ ⊢ exh/n]
-  | relUsed/c ru1 ⇒ let [_ ⊢ E] = relus_exh ru1 in
+  | relUsed/c ru1 ⇒
+    let [_ ⊢ E] = relus_exh ru1 in
     [_,x:obj ⊢ exh/c E[..] hal/0]
   ;
 
 % If RelName [Ψ ⊢ x] [Ψ ⊢ Δ] [Φ ⊢ σ] and (x : A) ∈ Φ, then x is the unique
 % linear element of Δ
 
-LF unqlin : obj → tp → lctx _ → type = unql : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ'
-  → unqlin X A Δ;
+LF unqlin : obj → tp → lctx _ → type =
+| unql : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ' → unqlin X A Δ;
 
 rec relnm_unqlin :
   RelName [Ψ ⊢ X] [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -37,7 +38,8 @@ rec relnm_unqlin :
     [_,x:obj ⊢ unql (upd/n U1[..]) (exh/c E[..] hal/0)]
   ;
 
-% Given Dec relation, obtain hyp judgment from look-up in explicit context
+% Obtain a hyp judgment from a look-up in the explicit context, given
+% (1) a RelUsed, (2) a RelName, or (3) a Dec relation
 
 rec relus_lookup_hyp :
   RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -50,8 +52,8 @@ rec relus_lookup_hyp :
     let [_ ⊢ U1'] = upd_refl [_ ⊢ U1] in
     let relUsed/c ru1 = ru in
     let Prune-Upd [_ ⊢ U1''] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    let [_ ⊢ hy] = relus_lookup_hyp ru1 [_ ⊢ U1''] in
-    [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]]
+    let [_ ⊢ H] = relus_lookup_hyp ru1 [_ ⊢ U1''] in
+    [_,b:block x:obj,h:hyp _ _ ⊢ H[..]]
   ;
 
 rec relnm_lookup_hyp :
@@ -68,14 +70,14 @@ rec relnm_lookup_hyp :
   | [_ ⊢ upd/n U1] ⇒
     let [_ ⊢ U1'] = upd_refl [_ ⊢ U1] in
     case rn of
-    | relName/t rn1 ⇒
+    | relName/t ru1 ⇒
       let Prune-Upd [_ ⊢ U1''] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ hy] = relus_lookup_hyp rn1 [_ ⊢ U1''] in
-      [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]]
+      let [_ ⊢ H] = relus_lookup_hyp ru1 [_ ⊢ U1''] in
+      [_,b:block x:obj,h:hyp _ _ ⊢ H[..]]
     | relName/n rn1 ⇒
       let Prune-Upd [_ ⊢ U1''] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ hy] = relnm_lookup_hyp rn1 [_ ⊢ U1''] in
-      [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]]
+      let [_ ⊢ H] = relnm_lookup_hyp rn1 [_ ⊢ U1''] in
+      [_,b:block x:obj,h:hyp _ _ ⊢ H[..]]
   ;
 
 rec dec_lookup_hyp :
@@ -83,7 +85,9 @@ rec dec_lookup_hyp :
   → [Ψ ⊢ upd Δ _ X _ A[] _ _ _ _]
   → [Φ ⊢ hyp X[$σ[..]] A[]] =
   / total 1 /
-  fn dc, u ⇒ case dc of
+  fn dc, u ⇒
+  let [_ ⊢ U] = u in
+  case dc of
   | Dec/fwd u1 rn ⇒
     let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     relnm_lookup_hyp rn [_ ⊢ U2]
@@ -92,16 +96,16 @@ rec dec_lookup_hyp :
     let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     dec_lookup_hyp dc1 [_ ⊢ U2]
   | Dec/out _ m dc1 dc2 ⇒
-    let ([_ ⊢ U'],[_ ⊢ MG']) = (u,m) in
-    let [_ ⊢ merge-lookup U2 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
+    let [_ ⊢ M] = m in
+    let [_ ⊢ merge-lookup U2 _ _ _ _] = merge_lookup [_ ⊢ U] [_ ⊢ M] in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U2[..]])
   | Dec/inp u1 dc1 ⇒
     let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in
     prune_hyp
       (prune_hyp (dec_lookup_hyp dc1 [_,x:obj,y:obj ⊢ upd/n (upd/n U2[..])]))
   | Dec/pcomp m _ dc1 dc2 ⇒
-    let ([_ ⊢ U'],[_ ⊢ MG']) = (u,m) in
-    let [_ ⊢ merge-lookup U1 _ _ _ _] = merge_lookup [_ ⊢ U'] [_ ⊢ MG'] in
+    let [_ ⊢ M] = m in
+    let [_ ⊢ merge-lookup U1 _ _ _ _] = merge_lookup [_ ⊢ U] [_ ⊢ M] in
     prune_hyp (dec_lookup_hyp dc1 [_,x:obj ⊢ upd/n U1[..]])
   | Dec/inl u1 dc1 ⇒
     let [_ ⊢ lookint U2] = lookup_upd_mult u1 u in

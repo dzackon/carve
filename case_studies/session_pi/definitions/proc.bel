@@ -1,0 +1,128 @@
+%======================================================%
+% Processes for the session-typed calculus
+%======================================================%
+
+% Processes
+
+LF proc : type =
+| null : proc
+| wait : obj → proc → proc
+| close : obj → proc → proc
+| inp : obj → (obj → proc) → proc
+| out : obj → obj → proc → proc
+| par : proc → proc → proc
+| res : (obj → obj → proc) → proc;
+
+% Structural congruence
+
+LF ≡ : proc → proc → type =
+% axioms
+| ≡par/comm : ≡ (par P Q) (par Q P)
+| ≡par/assoc : ≡ (par (par P Q) R) (par P (par Q R))
+| ≡par/null : {P:proc} ≡ (par P null) P
+| ≡res/par : ≡ (par (res P) Q) (res \x.\y.par (P x y) Q)
+| ≡res/swapB : ≡ (res \w.\x.res \y.\z.P w x y z) (res \y.\z.res \w.\x.P w x y z)
+| ≡res/swapC : ≡ (res \x.\y.P x y) (res \y.\x.P x y)
+% congruence rules
+| ≡c/null : ≡ null null
+| ≡c/wait : ≡ P P' → ≡ (wait X P) (wait X P')
+| ≡c/close : ≡ P P' → ≡ (close X P) (close X P')
+| ≡c/inp : ({x:obj} ≡ (P x) (P' x)) → ≡ (inp X P) (inp X P')
+| ≡c/out : ≡ P P' → ≡ (out X Y P) (out X Y P')
+| ≡c/par : ≡ P P' → ≡ (par P Q) (par P' Q)
+| ≡c/res : ({x:obj} {y:obj} ≡ (P x y) (P' x y)) → ≡ (res P) (res P')
+% symmetry, transitivity
+| ≡sym : ≡ P Q → ≡ Q P
+| ≡trans : ≡ P Q → ≡ Q R → ≡ P R
+;
+--infix ≡ 11 left.
+
+% Process P is prefixed at variable x
+
+LF pref : obj → proc → type =
+| pref/wait : pref X (wait X _)
+| pref/close : pref X (close X _)
+| pref/inp : pref X (inp X _)
+| pref/out : pref X (out X _ _);
+
+% P is prefixed at x by an action that matches the session type T
+
+LF pref_tp : obj → proc → tp → type =
+| pt/wait : pref_tp X (wait X _) end?
+| pt/close : pref_tp X (close X _) end!
+| pt/inp : pref_tp X (inp X _) (recv _ _)
+| pt/out : pref_tp X (out X _ _) (send _ _);
+
+%------------------------------------------------------%
+% Canonical form
+%------------------------------------------------------%
+
+% P = ((P₁ | P₂) | ⋯ | Pₘ) for some m ≥ 1, where each Pᵢ is a prefixed process.
+% (Association up to congruence is established by the canonical-form lemmas.)
+
+LF can_par : proc → type =
+| bcan/pref : pref _ P → can_par P
+| bcan/can : can_par P → pref _ Q → can_par (par P Q);
+
+% P = (νx₁y₁)…(νxₙyₙ)((P₁ | P₂) | ⋯ | Pₘ) for some n ≥ 0, m ≥ 1,
+% where no Pᵢ is a variable restriction nor (unless m = 1) a terminated process.
+
+LF can_form : proc → type =
+| can/null : can_form null
+| can/par : can_par P → can_form P
+| can/res : ({x:obj} {y:obj} can_form (P x y)) → can_form (res P);
+
+% P is congruent to P' in canonical form
+
+LF equiv_can_par : proc → type =
+| equiv-can-par : P ≡ P' → can_par P' → equiv_can_par P;
+
+LF equiv_can_form : proc → type =
+| equiv-can-form : P ≡ P' → can_form P' → equiv_can_form P;
+
+%------------------------------------------------------%
+% Prefix compatibility
+%------------------------------------------------------%
+
+% P and Q have complementary outer prefixes at the bound endpoints x and y
+
+LF pref_compatible : (obj → obj → proc) → (obj → obj → proc) → type =
+| compat/close_wait :
+  pref_compatible (\x.\y. close x (P x y)) (\x.\y. wait y (Q x y))
+| compat/wait_close :
+  pref_compatible (\x.\y. wait x (P x y)) (\x.\y. close y (Q x y))
+| compat/out_inp :
+  pref_compatible (\x.\y. out x (Z x y) (P x y)) (\x.\y. inp y (Q x y))
+| compat/inp_out :
+  pref_compatible (\x.\y. inp x (P x y)) (\x.\y. out y (Z x y) (Q x y));
+
+% Eight representative incompatible prefix pairs. The four omitted reversed
+% mixed pairs are covered by exchanging endpoints and parallel components
+
+LF pref_mismatch : (obj → obj → proc) → (obj → obj → proc) → type =
+| mm/wait_wait : pref_mismatch (\x.\y. wait x (P x y)) (\x.\y. wait y (Q x y))
+| mm/wait_inp : pref_mismatch (\x.\y. wait x (P x y)) (\x.\y. inp y (Q x y))
+| mm/wait_out :
+  pref_mismatch (\x.\y. wait x (P x y)) (\x.\y. out y (Z x y) (Q x y))
+| mm/close_close :
+  pref_mismatch (\x.\y. close x (P x y)) (\x.\y. close y (Q x y))
+| mm/close_inp : pref_mismatch (\x.\y. close x (P x y)) (\x.\y. inp y (Q x y))
+| mm/close_out :
+  pref_mismatch (\x.\y. close x (P x y)) (\x.\y. out y (Z x y) (Q x y))
+| mm/inp_inp : pref_mismatch (\x.\y. inp x (P x y)) (\x.\y. inp y (Q x y))
+| mm/out_out :
+  pref_mismatch (\x.\y. out x (Z x y) (P x y)) (\x.\y. out y (W x y) (Q x y));
+
+% P is in error form: it has incompatible prefixes on the two endpoints of one
+% restriction, with an arbitrary parallel remainder and additional enclosing
+% restrictions
+
+LF error_form : proc → type =
+| err/par : pref_mismatch P Q
+  → error_form (res \x.\y.par (par (P x y) (Q x y)) (R x y))
+| err/res : ({x:obj} {y:obj} error_form (P x y)) → error_form (res P);
+
+% P is a runtime error: it is congruent to a prefix-mismatch error form
+
+LF runtime_error : proc → type =
+| runtime-error : P ≡ P' → error_form P' → runtime_error P;

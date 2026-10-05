@@ -1,0 +1,104 @@
+%======================================================%
+% Properties of prefix compatibility
+%======================================================%
+
+LF pref_pair : (obj → obj → proc) → (obj → obj → proc) → type =
+| prfs : ({x:obj} {y:obj} pref x (P x y)) → ({x:obj} {y:obj} pref y (Q x y))
+  → pref_pair P Q;
+
+% If pref_mismatch((νxy)(P ‖ Q)) then P,Q are prefixed by x,y respectively
+% (follows trivially from definition)
+
+rec pref_mismatch_pair : (Ψ:ctx)
+  [Ψ ⊢ pref_mismatch (\x.\y.P) (\x.\y.Q)]
+  → [Ψ ⊢ pref_pair (\x.\y.P) (\x.\y.Q)] =
+  / total 1 /
+  fn nr ⇒ case nr of
+  | [_ ⊢ mm/wait_wait] ⇒ [_ ⊢ prfs (\x.\y.pref/wait) (\x.\y.pref/wait)]
+  | [_ ⊢ mm/wait_inp] ⇒ [_ ⊢ prfs (\x.\y.pref/wait) (\x.\y.pref/inp)]
+  | [_ ⊢ mm/wait_out] ⇒ [_ ⊢ prfs (\x.\y.pref/wait) (\x.\y.pref/out)]
+  | [_ ⊢ mm/close_close] ⇒ [_ ⊢ prfs (\x.\y.pref/close) (\x.\y.pref/close)]
+  | [_ ⊢ mm/close_inp] ⇒ [_ ⊢ prfs (\x.\y.pref/close) (\x.\y.pref/inp)]
+  | [_ ⊢ mm/close_out] ⇒ [_ ⊢ prfs (\x.\y.pref/close) (\x.\y.pref/out)]
+  | [_ ⊢ mm/inp_inp] ⇒ [_ ⊢ prfs (\x.\y.pref/inp) (\x.\y.pref/inp)]
+  | [_ ⊢ mm/out_out] ⇒ [_ ⊢ prfs (\x.\y.pref/out) (\x.\y.pref/out)]
+  ;
+
+% If pref_mismatch((νxy)(P ‖ Q)), then (νxy)(P ‖ Q) is not a pref_compatible
+% (follows trivially from definition)
+
+rec pref_compatible_contra : (Ψ:ctx)
+  [Ψ ⊢ pref_mismatch (\x.\y.P) (\x.\y.Q)]
+  → [Ψ ⊢ pref_compatible (\x.\y.P) (\x.\y.Q)]
+  → [ ⊢ false] =
+  / total 1 /
+  fn nr, r ⇒ case r of
+  | [_ ⊢ compat/close_wait] ⇒ impossible nr
+  | [_ ⊢ compat/wait_close] ⇒ impossible nr
+  | [_ ⊢ compat/out_inp] ⇒ impossible nr
+  | [_ ⊢ compat/inp_out] ⇒ impossible nr
+  ;
+
+% If (Δ, x :¹ T, y :¹ T^⊥) ⊢ (P ‖ Q), x ∉ fv(Q), y ∉ fv(P), and P and Q are
+% prefixed at x and y respectively, then the prefixes of (νxy)(P ‖ Q) are
+% compatible
+
+rec typed_pref_compatible : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
+  [Ψ,x:obj,y:obj ⊢
+    oft (cons (cons Δ[..] x T[] 𝟙) y T'[] 𝟙) (par P[..,x] Q[..,y])]
+  → [Ψ,x:obj,y:obj ⊢ pref x P[..,x]]
+  → [Ψ,x:obj,y:obj ⊢ pref y Q[..,y]]
+  → [ ⊢ dual T T']
+  → [Ψ ⊢ pref_compatible (\x.\y.P[..,x]) (\x.\y.Q[..,y])] =
+  / total 1 /
+  fn d, p1, p2, du ⇒
+  let [_,x:obj,y:obj ⊢ oft/par D1 D2 (mg/c (mg/c M1 T1[]) T2[])] = d in
+  let [ ⊢ mult/refl] = oft_notin_fv [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ D1]
+    (upd_refl_top [_,x:obj,y:obj ⊢ _] [_,x:obj,y:obj ⊢ _] [ ⊢ _] [ ⊢ _]) in
+  let [ ⊢ mult/refl] = oft_notin_fv [_,x:obj ⊢ _]
+    (oft_exch_top [_,x:obj,y:obj ⊢ D2[..,y,x]])
+    (upd_refl_top [_,x:obj,y:obj ⊢ _] [_,x:obj,y:obj ⊢ _] [ ⊢ _] [ ⊢ _]) in
+  let [ ⊢ •/10] = [ ⊢ T1] in
+  let [ ⊢ •/01] = [ ⊢ T2] in
+  let Prune-Merge [_,x:obj ⊢ M1'] [_,x:obj,y:obj ⊢ _] =
+    prune_merge [_,x:obj,y:obj ⊢ M1] in
+  let Prune-Merge [_ ⊢ _] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1'] in
+  let [_,x:obj,y:obj ⊢ P2] = p2 in
+  let [_,x:obj,y:obj ⊢ D2'] = oft_exch_top [_,x:obj,y:obj ⊢ D2] in
+  let [_,x:obj ⊢ PT1] = oft_pref_tp [_,x:obj,y:obj ⊢ D1] p1 in
+  let [_,y:obj ⊢ PT2] =
+    oft_pref_tp [_,y:obj,x:obj ⊢ D2'[..,x,y]] [_,y:obj,x:obj ⊢ P2[..,x,y]] in
+  case [_,x:obj ⊢ PT1] of
+  | [_,x:obj ⊢ pt/wait] ⇒
+    let [ ⊢ du/e1] = du in
+    let [_,y:obj ⊢ pt/close] = [_,y:obj ⊢ PT2] in
+    [_ ⊢ compat/wait_close]
+  | [_,x:obj ⊢ pt/close] ⇒
+    let [ ⊢ du/e2] = du in
+    let [_,y:obj ⊢ pt/wait] = [_,y:obj ⊢ PT2] in
+    [_ ⊢ compat/close_wait]
+  | [_,x:obj ⊢ pt/inp] ⇒
+    let [ ⊢ du/r _] = du in
+    let [_,y:obj ⊢ pt/out] = [_,y:obj ⊢ PT2] in
+    [_ ⊢ compat/inp_out]
+  | [_,x:obj ⊢ pt/out] ⇒
+    let [ ⊢ du/s _] = du in
+    let [_,y:obj ⊢ pt/inp] = [_,y:obj ⊢ PT2] in
+    [_ ⊢ compat/out_inp]
+  ;
+
+% Corollary: If (Δ, x :¹ T, y :¹ T^⊥) ⊢ (P ‖ Q), x ∉ fv(Q), and y ∉ fv(P),
+% then pref_mismatch((νxy)(P ‖ Q)) yields a contradiction
+
+rec typed_pref_mismatch_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
+  [Ψ ⊢ pref_mismatch (\x.\y.P[..,x]) (\x.\y.Q[..,y])]
+  → [Ψ,x:obj,y:obj ⊢
+      oft (cons (cons Δ[..] x T[] 𝟙) y T'[] 𝟙) (par P[..,x] Q[..,y])]
+  → [ ⊢ dual T T']
+  → [ ⊢ false] =
+  / total 1 /
+  fn nr, d, du ⇒
+  let [_ ⊢ prfs (\x.\y.P1) (\x.\y.P2)] = pref_mismatch_pair nr in
+  pref_compatible_contra nr
+    (typed_pref_compatible d [_,x:obj,y:obj ⊢ P1] [_,x:obj,y:obj ⊢ P2] du)
+  ;

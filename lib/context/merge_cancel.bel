@@ -23,6 +23,6 @@ rec merge_cancel_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ merge Δ₁' Δ₂ Δ]
   → [Ψ ⊢ ctx_eq Δ₁ Δ₁'] =
-  / total /
+  / total 1 /
   fn c, m1, m2 ⇒ merge_cancel c (merge_comm m1) (merge_comm m2)
   ;

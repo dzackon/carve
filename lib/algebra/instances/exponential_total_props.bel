@@ -7,8 +7,8 @@
 
 % Totality: For any α₁, α₂, there exists an α such that α₁ • α₂ = α
 
-rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂] =
-  / total /
+rec total_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂] =
+  / total 1 /
   mlam α₁, α₂ ⇒
   case [ ⊢ α₁] of
   | [ ⊢ 𝟘] ⇒ [_ ⊢ get-mult •/0a]
@@ -20,15 +20,15 @@ rec mult_total : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α
     | [ ⊢ 𝟙] ⇒ [ ⊢ get-mult •/11]
   ;
 
-rec mult_total_rec : Total =
+rec mult_total : Total =
   / total /
-  Is-Total mult_total
+  Is-Total total_prf
   ;
 
 % Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
-  / total /
+  / total 1 /
   fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/0a] ⇒
     (case m2 of
@@ -63,7 +63,7 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
 
 rec ident_0_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • 𝟘 m m2]
                 → [ ⊢ mult_eq m m2] =
-  / total /
+  / total 1 /
   mlam m, m2 ⇒ fn d ⇒ case d of
   | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
   | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
@@ -78,7 +78,7 @@ rec mult_ident_0 : Ident [ ⊢ 𝟘] =
 % For any α, obtain a harmless identity element β such that β • α = α
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
-  / total /
+  / total 1 /
   mlam _ ⇒ [ ⊢ get-unit hal/0 •/0a]
   ;
 
@@ -88,7 +88,7 @@ rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
 % fails (𝟙 • ω = ω with ω harmless but 𝟙 ≠ ω).
 
 rec mult_zsfree_cor : [ ⊢ • α₁ α₂ 𝟘] → [ ⊢ mult_eq α₁ 𝟘] =
-  / total /
+  / total 1 /
   fn m ⇒ case m of
   | [ ⊢ •/0a] ⇒ [ ⊢ mult/refl]
   | [ ⊢ •/a0] ⇒ [ ⊢ mult/refl]
@@ -97,7 +97,7 @@ rec mult_zsfree_cor : [ ⊢ • α₁ α₂ 𝟘] → [ ⊢ mult_eq α₁ 𝟘] 
 % Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
-  / total /
+  / total 1 /
   fn m ⇒ case m of
   | [ ⊢ •/0a] ⇒ [ ⊢ •/a0]
   | [ ⊢ •/a0] ⇒ [ ⊢ •/0a]
@@ -110,7 +110,7 @@ rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
 
 rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
                  [ ⊢ mult_assoc_res M1 M2] =
-  / total /
+  / total 1 /
   mlam M1, M2 ⇒ case [ ⊢ M1] of
   | [ ⊢ •/0a] ⇒ [ ⊢ mult-assoc M2 •/0a _ _]
   | [ ⊢ •/a0] ⇒ [ ⊢ mult-assoc •/0a M2 _ _]
@@ -118,7 +118,7 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
     (case [ ⊢ M2] of
     | [ ⊢ •/a0] ⇒ [ ⊢ mult-assoc •/a0 •/11 _ _]
     | [ ⊢ •/ωa]:[ ⊢ • _ α₃ _] ⇒
-      (case mult_total [ ⊢ 𝟙] [ ⊢ α₃] of
+      (case total_prf [ ⊢ 𝟙] [ ⊢ α₃] of
       | [ ⊢ get-mult •/a0] ⇒ [ ⊢ mult-assoc •/a0 •/11 _ _]
       | [ ⊢ get-mult •/11] ⇒ [ ⊢ mult-assoc •/11 •/aω _ _]
       | [ ⊢ get-mult •/aω] ⇒ [ ⊢ mult-assoc •/aω •/aω _ _]
@@ -129,7 +129,7 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
     (case [ ⊢ M2] of
     | [ ⊢ •/a0] ⇒ [ ⊢ mult-assoc •/a0 •/ωa _ _]
     | [ ⊢ •/ωa]:[ ⊢ • _ α₃ _] ⇒
-      let [ ⊢ get-mult M3] = mult_total [ ⊢ α₂] [ ⊢ α₃] in
+      let [ ⊢ get-mult M3] = total_prf [ ⊢ α₂] [ ⊢ α₃] in
       [ ⊢ mult-assoc M3 •/ωa _ _]
     | [ ⊢ •/aω] ⇒ [ ⊢ mult-assoc •/aω •/ωa _ _]
     )
@@ -148,13 +148,13 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
 % Harmless elements are idempotent
 
 rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
-  / total /
+  / total 1 /
   mlam _ ⇒ fn h ⇒ case h of
   | [ ⊢ hal/0] ⇒ [ ⊢ •/0a]
   | [ ⊢ hal/ω] ⇒ [ ⊢ •/ωa]
   ;
 
-rec mult_halidem_rec : HalIdem =
+rec mult_halidem : HalIdem =
   / total /
   Is-HalIdem halidem_prf
   ;

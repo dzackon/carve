@@ -1,0 +1,360 @@
+%======================================================%
+% Weak normalization via logical relations (with reduction under binders)
+%
+% Adapted from the proof of Andrew Cave
+% (https://github.com/Beluga-lang/Beluga/tree/master/examples/
+%   logrel/weak-norm-under-binders-beta-only.bel)
+%======================================================%
+
+%------------------------------------------------------%
+% Normal and neutral terms
+%------------------------------------------------------%
+
+LF normal : obj → type =
+| n/neut : neutral M → normal M
+| n/lam : ({x:obj} neutral x → normal (M x)) → normal (lam M)
+| n/bang : normal M → normal (bang M)
+
+and neutral : obj → type =
+| n/app : neutral M → normal N → neutral (app M N)
+| n/letbang : neutral M → ({x:obj} neutral x → normal (N x))
+  → neutral (letbang M N);
+
+schema nctx = block x:obj, u:neutral x;
+
+%------------------------------------------------------%
+% M halts
+%------------------------------------------------------%
+
+inductive Halts : (Ψ:nctx) {M:[Ψ ⊢ obj]} ctype =
+| Halts/c : {V:[Ψ ⊢ obj]} [Ψ ⊢ mstep M V] → [Ψ ⊢ normal V] → Halts [Ψ ⊢ M];
+
+%------------------------------------------------------%
+% Reducibility
+%------------------------------------------------------%
+
+inductive Closure : (Ψ:nctx) {A:[ ⊢ tp]} {M:[Ψ ⊢ obj]} ctype =
+| Clos/! : Reduce [ ⊢ A] [Ψ ⊢ M] → Closure [ ⊢ ! A] [Ψ ⊢ bang M]
+| Clos/neut : Halts [Ψ ⊢ M] → [Ψ ⊢ neutral M] → Closure [ ⊢ A] [Ψ ⊢ M]
+| Clos/step : Closure [ ⊢ A] [Ψ ⊢ M'] → [Ψ ⊢ step M M']
+  → Closure [ ⊢ A] [Ψ ⊢ M]
+
+and stratified Reduce : (Ψ:nctx) {A:[ ⊢ tp]} {M:[Ψ ⊢ obj]} ctype =
+| Red/base : Halts [Ψ ⊢ M] → Reduce [ ⊢ base] [Ψ ⊢ M]
+
+| Red/-o : {M:[Ψ ⊢ obj]} Halts [Ψ ⊢ M] →
+  ({Φ:nctx} {$S:$[Φ ⊢ Ψ]} {N:[Φ ⊢ obj]}
+  Reduce [ ⊢ A] [Φ ⊢ N] → Reduce [ ⊢ B] [Φ ⊢ app M[$S] N])
+  → Reduce [ ⊢ A -o B] [Ψ ⊢ M]
+
+| Red/! : Closure [ ⊢ ! A] [Ψ ⊢ M] → Reduce [ ⊢ ! A] [Ψ ⊢ M];
+
+%------------------------------------------------------%
+% Congruence of multi-step reduction
+%------------------------------------------------------%
+
+rec m_app2 : (Ψ:nctx) {M:[Ψ ⊢ obj]} [Ψ ⊢ mstep N N']
+  → [Ψ ⊢ mstep (app M N) (app M N')] =
+  / total 1 /
+  mlam M ⇒ fn s ⇒ case s of
+  | [_ ⊢ ms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_ ⊢ ms/onestep S MS] ⇒
+    let [_ ⊢ MS'] = m_app2 [_ ⊢ M] [_ ⊢ MS] in
+    [_ ⊢ ms/onestep (s/app2 S) MS']
+  ;
+
+rec m_bang : (Ψ:nctx) [Ψ ⊢ mstep M M'] → [Ψ ⊢ mstep (bang M) (bang M')] =
+  / total 1 /
+  fn s ⇒ case s of
+  | [_ ⊢ ms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_ ⊢ ms/onestep S MS] ⇒
+    let [_ ⊢ MS'] = m_bang [_ ⊢ MS] in
+    [_ ⊢ ms/onestep (s/bang S) MS']
+  ;
+
+rec m_letbang1 : (Ψ:nctx) {N:[Ψ, x:obj ⊢ obj]} [Ψ ⊢ mstep M M']
+  → [Ψ ⊢ mstep (letbang M \x.N) (letbang M' \x.N)] =
+  / total 2 /
+  mlam N ⇒ fn s ⇒ case s of
+  | [_ ⊢ ms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_ ⊢ ms/onestep S MS] ⇒
+    let [_ ⊢ MS'] = m_letbang1 [_,x:obj ⊢ N] [_ ⊢ MS] in
+    [_ ⊢ ms/onestep (s/letbang1 S) MS']
+  ;
+
+rec m_lam : (Ψ:nctx) {M:[Ψ, x:obj ⊢ obj]}
+  [Ψ, b:block x:obj, u:neutral x ⊢ mstep M[..,b.1] M'[..,b.1]]
+  → [Ψ ⊢ mstep (lam \x.M) (lam \x.M')] =
+  / total 2 /
+  mlam M ⇒ fn s ⇒ case s of
+  | [_, b:block x:obj, u:neutral _ ⊢ ms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_, b:block x:obj, u:neutral _ ⊢ ms/onestep S[..,b.1] MS] ⇒
+    let [_ ⊢ MS'] = m_lam [_ ⊢ _] [_, b:block x:obj, u:neutral x ⊢ MS] in
+    [_ ⊢ ms/onestep (s/lam \x.S) MS']
+  ;
+
+rec m_letbang2 : (Ψ:nctx) {M:[Ψ ⊢ obj]} {N:[Ψ, x:obj ⊢ obj]}
+  [Ψ, b:block x:obj, u:neutral x ⊢ mstep N[..,b.1] N'[..,b.1]]
+  → [Ψ ⊢ mstep (letbang M \x.N) (letbang M \x.N')] =
+  / total 3 /
+  mlam M, N ⇒ fn s ⇒ case s of
+  | [_, b:block x:obj, u:neutral _ ⊢ ms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_, b:block x:obj, u:neutral _ ⊢ ms/onestep S[..,b.1] MS] ⇒
+    let [_ ⊢ MS'] =
+      m_letbang2 [_ ⊢ M] [_ ⊢ _] [_, b:block x:obj, u:neutral x ⊢ MS] in
+    [_ ⊢ ms/onestep (s/letbang2 \x.S) MS']
+  ;
+
+%------------------------------------------------------%
+% Basic properties of the logical relation
+%------------------------------------------------------%
+
+% Reducible terms halt
+
+rec reduce_halts : (Ψ:nctx) {A:[ ⊢ tp]} Reduce [ ⊢ A] [Ψ ⊢ M] → Halts [Ψ ⊢ M] =
+  / total 1 /
+  mlam A ⇒ fn r ⇒ case [ ⊢ A] of
+  | [ ⊢ base] ⇒ let Red/base h = r in h
+  | [ ⊢ A1 -o A2] ⇒ let Red/-o [_ ⊢ _] h f = r in h
+  | [ ⊢ ! A1] ⇒ let Red/! c = r in closure_halts [ ⊢ A1] c
+
+and rec closure_halts : (Ψ:nctx) {A:[ ⊢ tp]}
+  Closure [ ⊢ ! A] [Ψ ⊢ M] → Halts [Ψ ⊢ M] =
+  / total c (closure_halts _ _ _ c) /
+  mlam A ⇒ fn c ⇒ case c of
+  | Clos/! r ⇒
+    let Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NV] = reduce_halts [ ⊢ A] r in
+    let [_ ⊢ MS'] = m_bang [_ ⊢ MS] in
+    Halts/c [_ ⊢ _] [_ ⊢ MS'] [_ ⊢ n/bang NV]
+  | Clos/neut h n ⇒ h
+  | Clos/step c' [_ ⊢ S] ⇒
+    let Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NV] = closure_halts [ ⊢ A] c' in
+    Halts/c [_ ⊢ _] [_ ⊢ ms/onestep S MS] [_ ⊢ NV]
+  ;
+
+% Backward closure under a single step, and its multi-step corollary
+
+rec bwd_closed : {A:[ ⊢ tp]} {S:[Ψ ⊢ step M M']} Reduce [ ⊢ A] [Ψ ⊢ M']
+  → Reduce [ ⊢ A] [Ψ ⊢ M] =
+  / total 1 /
+  mlam A, S ⇒ fn r ⇒ case [ ⊢ A] of
+  | [ ⊢ base] ⇒
+    let Red/base (Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NV]) = r in
+    Red/base (Halts/c [_ ⊢ _] [_ ⊢ ms/onestep S MS] [_ ⊢ NV])
+  | [ ⊢ A1 -o A2] ⇒
+    let Red/-o [_ ⊢ M] (Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NV]) f = r in
+    Red/-o [_ ⊢ _] (Halts/c [_ ⊢ _] [_ ⊢ ms/onestep S MS] [_ ⊢ NV])
+    (mlam _, $σ, N ⇒ fn rn ⇒
+      bwd_closed [ ⊢ _] [_ ⊢ s/app1 S[$σ]] (f [_] $[_ ⊢ $σ] [_ ⊢ N] rn))
+  | [ ⊢ ! A1] ⇒ let Red/! c = r in Red/! (Clos/step c [_ ⊢ S])
+  ;
+
+rec m_closed : [Ψ ⊢ mstep M M'] → Reduce [ ⊢ A] [Ψ ⊢ M']
+  → Reduce [ ⊢ A] [Ψ ⊢ M] =
+  / total s (m_closed _ _ _ _ s) /
+  fn s, r ⇒ case s of
+  | [_ ⊢ ms/refl] ⇒ r
+  | [_ ⊢ ms/onestep S MS] ⇒ bwd_closed [ ⊢ _] [_ ⊢ S] (m_closed [_ ⊢ MS] r)
+  ;
+
+% Neutral terms are reducible at every type
+
+rec reflect : (Ψ:nctx) {A:[ ⊢ tp]} {R:[Ψ ⊢ obj]} {NR:[Ψ ⊢ neutral R]}
+  Reduce [ ⊢ A] [Ψ ⊢ R] =
+  / total a (reflect _ a) /
+  mlam A, R, NR ⇒ case [ ⊢ A] of
+  | [ ⊢ base] ⇒ Red/base (Halts/c [_ ⊢ _] [_ ⊢ ms/refl] [_ ⊢ n/neut NR])
+  | [ ⊢ A1 -o A2] ⇒
+    Red/-o [_ ⊢ _] (Halts/c [_ ⊢ _] [_ ⊢ ms/refl] [_ ⊢ n/neut NR])
+    (mlam _, $σ, _ ⇒ fn rn ⇒
+      let Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NM] = reduce_halts [ ⊢ A1] rn in
+      m_closed (m_app2 [_ ⊢ _] [_ ⊢ MS])
+        (reflect [ ⊢ A2] [_ ⊢ _] [_ ⊢ n/app NR[$σ] NM]))
+  | [ ⊢ ! A1] ⇒
+    Red/! (Clos/neut (Halts/c [_ ⊢ _] [_ ⊢ ms/refl] [_ ⊢ n/neut NR]) [_ ⊢ NR])
+  ;
+
+%------------------------------------------------------%
+% Reducible substitutions
+%------------------------------------------------------%
+
+inductive RedSub : (Ψ:ctx) (Φ:nctx) {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[Φ ⊢ Ψ]} ctype =
+| Rsub/nil : RedSub [ ⊢ nil] $[Φ ⊢ ^]
+| Rsub/cons : RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → Reduce [ ⊢ A] [Φ ⊢ X]
+  → RedSub [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]] $[Φ ⊢ $σ, X];
+
+% Weakening a term M that is reducible at type A
+
+rec monotone : {$σ:$[Φ ⊢ Ψ]} Reduce [ ⊢ A] [Ψ ⊢ M]
+  → Reduce [ ⊢ A] [Φ ⊢ M[$σ]] =
+  / total r (monotone _ _ _ _ _ r) /
+  mlam $σ ⇒ fn r ⇒ case r of
+  | Red/base (Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NM]) ⇒
+    Red/base (Halts/c [_ ⊢ _] [_ ⊢ MS[$σ]] [_ ⊢ NM[$σ]])
+  | Red/-o [_ ⊢ M] (Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NM]) f ⇒
+    Red/-o [_ ⊢ M[$σ]] (Halts/c [_ ⊢ _] [_ ⊢ MS[$σ]] [_ ⊢ NM[$σ]])
+    (mlam _, $σ', N ⇒ fn rn ⇒ f [_] $[_ ⊢ $σ[$σ']] [_ ⊢ N] rn)
+  | Red/! c ⇒ Red/! (monotone_cl $[_ ⊢ $σ] c)
+
+and rec monotone_cl : {$σ:$[Φ ⊢ Ψ]} Closure [ ⊢ A] [Ψ ⊢ M]
+  → Closure [ ⊢ A] [Φ ⊢ M[$σ]] =
+  / total c (monotone_cl _ _ _ _ _ c) /
+  mlam $σ ⇒ fn c ⇒ case c of
+  | Clos/! r ⇒ Clos/! (monotone $[_ ⊢ $σ] r)
+  | Clos/neut (Halts/c [_ ⊢ _] [_ ⊢ MS] [_ ⊢ NM]) [_ ⊢ NR] ⇒
+    Clos/neut (Halts/c [_ ⊢ _] [_ ⊢ MS[$σ]] [_ ⊢ NM[$σ]]) [_ ⊢ NR[$σ]]
+  | Clos/step c' [_ ⊢ S] ⇒ Clos/step (monotone_cl $[_ ⊢ $σ] c') [_ ⊢ S[$σ]]
+  ;
+
+% Composing a reducible substitution with a variable substitution yields a
+% reducible substitution
+
+rec monotone_sub : (Δ:[Ψ ⊢ lctx K[]]) {$σ:$[Φ' ⊢ Φ]} RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ']
+  → RedSub [Ψ ⊢ Δ] $[Φ' ⊢ $σ'[$σ]] =
+  / total rs (monotone_sub _ _ _ _ _ _ _ rs) /
+  mlam $σ ⇒ fn r ⇒ case r of
+  | Rsub/nil ⇒ Rsub/nil
+  | Rsub/cons rs' rn ⇒
+    Rsub/cons (monotone_sub $[_ ⊢ $σ] rs') (monotone $[_ ⊢ $σ] rn)
+  ;
+
+% If RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] and X : A ∈ Δ, then X[$σ] is reducible at type A
+% in the context Φ
+
+rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
+  → Reduce [ ⊢ A] [Φ ⊢ X[$σ]] =
+  / total 1 /
+  fn r, u ⇒ case r of
+  | Rsub/nil ⇒ impossible u
+  | Rsub/cons rs1 rd1 ⇒ case u of
+    | [_,x:obj ⊢ upd/t _] ⇒ rd1
+    | [_,x:obj ⊢ upd/n U1] ⇒
+      let [_,x:obj ⊢ U1'] = upd_refl [_,x:obj ⊢ U1] in
+      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
+      lookup_redsub rs1 [_ ⊢ U2]
+  ;
+
+% If RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] and Δ₁ ⋈ Δ₂ = Δ, then RedSub [Ψ ⊢ Δ₁] $[Φ ⊢ $σ]
+% and RedSub [Ψ ⊢ Δ₂] $[Φ ⊢ $σ]
+
+inductive RedSubMerge : (Ψ:ctx) (Φ:nctx) {Δ₁:[Ψ ⊢ lctx K[]]}
+{Δ₂:[Ψ ⊢ lctx K[]]} {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[Φ ⊢ Ψ]} ctype =
+| Rsub/merge : RedSub [Ψ ⊢ Δ₁] $[Φ ⊢ $σ] → RedSub [Ψ ⊢ Δ₂] $[Φ ⊢ $σ]
+  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[Φ ⊢ $σ];
+
+rec rsub_merge : RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
+  / total 1 /
+  fn rs, mg ⇒ case rs of
+  | Rsub/nil ⇒ let [ ⊢ mg/n] = mg in Rsub/merge Rsub/nil Rsub/nil
+  | Rsub/cons rs' r ⇒
+    let [_,x:obj ⊢ mg/c M1 T[]] = mg in
+    let Prune-Merge [_ ⊢ M1'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
+    let Rsub/merge rs1 rs2 = rsub_merge rs' [_ ⊢ M1'] in
+    Rsub/merge (Rsub/cons rs1 r) (Rsub/cons rs2 r)
+  ;
+
+%------------------------------------------------------%
+% Eliminating a let-bang
+%------------------------------------------------------%
+
+rec eval_letbang : (Φ:nctx) {N:[Φ, x:obj ⊢ obj]}
+  Closure [ ⊢ ! A] [Φ ⊢ M]
+  → ({Φ':nctx} {$S:$[Φ' ⊢ Φ]} {X:[Φ' ⊢ obj]} Reduce [ ⊢ A] [Φ' ⊢ X]
+     → Reduce [ ⊢ B] [Φ' ⊢ N[$S, X]])
+  → Reduce [ ⊢ B] [Φ ⊢ letbang M \x.N] =
+  / total c (eval_letbang _ _ _ _ _ c) /
+  mlam N ⇒ fn c, f ⇒ case c of
+  | Clos/! r ⇒ bwd_closed [ ⊢ _] [_ ⊢ s/red!] (f [_] $[_ ⊢ ..] [_ ⊢ _] r)
+  | Clos/neut h [_ ⊢ NR] ⇒
+    let rx =
+      reflect [ ⊢ _] [_, b:block x:obj, u:neutral x ⊢ b.1] [_, b ⊢ b.2] in
+    let rd = f [_] $[_, b:block x:obj, u:neutral x ⊢ ..] [_ ⊢ _] rx in
+    let Halts/c [_, b:block x:obj, u:neutral x ⊢ V[..,b.1]]
+                [_, b:block x:obj, u:neutral x ⊢ MS1]
+                [_, b:block x:obj, u:neutral x ⊢ NV] =
+      reduce_halts [ ⊢ _] rd in
+    let ms2 = m_letbang2 [_ ⊢ _] [_,x:obj ⊢ N]
+      [_, b:block x:obj, u:neutral x ⊢ MS1] in
+    m_closed ms2 (reflect [ ⊢ _] [_ ⊢ _]
+      [_ ⊢ n/letbang NR \x.\u.NV[..,<x;u>]])
+  | Clos/step c' [_ ⊢ S] ⇒
+    bwd_closed [ ⊢ _] [_ ⊢ s/letbang1 S] (eval_letbang [_,x:obj ⊢ N] c' f)
+  ;
+
+%------------------------------------------------------%
+% The fundamental lemma
+%------------------------------------------------------%
+
+% If Δ ⊢ M : A under Ψ and RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ], then M[$σ] is reducible at
+% type A in the context Φ
+
+rec eval : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → Reduce [ ⊢ A] [Φ ⊢ M[$σ]] =
+  / total d (eval _ _ _ _ _ _ _ d _) /
+  fn d, rs ⇒
+  let _ : RedSub [_ ⊢ _] $[Φ ⊢ $σ] = rs in
+  case d of
+  | [_ ⊢ oft/var U _] ⇒ lookup_redsub rs [_ ⊢ U]
+  | [_ ⊢ oft/vari U _] ⇒ lookup_redsub rs [_ ⊢ U]
+  | [_ ⊢ oft/lam (\x.D1)]:[_ ⊢ oft _ (lam \x.M1) (A1[] -o A2[])] ⇒
+    let rx =
+      reflect [ ⊢ A1] [Φ, b:block x:obj, u:neutral x ⊢ b.1] [_, b ⊢ b.2] in
+    let rd = eval [_,x:obj ⊢ D1]
+      (Rsub/cons (monotone_sub $[_, b:block x:obj, u:neutral x ⊢ ..] rs) rx) in
+    let Halts/c [_, b:block x:obj, u:neutral x ⊢ V[..,b.1]]
+                [_, b:block x:obj, u:neutral x ⊢ MS1]
+                [_, b:block x:obj, u:neutral x ⊢ NV] =
+      reduce_halts [ ⊢ A2] rd in
+    let ms2 = m_lam [_,x:obj ⊢ M1[$σ[..], x]]
+      [_, b:block x:obj, u:neutral x ⊢ MS1] in
+    Red/-o [_ ⊢ lam \x.M1[$σ[..], x]]
+      (Halts/c [_ ⊢ _] ms2 [_ ⊢ n/lam \x.\u.NV[..,<x;u>]])
+      (mlam _, $σ', N ⇒ fn rn ⇒ bwd_closed [ ⊢ A2] [_ ⊢ s/red]
+        (eval [_,x:obj ⊢ D1] (Rsub/cons (monotone_sub $[_ ⊢ $σ'] rs) rn)))
+  | [_ ⊢ oft/app D1 D2 M1]:[_ ⊢ oft _ (app _ N) _] ⇒
+    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let Red/-o [_ ⊢ _] h f = eval [_ ⊢ D1] rs1 in
+    f [_] $[_ ⊢ ..] [_ ⊢ N[$σ]] (eval [_ ⊢ D2] rs2)
+  | [_ ⊢ oft/bang _ D1] ⇒ Red/! (Clos/! (eval [_ ⊢ D1] rs))
+  | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
+    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let Red/! c = eval [_ ⊢ D1] rs1 in
+    eval_letbang [_,x:obj ⊢ _] c
+      (mlam _, $σ', X ⇒ fn rx ⇒
+        eval [_,x:obj ⊢ D2] (Rsub/cons (monotone_sub $[_ ⊢ $σ'] rs2) rx))
+  ;
+
+%------------------------------------------------------%
+% Theorem: well-typed terms halt
+%------------------------------------------------------%
+
+% $Id moves from a term context to a neutral-term context
+
+inductive IdSub : (Ψ:ctx) (Φ:nctx) {Δ:[Ψ ⊢ lctx K[]]} {$Id:$[Φ ⊢ Ψ]} ctype =
+| Id/nil : IdSub [ ⊢ nil] $[ ⊢ ^]
+| Id/cons : IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id]
+  → IdSub [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]]
+          $[Φ, b:block x:obj, u:neutral x ⊢ $Id[..], b.1];
+
+rec id_rsub : IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id] → RedSub [Ψ ⊢ Δ] $[Φ ⊢ $Id] =
+  / total 1 /
+  fn is ⇒ case is of
+  | Id/nil ⇒ Rsub/nil
+  | Id/cons is' ⇒
+    Rsub/cons (monotone_sub $[_, b:block x:obj, u:neutral x ⊢ ..] (id_rsub is'))
+    (reflect [ ⊢ _] [_ ⊢ _] [_, b:block x:obj, u:neutral x ⊢ b.2])
+  ;
+
+rec weak_norm : [Ψ ⊢ oft Δ M A[]] → IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id]
+  → Halts [Φ ⊢ M[$Id]] =
+  / total 1 /
+  fn d, is ⇒ reduce_halts [ ⊢ _] (eval d (id_rsub is))
+  ;
+
+rec weak_norm_cor : [ ⊢ oft nil M A] → Halts [ ⊢ M] =
+  / total 1 /
+  fn d ⇒ weak_norm d Id/nil
+  ;

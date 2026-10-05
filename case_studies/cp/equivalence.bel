@@ -1,0 +1,199 @@
+%======================================================%
+% Equivalence of CP and SCP
+%======================================================%
+
+% (1) From CP to SCP
+
+rec cp2scp : Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ oft P Δ] → [Φ ⊢ wtp P[$σ]] =
+  / total 2 /
+  fn ec, d ⇒
+  let _ : Enc [_ ⊢ _] $[_ ⊢ $σ] = ec in
+  case d of
+  | [_ ⊢ oft/fwd DU[] U1 U2 E] ⇒
+    let [_ ⊢ lookintm U3] = lookup_upd (upd_symm [_ ⊢ U1]) [_ ⊢ U2]
+      (lookup_mult_neq_r (upd_symm [_ ⊢ U1]) [_ ⊢ U2]) in
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U3] in
+    let [_ ⊢ HY] = lookup_to_hyp ec [_ ⊢ U1] in
+    [_ ⊢ wtp_fwd DU[] _ HX _ HY]
+  | [_ ⊢ oft/close U1 _] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    [_ ⊢ wtp_close _ HX]
+  | [_ ⊢ oft/wait U1 O1] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    let [_ ⊢ W] = cp2scp (encctx_upd ec [_ ⊢ U1]) [_ ⊢ O1] in
+    [_ ⊢ wtp_wait _ HX W]
+  | [_ ⊢ oft/out U1 M (\x.O1) (\x.O2)] ⇒
+    let [_ ⊢ M_comm] = merge_comm [_ ⊢ M] in
+    let [_ ⊢ merge-lookup2 _ U2 •/10 _ _] =
+      merge_lookup2 [_ ⊢ U1] [_ ⊢ M_comm] in
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U2] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W2] =
+      cp2scp
+        (Enc/c (encctx_upd (encctx_merge ec (merge_comm [_ ⊢ M])) [_ ⊢ U1])
+        [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
+    let [_ ⊢ LN] = oft_linear [_,x:obj ⊢ O1] in
+    [_ ⊢ wtp_out LN[$σ] _ HX (\y.\hy.W1[..,<y;hy>]) (\y.\hy.W2[..,<y;hy>])]
+  | [_ ⊢ oft/inp U1 \x.\y.O1] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    let [_,b1:block (x:obj,hx:hyp _ _),b2:block (y:obj,hy:hyp _ _) ⊢ W] =
+      cp2scp
+        (Enc/c (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _] [ ⊢ _])
+        [_,x:obj,y:obj ⊢ O1] in
+    let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (A[] ⅋ _) _ _ _ _] = [_ ⊢ U1] in
+    let [_,x:obj ⊢ LN] = oft_linear [_,x:obj,y:obj ⊢ O1] in
+    [_ ⊢ wtp_inp (\x.LN[$σ[..],x]) _ HX (\y.\hy.\z.\hz.W[..,<y;hy>,<z;hz>])]
+  | [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] ⇒
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W2] = cp2scp
+      (Enc/c (encctx_merge ec (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _])
+      [_,x:obj ⊢ O2] in
+    let [_ ⊢ LN1] = oft_linear [_,x:obj ⊢ O1] in
+    let [_ ⊢ LN2] = oft_linear [_,x:obj ⊢ O2] in
+    [_ ⊢ wtp_pcomp DU[] (\x.\hx.W1[..,<x;hx>]) (\x.\hx.W2[..,<x;hx>])
+      LN1[$σ] LN2[$σ]]
+  | [_ ⊢ oft/inl U1 \x.O1] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    [_ ⊢ wtp_inl _ HX (\y.\hy.W[..,<y;hy>])]
+  | [_ ⊢ oft/inr U1 \x.O1] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    let [_,b:block x:obj,h:hyp _ _ ⊢ W] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    [_ ⊢ wtp_inr _ HX (\y.\hy.W[..,<y;hy>])]
+  | [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)] ⇒
+    let [_ ⊢ HX] = lookup_to_hyp ec [_ ⊢ U1] in
+    let [_,b:block x:obj,hx:hyp x _ ⊢ W1] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1] in
+    let [_,b:block x:obj,hx:hyp x _ ⊢ W2] =
+      cp2scp (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2] in
+    [_ ⊢ wtp_choice _ HX (\y.\hy.W1[..,<y;hy>]) (\y.\hy.W2[..,<y;hy>])]
+  ;
+
+% (2) From SCP to CP
+
+rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] → [Ψ ⊢ oft P Δ] =
+  / total 2 /
+  fn dc, w ⇒ case dc of
+  | Dec/fwd u1 rn ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_fwd DU[] _ HX _ HY] = w in
+    let [_ ⊢ unql U2 E] = relnm_unqlin rn [_ ⊢ HX] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HY] (dec_lookup_hyp dc u1) in
+    [_ ⊢ oft/fwd DU[] U1 U2 E]
+  | Dec/close rn ⇒
+    let [_ ⊢ wtp_close _ HX] = w in
+    let [_ ⊢ unql U1 E] = relnm_unqlin rn [_ ⊢ HX] in
+    [_ ⊢ oft/close U1 E]
+  | Dec/wait u1 dc1 ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_wait _ HX W1] = w in
+    let [_ ⊢ O] = scp2cp dc1 [_ ⊢ W1] in
+    [_ ⊢ oft/wait U1 O]
+  | Dec/out u1 m dc1 dc2 ⇒
+    let ([_ ⊢ U1],[_ ⊢ M],[_ ⊢ M_comm]) = (u1,m,merge_comm m) in
+    let [_ ⊢ wtp_out _ _ HX (\y.\hy.W1) (\y.\hy.W2)] = w in
+    let [_ ⊢ merge-lookup2 _ U2 •/10 _ _] =
+      merge_lookup2 [_ ⊢ U1] [_ ⊢ M_comm] in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HX] (dec_lookup_hyp dc [_ ⊢ U2]) in
+    let [_,x:obj ⊢ O1] =
+      scp2cp dc1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp dc2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    [_ ⊢ oft/out U1 M (\x.O1) (\x.O2)]
+  | Dec/inp u1 dc1 ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_inp (\y._) _ HX \y.\hy.\z.\hz.W1] = w in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HX] (dec_lookup_hyp dc u1) in
+    let [_,x:obj,y:obj ⊢ O1] = scp2cp dc1
+      [_,b1:block (y:obj,hy:hyp _ _),b2:block (z:obj,hz:hyp _ _) ⊢
+      W1[..,b1.1,b1.2,b2.1,b2.2]] in
+    [_ ⊢ oft/inp U1 \x.\y.O1]
+  | Dec/pcomp m du1 dc1 dc2 ⇒
+    let [_ ⊢ M] = m in
+    let [_ ⊢ wtp_pcomp DU2[] (\y.\hy.W1) (\y.\hy.W2) _ _] = w in
+    let [_,x:obj ⊢ O1] =
+      scp2cp dc1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [ ⊢ tp/refl] = dual_unique du1 [ ⊢ DU2] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp dc2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    [_ ⊢ oft/pcomp DU2[] M (\x.O1) (\x.O2)]
+  | Dec/inl u1 dc1 ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_inl _ HX \y.\hy.W1] = w in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HX] (dec_lookup_hyp dc u1) in
+    let [_,x:obj ⊢ O] =
+      scp2cp dc1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    [_ ⊢ oft/inl U1 \x.O]
+  | Dec/inr u1 dc1 ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_inr _ HX \y.\hy.W1] = w in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HX] (dec_lookup_hyp dc u1) in
+    let [_,x:obj ⊢ O] =
+      scp2cp dc1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    [_ ⊢ oft/inr U1 \x.O]
+  | Dec/choice u1 dc1 dc2 ⇒
+    let [_ ⊢ U1] = u1 in
+    let [_ ⊢ wtp_choice _ HX (\y.\hy.W1) (\y.\hy.W2)] = w in
+    let [ ⊢ tp/refl] = hyp_unq [_ ⊢ HX] (dec_lookup_hyp dc u1) in
+    let [_,x:obj ⊢ O1] =
+      scp2cp dc1 [_,b:block x:obj,h:hyp _ _ ⊢ W1[..,b.1,b.2]] in
+    let [_,x:obj ⊢ O2] =
+      scp2cp dc2 [_,b:block x:obj,h:hyp _ _ ⊢ W2[..,b.1,b.2]] in
+    [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)]
+  ;
+
+% The relations Enc and Dec used by the two translations are interderivable
+
+rec enc2dec :
+  Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
+  → [Ψ ⊢ oft P Δ]
+  → Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
+  / total 2 /
+  fn ec, d ⇒ case d of
+  | [_ ⊢ oft/fwd DU[] U1 U2 E] ⇒ Dec/fwd [_ ⊢ U1]
+    (unqlin_to_relnm (encctx_upd ec [_ ⊢ U1]) [_ ⊢ U2] [_ ⊢ E])
+  | [_ ⊢ oft/close U1 E] ⇒ Dec/close (unqlin_to_relnm ec [_ ⊢ U1] [_ ⊢ E])
+  | [_ ⊢ oft/wait U1 O1] ⇒ Dec/wait [_ ⊢ U1]
+    (enc2dec (encctx_upd ec [_ ⊢ U1]) [_ ⊢ O1])
+  | [_ ⊢ oft/out U1 M (\x.O1) (\x.O2)] ⇒
+    Dec/out [_ ⊢ U1] [_ ⊢ M]
+      (enc2dec (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+      (enc2dec (Enc/c (encctx_upd (encctx_merge ec (merge_comm [_ ⊢ M]))
+        [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
+  | [_ ⊢ oft/inp U1 (\x.\y.O1)] ⇒
+    Dec/inp [_ ⊢ U1]
+      (enc2dec (Enc/c (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [ ⊢ _]
+      [ ⊢ _]) [_,x:obj,y:obj ⊢ O1])
+  | [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] ⇒
+    Dec/pcomp [_ ⊢ M] [ ⊢ DU]
+      (enc2dec (Enc/c (encctx_merge ec [_ ⊢ M]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+      (enc2dec (Enc/c (encctx_merge ec (merge_comm [_ ⊢ M])) [ ⊢ _] [ ⊢ _])
+        [_,x:obj ⊢ O2])
+  | [_ ⊢ oft/inl U1 (\x.O1)] ⇒ Dec/inl [_ ⊢ U1]
+    (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+  | [_ ⊢ oft/inr U1 (\x.O1)] ⇒ Dec/inr [_ ⊢ U1]
+    (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+  | [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)] ⇒
+    Dec/choice [_ ⊢ U1]
+      (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
+      (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
+  ;
+
+rec dec2enc : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
+  / total 1 /
+  fn dc ⇒ case dc of
+  | Dec/fwd u1 rn ⇒ encctx_upd (relnm_to_encctx rn) (upd_symm u1)
+  | Dec/close rn ⇒ relnm_to_encctx rn
+  | Dec/wait u1 dc1 ⇒ encctx_upd (dec2enc dc1) (upd_symm u1)
+  | Dec/out _ m dc1 _ ⇒ encctx_merge_l (enc_tail (dec2enc dc1)) m
+  | Dec/inp u1 dc1 ⇒
+    encctx_upd (enc_tail (enc_tail (dec2enc dc1))) (upd_symm u1)
+  | Dec/pcomp m _ dc1 _ ⇒ encctx_merge_l (enc_tail (dec2enc dc1)) m
+  | Dec/inl u1 dc1 ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
+  | Dec/inr u1 dc1 ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
+  | Dec/choice u1 dc1 _ ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
+  ;

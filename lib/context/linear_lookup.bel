@@ -12,10 +12,10 @@ rec lookup_mult_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A A' 𝟙 α' Δ']
   → [Ψ ⊢ upd Δ m[] Y Y' B B' 𝟘 β' Δ'']
   → [ ⊢ neq n m] =
-  / total /
+  / total 1 /
   fn u1, u2 ⇒
-  let [_ ⊢ _]:[_ ⊢ upd _ n[] _ _ _ _ _ _ _] = u1 in
-  let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = u2 in
+  let [_ ⊢ _]:[_ ⊢ upd _ n[] _ _ A A' α α' _] = u1 in
+  let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ B B' β β' _] = u2 in
   case comp_nats [ ⊢ n] [ ⊢ m] of
   | [ ⊢ comp_nats/eq] ⇒ impossible lookup_unique u1 u2
   | [ ⊢ comp_nats/neq NEQ] ⇒ [ ⊢ NEQ]
@@ -25,6 +25,6 @@ rec lookup_mult_neq_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A A' 𝟘 α' Δ']
   → [Ψ ⊢ upd Δ m[] Y Y' B B' 𝟙 β' Δ'']
   → [ ⊢ neq n m] =
-  / total /
+  / total 1 /
   fn u1, u2 ⇒ neq_comm (lookup_mult_neq u2 u1)
   ;

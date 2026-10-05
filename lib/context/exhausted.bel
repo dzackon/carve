@@ -56,6 +56,6 @@ rec exh_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exh Δ]
   → [Ψ ⊢ upd Δ n X Y A B α[] α[] Δ']
   → [Ψ ⊢ exh Δ'] =
-  / total /
+  / total 1 /
   fn e, u ⇒ exh_upd_hal e (exh_lookup e u) u
   ;

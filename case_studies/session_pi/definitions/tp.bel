@@ -1,0 +1,24 @@
+%======================================================%
+% Types for the session-typed calculus
+%======================================================%
+
+%------------------------------------------------------%
+% Session types
+%------------------------------------------------------%
+
+% Session types
+LF tp : type =
+| end? : tp            % end?
+| end! : tp            % end!
+| recv : tp → tp → tp  % ?T.S
+| send : tp → tp → tp; % !T.S
+
+% Type equality
+LF tp_eq : tp → tp → type = tp/refl : tp_eq T T;
+
+% Duality conditions
+LF dual : tp → tp → type =
+| du/e1 : dual end? end!
+| du/e2 : dual end! end?
+| du/r : dual U U' → dual (recv T U) (send T U')
+| du/s : dual U U' → dual (send T U) (recv T U');

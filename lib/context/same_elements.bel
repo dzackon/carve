@@ -55,7 +55,7 @@ rec merge_same_elts : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 rec merge_same_elts_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ same_elts Δ₁ Δ₂] =
-  / total /
+  / total 1 /
   fn m ⇒ same_elts_trans (merge_same_elts m)
     (same_elts_symm (merge_same_elts (merge_comm m)))
   ;
@@ -86,7 +86,7 @@ rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_n X Δ]
   → [Ψ ⊢ lookup_n X Δ'] =
-  / total /
+  / total 1 /
   fn se, l ⇒
   let [_ ⊢ lookn U] = l in
   let [_ ⊢ U1] = upd_refl [_ ⊢ U] in

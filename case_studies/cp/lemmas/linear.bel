@@ -1,0 +1,58 @@
+%======================================================%
+% Properties of PCP linearity predicate
+%======================================================%
+
+% Strengthening for linearity predicate
+
+rec linear_str : (Ψ:ctx) [Ψ,x:obj ⊢ linear \y.P[..,y]] → [Ψ ⊢ linear \y.P] =
+  / total 1 /
+  fn l ⇒ case l of
+  | [_,x:obj ⊢ l_fwd1] ⇒ [_ ⊢ l_fwd1]
+  | [_,x:obj ⊢ l_fwd2] ⇒ [_ ⊢ l_fwd2]
+  | [_,x:obj ⊢ l_close] ⇒ [_ ⊢ l_close]
+  | [_,x:obj ⊢ l_wait] ⇒ [_ ⊢ l_wait]
+  | [_,x:obj ⊢ l_out L1] ⇒
+    let [_ ⊢ L1'] = linear_str [_,x:obj ⊢ L1] in
+    [_ ⊢ l_out L1']
+  | [_,x:obj ⊢ l_inp (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_inp (\w.L1')]
+  | [_,x:obj ⊢ l_inl L1] ⇒
+    let [_ ⊢ L1'] = linear_str [_,x:obj ⊢ L1] in
+    [_ ⊢ l_inl L1']
+  | [_,x:obj ⊢ l_inr L1] ⇒
+    let [_ ⊢ L1'] = linear_str [_,x:obj ⊢ L1] in
+    [_ ⊢ l_inr L1']
+  | [_,x:obj ⊢ l_choice L1 L2] ⇒
+    let [_ ⊢ L1'] = linear_str [_,x:obj ⊢ L1] in
+    let [_ ⊢ L2'] = linear_str [_,x:obj ⊢ L2] in
+    [_ ⊢ l_choice L1' L2']
+  | [_,x:obj ⊢ l_wait2 L1] ⇒
+    let [_ ⊢ L1'] = linear_str [_,x:obj ⊢ L1] in
+    [_ ⊢ l_wait2 L1']
+  | [_,x:obj ⊢ l_out2 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_out2 (\w.L1')]
+  | [_,x:obj ⊢ l_out3 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_out3 (\w.L1')]
+  | [_,x:obj ⊢ l_inp2 (\w.\v.L1[..,w,v,x])] ⇒
+    let [_,w:obj,v:obj ⊢ L1'] = linear_str [_,w:obj,v:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_inp2 (\w.\v.L1')]
+  | [_,x:obj ⊢ l_pcomp1 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_pcomp1 (\w.L1')]
+  | [_,x:obj ⊢ l_pcomp2 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_pcomp2 (\w.L1')]
+  | [_,x:obj ⊢ l_inl2 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_inl2 (\w.L1')]
+  | [_,x:obj ⊢ l_inr2 (\w.L1[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    [_ ⊢ l_inr2 (\w.L1')]
+  | [_,x:obj ⊢ l_choice2 (\w.L1[..,w,x]) (\w.L2[..,w,x])] ⇒
+    let [_,w:obj ⊢ L1'] = linear_str [_,w:obj,x:obj ⊢ L1] in
+    let [_,w:obj ⊢ L2'] = linear_str [_,w:obj,x:obj ⊢ L2] in
+    [_ ⊢ l_choice2 (\w.L1') (\w.L2')]
+  ;

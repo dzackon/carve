@@ -8,7 +8,7 @@
 % Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
-  / total /
+  / total 1 /
   fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
@@ -21,7 +21,7 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
 
 rec ident_w_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • ω m m2]
                 → [ ⊢ mult_eq m m2] =
-  / total /
+  / total 1 /
   mlam m, m2 ⇒ fn d ⇒ case d of
   | [ ⊢ •/ω1] ⇒ [ ⊢ mult/refl]
   | [ ⊢ •/ωω] ⇒ [ ⊢ mult/refl]
@@ -33,7 +33,7 @@ rec mult_ident_w : Ident [ ⊢ ω] =
   ;
 
 rec halident_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → Ident [ ⊢ α] =
-  / total /
+  / total 1 /
   mlam α ⇒ fn h ⇒ let [ ⊢ hal/ω] = h in mult_ident_w
   ;
 
@@ -45,7 +45,7 @@ rec mult_halident : HalIdent =
 % Every unit element is harmless
 
 rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
-  / total /
+  / total 1 /
   mlam _, _ ⇒ fn d ⇒ case d of
   | [ ⊢ •/ω1] ⇒ [ ⊢ hal/ω]
   | [ ⊢ •/ωω] ⇒ [ ⊢ hal/ω]
@@ -59,7 +59,7 @@ rec mult_unithal : UnitHal =
 % For any α, obtain a harmless identity element β such that β • α = α
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
-  / total /
+  / total 1 /
   mlam α ⇒ case [ ⊢ α] of
   | [ ⊢ 𝟙] ⇒ [ ⊢ get-unit hal/ω •/ω1]
   | [ ⊢ ω] ⇒ [ ⊢ get-unit hal/ω •/ωω]
@@ -67,21 +67,16 @@ rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
 
 % Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
 
-rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
-  / total /
-  fn m, u ⇒
+rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total 1 /
+  mlam _, _, _ ⇒ fn m, u ⇒
   let [ ⊢ hal/ω] = u in
   let [ ⊢ •/ωω] = m in
   [ ⊢ mult/refl]
   ;
 
-rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
-                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
-  / total /
-  mlam _, _, _ ⇒ fn m, u ⇒ mult_zsfree m u
-  ;
-
-rec mult_zsfree_rec : ZsFree =
+rec mult_zsfree : ZsFree =
   / total /
   Is-ZsFree zsfree_prf
   ;
@@ -89,7 +84,7 @@ rec mult_zsfree_rec : ZsFree =
 % Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
-  / total /
+  / total 1 /
   fn m ⇒ case m of
   | [ ⊢ •/1ω] ⇒ [ ⊢ •/ω1]
   | [ ⊢ •/ω1] ⇒ [ ⊢ •/1ω]
@@ -100,7 +95,7 @@ rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
 
 rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
                  [ ⊢ mult_assoc_res M1 M2] =
-  / total /
+  / total 1 /
   mlam M1, M2 ⇒
   case [ ⊢ M1] of
   | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = [ ⊢ M2] in [ ⊢ mult-assoc •/ωω •/1ω _ _]
@@ -113,23 +108,18 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
 
 % Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
 
-rec mult_cancel : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
-  / total /
-  fn m1, m2 ⇒ case m1 of
+rec cancel_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total 1 /
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/1ω] ⇒ let [ ⊢ •/1ω] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/ω1] ⇒ let [ ⊢ •/ω1] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
-rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
-               [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
-  / total /
-  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_cancel m1 m2
-  ;
-
 rec mult_cancel : Cancl =
   / total /
-  Is-Cancl canc_prf
+  Is-Cancl cancel_prf
   ;
 
 %------------------------------------------------------%
@@ -139,11 +129,11 @@ rec mult_cancel : Cancl =
 % Harmless elements are idempotent
 
 rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
-  / total /
+  / total 1 /
   mlam _ ⇒ fn h ⇒ let [ ⊢ hal/ω] = h in [ ⊢ •/ωω]
   ;
 
-rec mult_halidem_rec : HalIdem =
+rec mult_halidem : HalIdem =
   / total /
   Is-HalIdem halidem_prf
   ;

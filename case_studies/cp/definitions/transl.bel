@@ -30,7 +30,7 @@ inductive RelUsed : (Φ:hctx) (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {$σ:$[Φ ⊢ Ψ]}
     $[Φ,b:block x:obj,h:hyp x A[] ⊢ $σ[..],b.1];
 
 % Relate Φ with a typing context Δ containing the same typing information, but
-% will all names except X set as `used`
+% with all names except X set as `used`
 
 inductive RelName : (Ψ:ctx) (Φ:hctx) {X:[Ψ ⊢ obj]} {Δ:[Ψ ⊢ lctx N[]]}
   {$σ:$[Φ ⊢ Ψ]} ctype =

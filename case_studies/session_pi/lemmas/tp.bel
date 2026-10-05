@@ -1,0 +1,14 @@
+%======================================================%
+% Properties of session types
+%======================================================%
+
+% Duality is symmetric
+
+rec dual_symm : [ ⊢ dual T T'] → [ ⊢ dual T' T] =
+  / total 1 /
+  fn du ⇒ case du of
+  | [ ⊢ du/e1] ⇒ [ ⊢ du/e2]
+  | [ ⊢ du/e2] ⇒ [ ⊢ du/e1]
+  | [ ⊢ du/r DU1] ⇒ let [ ⊢ DU2] = dual_symm [ ⊢ DU1] in [ ⊢ du/s DU2]
+  | [ ⊢ du/s DU1] ⇒ let [ ⊢ DU2] = dual_symm [ ⊢ DU1] in [ ⊢ du/r DU2]
+  ;

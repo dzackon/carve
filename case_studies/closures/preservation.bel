@@ -1,0 +1,27 @@
+%======================================================%
+% Type preservation
+%======================================================%
+
+% Type preservation: if η ⊢ M ⇓ W, η : Δ, and Δ ⊢ M : T, then W : T
+
+rec preservation :
+  [ ⊢ eval η M W]
+  → [ ⊢ hasty_env η Δ]
+  → [ ⊢ oft Δ M T]
+  → [ ⊢ hasty W T] =
+  / total 1 /
+  fn ev, e, d ⇒ case ev of
+  | [ ⊢ eval/var L] ⇒
+    let [ ⊢ oft/var U _] = d in
+    lookup_hasty e [ ⊢ U] [ ⊢ L]
+  | [ ⊢ eval/abs] ⇒
+    let [ ⊢ E] = e in
+    let [ ⊢ D] = d in
+    [ ⊢ hasty_closure D E]
+  | [ ⊢ eval/app EV1 EV2 EV3] ⇒
+    let [ ⊢ oft/app D1 D2 M] = d in
+    let [ ⊢ H2] = preservation [ ⊢ EV2] (pres_hasty_env_r e [ ⊢ M]) [ ⊢ D2] in
+    let [ ⊢ hasty_closure (oft/abs D1') E1'] =
+      preservation [ ⊢ EV1] (pres_hasty_env e [ ⊢ M]) [ ⊢ D1] in
+    preservation [ ⊢ EV3] [ ⊢ hasty_env/c E1' H2] [ ⊢ D1']
+  ;

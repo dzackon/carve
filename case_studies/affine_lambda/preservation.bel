@@ -20,10 +20,12 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ oft/app O1 O2 M1] ⇒
     case st of
     | [_ ⊢ s/app1 ST1] ⇒
-      let [_ ⊢ O1'] = preservation [_ ⊢ O1] [_ ⊢ ST1] (varctx_split vc [_ ⊢ M1]) in
+      let [_ ⊢ O1'] =
+        preservation [_ ⊢ O1] [_ ⊢ ST1] (varctx_split vc [_ ⊢ M1]) in
       [_ ⊢ oft/app O1' O2 M1]
     | [_ ⊢ s/app2 ST2] ⇒
-      let [_ ⊢ O2'] = preservation [_ ⊢ O2] [_ ⊢ ST2] (varctx_split_r vc [_ ⊢ M1]) in
+      let [_ ⊢ O2'] =
+        preservation [_ ⊢ O2] [_ ⊢ ST2] (varctx_split_r vc [_ ⊢ M1]) in
       [_ ⊢ oft/app O1 O2' M1]
     | [_ ⊢ s/red] ⇒
       case [_ ⊢ O1] of

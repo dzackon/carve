@@ -5,7 +5,7 @@
 % Identity: If α₁ • α₂ = α and α₁ is an identity element, then α₂ = α
 
 rec mult_id_gen : Ident [ ⊢ α₁] → [ ⊢ • α₁ α₂ α] → [ ⊢ mult_eq α₂ α] =
-  / total /
+  / total 1 /
   fn i, m ⇒ let Is-Id f = i in f [ ⊢ _] [ ⊢ _] m
   ;
 
@@ -14,7 +14,7 @@ rec mult_id_gen : Ident [ ⊢ α₁] → [ ⊢ • α₁ α₂ α] → [ ⊢ mul
 
 rec mult_id_hal : HalIdent → [ ⊢ hal α₁] → [ ⊢ • α₁ α₂ α]
                 → [ ⊢ mult_eq α₂ α] =
-  / total /
+  / total 1 /
   fn hi, h, m ⇒ let Hal-Ident f = hi in mult_id_gen (f [ ⊢ _] h) m
   ;
 
@@ -22,7 +22,7 @@ rec mult_id_hal : HalIdent → [ ⊢ hal α₁] → [ ⊢ • α₁ α₂ α]
 
 rec mult_total_gen : Total → {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]}
                      [ ⊢ get_mult α₁ α₂] =
-  / total /
+  / total 1 /
   fn t ⇒ mlam α₁, α₂ ⇒ let Is-Total f = t in f [ ⊢ α₁] [ ⊢ α₂]
   ;
 
@@ -30,7 +30,7 @@ rec mult_total_gen : Total → {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]}
 
 rec mult_canc_gen : Cancl → [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α]
                   → [ ⊢ mult_eq α₂ α₂'] =
-  / total /
+  / total 1 /
   fn c, m1, m2 ⇒
   let Is-Cancl f = c in f [ ⊢ _] [ ⊢ _] [ ⊢ _] [ ⊢ _] m1 m2
   ;
@@ -39,13 +39,13 @@ rec mult_canc_gen : Cancl → [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α�
 
 rec mult_zsfree_gen : ZsFree → [ ⊢ • α₁ α₂ α] → [ ⊢ hal α]
                     → [ ⊢ mult_eq α₁ α] =
-  / total /
+  / total 1 /
   fn z, m, h ⇒ let Is-ZsFree f = z in f [ ⊢ _] [ ⊢ _] [ ⊢ _] m h
   ;
 
 % Idempotence of harmless elements: If α is harmless, then α • α = α
 
 rec mult_halidem_gen : HalIdem → [ ⊢ hal α] → [ ⊢ • α α α] =
-  / total /
+  / total 1 /
   fn hi, h ⇒ let Is-HalIdem f = hi in f [ ⊢ _] h
   ;

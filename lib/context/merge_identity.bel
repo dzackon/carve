@@ -40,14 +40,14 @@ rec merge_id_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdent
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ exh Δ₂]
   → [Ψ ⊢ ctx_eq Δ₁ Δ] =
-  / total /
+  / total 1 /
   fn hi, m, e ⇒ merge_id hi (merge_comm m) e
   ;
 
 rec merge_isid_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) UnitHal
   → [Ψ ⊢ merge Δ Δ' Δ]
   → [Ψ ⊢ exh Δ'] =
-  / total /
+  / total 1 /
   fn uh, m ⇒ merge_isid uh (merge_comm m)
   ;
 

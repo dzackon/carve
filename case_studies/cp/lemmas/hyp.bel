@@ -7,13 +7,13 @@
 rec prune_hyp : (Φ:hctx)
   [Φ,b:block y:obj,h:hyp y B[] ⊢ hyp X[..] A[]]
   → [Φ ⊢ hyp X A[]] =
-  / total /
-  fn hp ⇒ let [_,b:block x:obj,h:hyp _ _ ⊢ hy[..]] = hp in [_ ⊢ hy]
+  / total 1 /
+  fn hp ⇒ let [_,b:block x:obj,h:hyp _ _ ⊢ #p.2[..]] = hp in [_ ⊢ #p.2]
   ;
 
 % Names are assigned unique types
 
 rec hyp_unq : (Φ:hctx) [Φ ⊢ hyp x A[]] → [Φ ⊢ hyp x B[]] → [ ⊢ tp_eq A B] =
-  / total /
+  / total 1 /
   fn hp1, hp2 ⇒ let ([_ ⊢ #p.2],[_ ⊢ #p.2]) = (hp1,hp2) in [ ⊢ tp/refl]
   ;

@@ -6,18 +6,71 @@
 % Structural properties of typing judgment
 %------------------------------------------------------%
 
-% 'Prune' LF context to remove dependencies
+% 'Prune' LF context to remove dependencies: if the context does not mention
+% x, the derivation does not either
 
 rec prune_seq_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ seq_cf Δ[..] C[]]
   → [Ψ ⊢ seq_cf Δ C[]] =
-  / total /
-  fn sq ⇒ let [_,x:obj ⊢ SEQ[..]] = sq in [_ ⊢ SEQ]
+  / total 1 /
+  fn sq ⇒ case sq of
+  | [_,x:obj ⊢ hyp_cf U E] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_ ⊢ E'] = prune_exh [_,x:obj ⊢ E] in
+    [_ ⊢ hyp_cf U' E']
+  | [_,x:obj ⊢ R①_cf E] ⇒
+    let [_ ⊢ E'] = prune_exh [_,x:obj ⊢ E] in
+    [_ ⊢ R①_cf E']
+  | [_,x:obj ⊢ L①_cf U SQ1] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    [_ ⊢ L①_cf U' SQ1']
+  | [_,x:obj ⊢ R⊗_cf SQ1 SQ2 M] ⇒
+    let Prune-Merge [_ ⊢ M'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M] in
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    let [_ ⊢ SQ2'] = prune_seq_cf [_,x:obj ⊢ SQ2] in
+    [_ ⊢ R⊗_cf SQ1' SQ2' M']
+  | [_,x:obj ⊢ L⊗_cf U (\y.\z.SQ1[..,y,z,x])] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_,y:obj,z:obj ⊢ SQ1'] = prune_seq_cf [_,y:obj,z:obj,x:obj ⊢ SQ1] in
+    [_ ⊢ L⊗_cf U' (\y.\z.SQ1')]
+  | [_,x:obj ⊢ R-o_cf (\y.SQ1[..,y,x])] ⇒
+    let [_,y:obj ⊢ SQ1'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ1] in
+    [_ ⊢ R-o_cf (\y.SQ1')]
+  | [_,x:obj ⊢ L-o_cf U M SQ1 (\y.SQ2[..,y,x])] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let Prune-Merge [_ ⊢ M'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M] in
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    let [_,y:obj ⊢ SQ2'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ2] in
+    [_ ⊢ L-o_cf U' M' SQ1' (\y.SQ2')]
+  | [_,x:obj ⊢ R&_cf SQ1 SQ2] ⇒
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    let [_ ⊢ SQ2'] = prune_seq_cf [_,x:obj ⊢ SQ2] in
+    [_ ⊢ R&_cf SQ1' SQ2']
+  | [_,x:obj ⊢ L&1_cf U (\y.SQ1[..,y,x])] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_,y:obj ⊢ SQ1'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ1] in
+    [_ ⊢ L&1_cf U' (\y.SQ1')]
+  | [_,x:obj ⊢ L&2_cf U (\y.SQ1[..,y,x])] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_,y:obj ⊢ SQ1'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ1] in
+    [_ ⊢ L&2_cf U' (\y.SQ1')]
+  | [_,x:obj ⊢ R⊕1_cf SQ1] ⇒
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    [_ ⊢ R⊕1_cf SQ1']
+  | [_,x:obj ⊢ R⊕2_cf SQ1] ⇒
+    let [_ ⊢ SQ1'] = prune_seq_cf [_,x:obj ⊢ SQ1] in
+    [_ ⊢ R⊕2_cf SQ1']
+  | [_,x:obj ⊢ L⊕_cf U (\y.SQ1[..,y,x]) (\y.SQ2[..,y,x])] ⇒
+    let Prune-Upd [_ ⊢ U'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U] in
+    let [_,y:obj ⊢ SQ1'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ1] in
+    let [_,y:obj ⊢ SQ2'] = prune_seq_cf [_,y:obj,x:obj ⊢ SQ2] in
+    [_ ⊢ L⊕_cf U' (\y.SQ1') (\y.SQ2')]
   ;
 
-% Exchange lemma for cut-free and non-cut-free sequent calculi: Δ ⊢ C and
-% Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ C. (Plus a series corollaries as helper
-% lemmas for permuting the topmost elements of a context.)
+% Exchange lemma for cut-free and non-cut-free sequent calculi: if Δ ⊢ C and
+% Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ C. (Plus a series of corollaries as
+% helper lemmas for permuting the topmost elements of a context.)
 
 rec seq_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ seq Δ C]
@@ -182,7 +235,7 @@ rec seqcf_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 rec seq_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ seq (cons (cons Δ X A[] α[]) Y B[] β[]) C]
   → [Ψ ⊢ seq (cons (cons Δ Y B[] β[]) X A[] α[]) C] =
-  / total /
+  / total 1 /
   fn sq ⇒ seq_exch sq
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
@@ -190,17 +243,17 @@ rec seq_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 rec seqcf_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ seq_cf (cons (cons Δ X A[] α[]) Y B[] β[]) C]
   → [Ψ ⊢ seq_cf (cons (cons Δ Y B[] β[]) X A[] α[]) C] =
-  / total /
+  / total 1 /
   fn sq ⇒ seqcf_exch sq
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
 
 rec seq_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ seq (cons (cons (cons Δ X A α) Y B β) Z C γ) D]
-  → [Ψ ⊢ seq (cons (cons (cons Δ Y B β) Z C γ) X A α) D] =
-  / total /
+  [Ψ ⊢ seq (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) D]
+  → [Ψ ⊢ seq (cons (cons (cons Δ Y B[] β[]) Z C[] γ[]) X A[] α[]) D] =
+  / total 1 /
   fn sq ⇒
-  let [_ ⊢ _]:[_ ⊢ seq (cons (cons (cons Δ X A[] α[]) Y B[] β[]) _ _ _) _] =
+  let [_ ⊢ _]:[_ ⊢ seq (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C γ) D] =
     sq in
   let [_ ⊢ exch/u NEQ[] EX1 EX2] =
     exch_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
@@ -208,11 +261,11 @@ rec seq_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 rec seqcf_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ seq_cf (cons (cons (cons Δ X A α) Y B β) Z C γ) D]
-  → [Ψ ⊢ seq_cf (cons (cons (cons Δ Y B β) Z C γ) X A α) D] =
-  / total /
+  [Ψ ⊢ seq_cf (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) D]
+  → [Ψ ⊢ seq_cf (cons (cons (cons Δ Y B[] β[]) Z C[] γ[]) X A[] α[]) D] =
+  / total 1 /
   fn sq ⇒
-  let [_ ⊢ _]:[_ ⊢ seq_cf (cons (cons (cons Δ X A[] α[]) Y B[] β[]) _ _ _) _] =
+  let [_ ⊢ _]:[_ ⊢ seq_cf (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C γ) D] =
     sq in
   let [_ ⊢ exch/u NEQ[] EX1 EX2] =
     exch_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] in
@@ -220,11 +273,11 @@ rec seqcf_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 rec seq_exch_top3 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ seq (cons (cons (cons Δ Y B β) Z C γ) X A α) D]
-  → [Ψ ⊢ seq (cons (cons (cons Δ X A α) Y B β) Z C γ) D] =
-  / total /
+  [Ψ ⊢ seq (cons (cons (cons Δ Y B[] β[]) Z C[] γ[]) X A[] α[]) D]
+  → [Ψ ⊢ seq (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) D] =
+  / total 1 /
   fn sq ⇒
-  let [_ ⊢ _]:[_ ⊢ seq (cons (cons (cons Δ Y B[] β[]) _ _ _) X A[] α[]) _] =
+  let [_ ⊢ _]:[_ ⊢ seq (cons (cons (cons Δ Y B[] β[]) Z C γ) X A[] α[]) D] =
     sq in
   let [_ ⊢ exch/u NEQ[] EX1 EX2] =
     exch_top [_ ⊢ Δ] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] [_ ⊢ X] [ ⊢ A] [ ⊢ α] in
@@ -232,15 +285,83 @@ rec seq_exch_top3 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 rec seqcf_exch_top3 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ seq_cf (cons (cons (cons Δ Y B β) Z C γ) X A α) D]
-  → [Ψ ⊢ seq_cf (cons (cons (cons Δ X A α) Y B β) Z C γ) D] =
-  / total /
+  [Ψ ⊢ seq_cf (cons (cons (cons Δ Y B[] β[]) Z C[] γ[]) X A[] α[]) D]
+  → [Ψ ⊢ seq_cf (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) D] =
+  / total 1 /
   fn sq ⇒
-  let [_ ⊢ _]:[_ ⊢ seq_cf (cons (cons (cons Δ Y B[] β[]) _ _ _) X A[] α[]) _] =
+  let [_ ⊢ _]:[_ ⊢ seq_cf (cons (cons (cons Δ Y B[] β[]) Z C γ) X A[] α[]) D] =
     sq in
   let [_ ⊢ exch/u NEQ[] EX1 EX2] =
     exch_top [_ ⊢ Δ] [_ ⊢ Y] [ ⊢ B] [ ⊢ β] [_ ⊢ X] [ ⊢ A] [ ⊢ α] in
   seqcf_exch (seqcf_exch_top sq) [_ ⊢ exch/u NEQ[] (upd/n EX1) (upd/n EX2)]
+  ;
+
+% Deletion lemma for cut-free sequent calculus: an entry with multiplicity 𝟘
+% can be removed from the context
+
+rec seqcf_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
+  [Ψ ⊢ seq_cf Δ C[]] → [Ψ ⊢ del Δ n[] Δ'] → [Ψ ⊢ seq_cf Δ' C[]] =
+  / total 1 /
+  fn sq, dl ⇒
+  let [_ ⊢ DL] = dl in
+  case sq of
+  | [_ ⊢ hyp_cf U1 E1] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_ ⊢ E2] = del_exh [_ ⊢ DL1] [_ ⊢ E1] in
+    [_ ⊢ hyp_cf U2 E2]
+  | [_ ⊢ R①_cf E1] ⇒
+    let [_ ⊢ E2] = del_exh [_ ⊢ DL] [_ ⊢ E1] in [_ ⊢ R①_cf E2]
+  | [_ ⊢ L①_cf U1 SQ1] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_ ⊢ SQ2] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL1] in
+    [_ ⊢ L①_cf U2 SQ2]
+  | [_ ⊢ R⊗_cf SQ1 SQ2 M1] ⇒
+    let [_ ⊢ del-merge M2 DL1 DL2 _ _] = del_merge [_ ⊢ DL] [_ ⊢ M1] in
+    let [_ ⊢ SQ3] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL1] in
+    let [_ ⊢ SQ4] = seqcf_del [_ ⊢ SQ2] [_ ⊢ DL2] in
+    [_ ⊢ R⊗_cf SQ3 SQ4 M2]
+  | [_ ⊢ L⊗_cf U1 \x.\y.SQ1] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_,x:obj,y:obj ⊢ SQ2] =
+      seqcf_del [_,x:obj,y:obj ⊢ SQ1] [_,x:obj,y:obj ⊢ del/n (del/n DL1[..])] in
+    [_ ⊢ L⊗_cf U2 \x.\y.SQ2]
+  | [_ ⊢ R-o_cf \x.SQ1] ⇒
+    let [_,x:obj ⊢ SQ2] = seqcf_del [_,x:obj ⊢ SQ1] [_,x:obj ⊢ del/n DL[..]] in
+    [_ ⊢ R-o_cf \x.SQ2]
+  | [_ ⊢ L-o_cf U1 M1 SQ1 \x.SQ2] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_ ⊢ del-merge M2 DL2 DL3 _ _] = del_merge [_ ⊢ DL1] [_ ⊢ M1] in
+    let [_ ⊢ SQ3] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL2] in
+    let [_,x:obj ⊢ SQ4] = seqcf_del [_,x:obj ⊢ SQ2] [_,x:obj ⊢ del/n DL3[..]] in
+    [_ ⊢ L-o_cf U2 M2 SQ3 \x.SQ4]
+  | [_ ⊢ R&_cf SQ1 SQ2] ⇒
+    let [_ ⊢ SQ3] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL] in
+    let [_ ⊢ SQ4] = seqcf_del [_ ⊢ SQ2] [_ ⊢ DL] in
+    [_ ⊢ R&_cf SQ3 SQ4]
+  | [_ ⊢ L&1_cf U1 \x.SQ1] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_,x:obj ⊢ SQ2] = seqcf_del [_,x:obj ⊢ SQ1] [_,x:obj ⊢ del/n DL1[..]] in
+    [_ ⊢ L&1_cf U2 \x.SQ2]
+  | [_ ⊢ L&2_cf U1 \x.SQ1] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_,x:obj ⊢ SQ2] = seqcf_del [_,x:obj ⊢ SQ1] [_,x:obj ⊢ del/n DL1[..]] in
+    [_ ⊢ L&2_cf U2 \x.SQ2]
+  | [_ ⊢ R⊕1_cf SQ1] ⇒
+    let [_ ⊢ SQ2] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL] in [_ ⊢ R⊕1_cf SQ2]
+  | [_ ⊢ R⊕2_cf SQ1] ⇒
+    let [_ ⊢ SQ2] = seqcf_del [_ ⊢ SQ1] [_ ⊢ DL] in [_ ⊢ R⊕2_cf SQ2]
+  | [_ ⊢ L⊕_cf U1 (\x.SQ1) (\x.SQ2)] ⇒
+    let [_ ⊢ del-upd U2 DL1 _ _ _] =
+      del_upd [_ ⊢ DL] [_ ⊢ U1] (fn e ⇒ impossible e) in
+    let [_,x:obj ⊢ SQ3] = seqcf_del [_,x:obj ⊢ SQ1] [_,x:obj ⊢ del/n DL1[..]] in
+    let [_,x:obj ⊢ SQ4] = seqcf_del [_,x:obj ⊢ SQ2] [_,x:obj ⊢ del/n DL1[..]] in
+    [_ ⊢ L⊕_cf U2 (\x.SQ3) (\x.SQ4)]
   ;
 
 % Strengthening lemma for cut-free sequent calculus:
@@ -249,43 +370,20 @@ rec seqcf_exch_top3 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 rec seqcf_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ seq_cf (cons Δ X A[] 𝟘) C[]]
   → [Ψ ⊢ seq_cf Δ C[]] =
-  / total d (seqcf_str d) /
-  fn sq ⇒ case sq of
-  | [_ ⊢ hyp_cf (upd/n U1) (exh/c E1 _)] ⇒ [_ ⊢ hyp_cf U1 E1]
-  | [_ ⊢ R①_cf (exh/c E1 _)] ⇒ [_ ⊢ R①_cf E1]
-  | [_ ⊢ L①_cf (upd/n U1) SQ1] ⇒ let [_ ⊢ SQ2] = seqcf_str [_ ⊢ SQ1] in
-    [_ ⊢ L①_cf U1 SQ2]
-  | [_ ⊢ R⊗_cf SQ1 SQ2 (mg/c M1 •/00)] ⇒
-    let [_ ⊢ SQ3] = seqcf_str [_ ⊢ SQ1] in
-    let [_ ⊢ SQ4] = seqcf_str [_ ⊢ SQ2] in
-    [_ ⊢ R⊗_cf SQ3 SQ4 M1]
-  | [_ ⊢ L⊗_cf (upd/n U1) \x.\y.SQ1] ⇒
-    let [_,x:obj,y:obj ⊢ SQ2] =
-      seqcf_str (seqcf_exch_top2 [_,x:obj,y:obj ⊢ SQ1]) in
-    [_ ⊢ L⊗_cf U1 \x.\y.SQ2]
-  | [_ ⊢ R-o_cf \x.SQ1] ⇒
-    let [_,x:obj ⊢ SQ2] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ1]) in
-    [_ ⊢ R-o_cf \x.SQ2]
-  | [_ ⊢ L-o_cf (upd/n U1) (mg/c M1 •/00) SQ1 \x.SQ2] ⇒
-    let [_ ⊢ SQ3] = seqcf_str [_ ⊢ SQ1] in
-    let [_,x:obj ⊢ SQ4] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ2]) in
-    [_ ⊢ L-o_cf U1 M1 SQ3 \x.SQ4]
-  | [_ ⊢ R&_cf SQ1 SQ2] ⇒
-    let [_ ⊢ SQ3] = seqcf_str [_ ⊢ SQ1] in
-    let [_ ⊢ SQ4] = seqcf_str [_ ⊢ SQ2] in
-    [_ ⊢ R&_cf SQ3 SQ4]
-  | [_ ⊢ L&1_cf (upd/n U1) \x.SQ1] ⇒
-    let [_,x:obj ⊢ SQ2] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ1]) in
-    [_ ⊢ L&1_cf U1 \x.SQ2]
-  | [_ ⊢ L&2_cf (upd/n U1) \x.SQ1] ⇒
-    let [_,x:obj ⊢ SQ2] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ1]) in
-    [_ ⊢ L&2_cf U1 \x.SQ2]
-  | [_ ⊢ R⊕1_cf SQ1] ⇒ let [_ ⊢ SQ2] = seqcf_str [_ ⊢ SQ1] in [_ ⊢ R⊕1_cf SQ2]
-  | [_ ⊢ R⊕2_cf SQ1] ⇒ let [_ ⊢ SQ2] = seqcf_str [_ ⊢ SQ1] in [_ ⊢ R⊕2_cf SQ2]
-  | [_ ⊢ L⊕_cf (upd/n U1) (\x.SQ1) (\x.SQ2)] ⇒
-    let [_,x:obj ⊢ SQ3] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ1]) in
-    let [_,x:obj ⊢ SQ4] = seqcf_str (seqcf_exch_top [_,x:obj ⊢ SQ2]) in
-    [_ ⊢ L⊕_cf U1 (\x.SQ3) (\x.SQ4)]
+  / total 1 /
+  fn sq ⇒ seqcf_del sq [_ ⊢ del/t _]
+  ;
+
+% Corollary: strengthening below the topmost hypothesis.
+% If (Δ, x :⁰ A, y :β B) ⊢ C, then (Δ, y :β B) ⊢ C
+
+rec seqcf_str_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ,x:obj,y:obj ⊢ seq_cf (cons (cons Δ[..] x A[] 𝟘) y B[] β[]) C[]]
+  → [Ψ,y:obj ⊢ seq_cf (cons Δ[..] y B[] β[]) C[]] =
+  / total 1 /
+  fn sq ⇒
+  let [_,x:obj,y:obj ⊢ SQ] = seqcf_del sq [_ ⊢ del/n (del/t _)] in
+  prune_seq_cf [_,y:obj,x:obj ⊢ SQ[..,x,y]]
   ;
 
 % Weakening lemma for cut-free and non-cut-free sequent calculi:
@@ -400,6 +498,31 @@ rec seqcf_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ L⊕_cf (upd/n U1) (\x.SQ3) (\x.SQ4)]
   ;
 
+% Corollary: weakening below the topmost hypothesis.
+% If (Δ, y :β B) ⊢ C, then (Δ, x :⁰ A, y :β B) ⊢ C for any A
+
+rec seq_weak_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ,y:obj ⊢ seq (cons Δ[..] y B[] β[]) C[]]
+  → {A:[ ⊢ tp]}
+    [Ψ,x:obj,y:obj ⊢ seq (cons (cons Δ[..] x A[] 𝟘) y B[] β[]) C[]] =
+  / total 1 /
+  fn sq ⇒ mlam A ⇒
+  let [_,y:obj ⊢ SQ] = sq in
+  seq_exch_top
+    (seq_weak [_,x:obj,y:obj ⊢ SQ[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ A])
+  ;
+
+rec seqcf_weak_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ,y:obj ⊢ seq_cf (cons Δ[..] y B[] β[]) C[]]
+  → {A:[ ⊢ tp]}
+    [Ψ,x:obj,y:obj ⊢ seq_cf (cons (cons Δ[..] x A[] 𝟘) y B[] β[]) C[]] =
+  / total 1 /
+  fn sq ⇒ mlam A ⇒
+  let [_,y:obj ⊢ SQ] = sq in
+  seqcf_exch_top
+    (seqcf_weak [_,x:obj,y:obj ⊢ SQ[..,y]] [_,x:obj,y:obj ⊢ x] [ ⊢ A])
+  ;
+
 %------------------------------------------------------%
 % Main lemmas
 %------------------------------------------------------%
@@ -412,30 +535,30 @@ rec unit_lemma_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ seq_cf Δ C[]] =
   / total 1 /
-  fn s1, s2, mg ⇒
+  fn sq1, sq2, mg ⇒
   let [_ ⊢ M] = mg in
-  let [_ ⊢ S2] = s2 in
-  case s1 of
+  let [_ ⊢ SQ] = sq2 in
+  case sq1 of
   | [_ ⊢ hyp_cf U1 E1] ⇒
     let [_ ⊢ merge-upd2 U2 U3 •/10 M1 _ _ _] =
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_ ⊢ ctx/refl] = merge_id mult_halident [_ ⊢ M1] [_ ⊢ E1] in
-    [_ ⊢ L①_cf U3 S2]
+    [_ ⊢ L①_cf U3 SQ]
   | [_ ⊢ R①_cf E1] ⇒
-    let [_ ⊢ ctx/refl] = merge_id mult_halident mg [_ ⊢ E1] in s2
+    let [_ ⊢ ctx/refl] = merge_id mult_halident mg [_ ⊢ E1] in sq2
   | [_ ⊢ L①_cf U1 SQ1] ⇒
     let [_ ⊢ merge-upd2 U2 U3 •/10 M1 _ _ _] =
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
-    let [_ ⊢ SQ2] = unit_lemma_cf [_ ⊢ SQ1] s2 [_ ⊢ M1] in
+    let [_ ⊢ SQ2] = unit_lemma_cf [_ ⊢ SQ1] sq2 [_ ⊢ M1] in
     [_ ⊢ L①_cf U3 SQ2]
   | [_ ⊢ L⊗_cf U1 \x.\y.SQ1] ⇒
     let [_ ⊢ merge-upd2 U2 U3 •/10 M1 _ _ _] =
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_,x:obj,y:obj ⊢ SQ2] = unit_lemma_cf [_,x:obj,y:obj ⊢ SQ1]
-      (seqcf_weak (seqcf_weak [_,x:obj,y:obj ⊢ S2[..]]
+      (seqcf_weak (seqcf_weak [_,x:obj,y:obj ⊢ SQ[..]]
         [_ ⊢ _] [ ⊢ _]) [_ ⊢ _] [ ⊢ _])
       [_,x:obj,y:obj ⊢ mg/c (mg/c M1[..] •/10) •/10] in
     [_ ⊢ L⊗_cf U3 \x.\y.SQ2]
@@ -445,7 +568,7 @@ rec unit_lemma_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M2] [_ ⊢ M1] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_,x:obj ⊢ SQ3] = unit_lemma_cf [_,x:obj ⊢ SQ2]
-      (seqcf_weak [_,x:obj ⊢ S2[..]] [_ ⊢ _] [ ⊢ _])
+      (seqcf_weak [_,x:obj ⊢ SQ[..]] [_ ⊢ _] [ ⊢ _])
       [_,x:obj ⊢ mg/c M3[..] •/10] in
     [_ ⊢ L-o_cf U3 M4 SQ1 \x.SQ3]
   | [_ ⊢ L&1_cf U1 \x.SQ1] ⇒
@@ -453,7 +576,7 @@ rec unit_lemma_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_,x:obj ⊢ SQ2] = unit_lemma_cf [_,x:obj ⊢ SQ1]
-      (seqcf_weak [_,x:obj ⊢ S2[..]] [_ ⊢ _] [ ⊢ _])
+      (seqcf_weak [_,x:obj ⊢ SQ[..]] [_ ⊢ _] [ ⊢ _])
       [_,x:obj ⊢ mg/c M1[..] •/10] in
     [_ ⊢ L&1_cf U3 \x.SQ2]
   | [_ ⊢ L&2_cf U1 \x.SQ1] ⇒
@@ -461,7 +584,7 @@ rec unit_lemma_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_,x:obj ⊢ SQ2] = unit_lemma_cf [_,x:obj ⊢ SQ1]
-      (seqcf_weak [_,x:obj ⊢ S2[..]] [_ ⊢ _] [ ⊢ _])
+      (seqcf_weak [_,x:obj ⊢ SQ[..]] [_ ⊢ _] [ ⊢ _])
       [_,x:obj ⊢ mg/c M1[..] •/10] in
     [_ ⊢ L&2_cf U3 \x.SQ2]
   | [_ ⊢ L⊕_cf U1 (\x.SQ1) (\x.SQ2)] ⇒
@@ -469,12 +592,173 @@ rec unit_lemma_cf : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       merge_upd_cor_l [_ ⊢ U1] [_ ⊢ M] [ ⊢ •/00] in
     let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U2] in
     let [_,x:obj ⊢ SQ3] = unit_lemma_cf [_,x:obj ⊢ SQ1]
-      (seqcf_weak [_,x:obj ⊢ S2[..]] [_ ⊢ _] [ ⊢ _])
+      (seqcf_weak [_,x:obj ⊢ SQ[..]] [_ ⊢ _] [ ⊢ _])
       [_,x:obj ⊢ mg/c M1[..] •/10] in
     let [_,x:obj ⊢ SQ4] = unit_lemma_cf [_,x:obj ⊢ SQ2]
-      (seqcf_weak [_,x:obj ⊢ S2[..]] [_ ⊢ _] [ ⊢ _])
+      (seqcf_weak [_,x:obj ⊢ SQ[..]] [_ ⊢ _] [ ⊢ _])
       [_,x:obj ⊢ mg/c M1[..] •/10] in
     [_ ⊢ L⊕_cf U3 (\x.SQ3) (\x.SQ4)]
+  ;
+
+% Moving a linear hypothesis: if Δ₁ ⊢ C where Y :¹ A is the k-th entry of Δ₁
+% and X :⁰ A the n-th, then C is derivable in the context where the k-th
+% entry is Y :⁰ A and the n-th is X :¹ A.
+
+rec seqcf_move : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ seq_cf Δ₁ C[]]
+  → [Ψ ⊢ upd Δ₁ k[] Y Y A[] A[] 𝟙 𝟘 Δ₁⁰]
+  → [Ψ ⊢ upd Δ₁⁰ n[] X X A[] A[] 𝟘 𝟙 Δ₂]
+  → [Ψ ⊢ seq_cf Δ₂ C[]] =
+  / total 1 /
+  fn s1, uk, un ⇒
+  let [_ ⊢ UK] = uk in
+  let [_ ⊢ UN] = un in
+  let [_ ⊢ V] = upd_symm un in
+  case s1 of
+  | [_ ⊢ hyp_cf U1 E1] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ hyp_cf V E1]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ lookintm U2] =
+        lookup_upd [_ ⊢ U1] [_ ⊢ UK] (neq_comm [ ⊢ NEQ]) in
+      impossible exh_lookup [_ ⊢ E1] [_ ⊢ U2]
+    )
+  | [_ ⊢ R①_cf E1] ⇒ impossible exh_lookup [_ ⊢ E1] uk
+  | [_ ⊢ L①_cf U1 SQ1] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L①_cf V SQ1]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] [_ ⊢ UK'] [_ ⊢ UN'] in
+      [_ ⊢ L①_cf U1' SQ1']
+    )
+  | [_ ⊢ R⊗_cf SQ1 SQ2 M1] ⇒
+    let [_ ⊢ merge-upd UKa UKb T[] M⁰ _ _ _] =
+      merge_upd_cor [_ ⊢ UK] [_ ⊢ M1] [ ⊢ •/00] in
+    (case [ ⊢ T] of
+    | [ ⊢ •/10] ⇒
+      let [_ ⊢ merge-upd UNa UNb •/00 M₂ _ _ _] =
+        merge_upd_cor [_ ⊢ UN] [_ ⊢ M⁰] [ ⊢ •/10] in
+      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UKb] in
+      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UNb] in
+      let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] [_ ⊢ UKa] [_ ⊢ UNa] in
+      [_ ⊢ R⊗_cf SQ1' SQ2 M₂]
+    | [ ⊢ •/01] ⇒
+      let [_ ⊢ merge-upd UNa UNb •/00 M₂ _ _ _] =
+        merge_upd_cor [_ ⊢ UN] [_ ⊢ M⁰] [ ⊢ •/01] in
+      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UKa] in
+      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UNa] in
+      let [_ ⊢ SQ2'] = seqcf_move [_ ⊢ SQ2] [_ ⊢ UKb] [_ ⊢ UNb] in
+      [_ ⊢ R⊗_cf SQ1 SQ2' M₂]
+    )
+  | [_ ⊢ L⊗_cf U1 (\y.\z.SQ1)] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L⊗_cf V (\y.\z.SQ1)]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_,y:obj,z:obj ⊢ SQ1'] = seqcf_move [_,y:obj,z:obj ⊢ SQ1]
+        [_,y:obj,z:obj ⊢ upd/n (upd/n UK'[..])]
+        [_,y:obj,z:obj ⊢ upd/n (upd/n UN'[..])] in
+      [_ ⊢ L⊗_cf U1' (\y.\z.SQ1')]
+    )
+  | [_ ⊢ R-o_cf \y.SQ1] ⇒
+    let [_,y:obj ⊢ SQ1'] = seqcf_move [_,y:obj ⊢ SQ1]
+      [_,y:obj ⊢ upd/n UK[..]] [_,y:obj ⊢ upd/n UN[..]] in
+    [_ ⊢ R-o_cf \y.SQ1']
+  | [_ ⊢ L-o_cf U1 M1 SQ1 \y.SQ2] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L-o_cf V M1 SQ1 \y.SQ2]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_ ⊢ merge-upd UKa UKb T[] M⁰ _ _ _] =
+        merge_upd_cor [_ ⊢ UK'] [_ ⊢ M1] [ ⊢ •/00] in
+      (case [ ⊢ T] of
+      | [ ⊢ •/10] ⇒
+        let [_ ⊢ merge-upd UNa UNb •/00 M₂ _ _ _] =
+          merge_upd_cor [_ ⊢ UN'] [_ ⊢ M⁰] [ ⊢ •/10] in
+        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UKb] in
+        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UNb] in
+        let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] [_ ⊢ UKa] [_ ⊢ UNa] in
+        [_ ⊢ L-o_cf U1' M₂ SQ1' \y.SQ2]
+      | [ ⊢ •/01] ⇒
+        let [_ ⊢ merge-upd UNa UNb •/00 M₂ _ _ _] =
+          merge_upd_cor [_ ⊢ UN'] [_ ⊢ M⁰] [ ⊢ •/01] in
+        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UKa] in
+        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ UNa] in
+        let [_,y:obj ⊢ SQ2'] = seqcf_move [_,y:obj ⊢ SQ2]
+          [_,y:obj ⊢ upd/n UKb[..]] [_,y:obj ⊢ upd/n UNb[..]] in
+        [_ ⊢ L-o_cf U1' M₂ SQ1 \y.SQ2']
+      )
+    )
+  | [_ ⊢ R&_cf SQ1 SQ2] ⇒
+    let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] uk un in
+    let [_ ⊢ SQ2'] = seqcf_move [_ ⊢ SQ2] uk un in
+    [_ ⊢ R&_cf SQ1' SQ2']
+  | [_ ⊢ L&1_cf U1 (\y.SQ1)] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L&1_cf V (\y.SQ1)]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_,y:obj ⊢ SQ1'] = seqcf_move [_,y:obj ⊢ SQ1]
+        [_,y:obj ⊢ upd/n UK'[..]] [_,y:obj ⊢ upd/n UN'[..]] in
+      [_ ⊢ L&1_cf U1' (\y.SQ1')]
+    )
+  | [_ ⊢ L&2_cf U1 (\y.SQ1)] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L&2_cf V (\y.SQ1)]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_,y:obj ⊢ SQ1'] = seqcf_move [_,y:obj ⊢ SQ1]
+        [_,y:obj ⊢ upd/n UK'[..]] [_,y:obj ⊢ upd/n UN'[..]] in
+      [_ ⊢ L&2_cf U1' (\y.SQ1')]
+    )
+  | [_ ⊢ R⊕1_cf SQ1] ⇒
+    let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] uk un in [_ ⊢ R⊕1_cf SQ1']
+  | [_ ⊢ R⊕2_cf SQ1] ⇒
+    let [_ ⊢ SQ1'] = seqcf_move [_ ⊢ SQ1] uk un in [_ ⊢ R⊕2_cf SQ1']
+  | [_ ⊢ L⊕_cf U1 (\y.SQ1) (\y.SQ2)] ⇒
+    (case comp_look [_ ⊢ UK] [_ ⊢ U1] of
+    | [_ ⊢ look-eq _ _] ⇒
+      let [_ ⊢ ctx/refl] = upd_func uk [_ ⊢ U1] in
+      [_ ⊢ L⊕_cf V (\y.SQ1) (\y.SQ2)]
+    | [_ ⊢ look-neq NEQ[] _ _] ⇒
+      let [_ ⊢ upd-pushout U1⁰ UK' _ _] =
+        upd_pushout [_ ⊢ UK] [_ ⊢ U1] [ ⊢ NEQ] in
+      let [_ ⊢ upd-pushout U1' UN' _ _] =
+        upd_pushout [_ ⊢ UN] [_ ⊢ U1⁰] (lookup_mult_neq_r [_ ⊢ UN] [_ ⊢ U1⁰]) in
+      let [_,y:obj ⊢ SQ1'] = seqcf_move [_,y:obj ⊢ SQ1]
+        [_,y:obj ⊢ upd/n UK'[..]] [_,y:obj ⊢ upd/n UN'[..]] in
+      let [_,y:obj ⊢ SQ2'] = seqcf_move [_,y:obj ⊢ SQ2]
+        [_,y:obj ⊢ upd/n UK'[..]] [_,y:obj ⊢ upd/n UN'[..]] in
+      [_ ⊢ L⊕_cf U1' (\y.SQ1') (\y.SQ2')]
+    )
   ;
 
 % Renaming lemma for cut-free sequent calculus:
@@ -484,161 +768,10 @@ rec seqcf_rename : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ seq_cf (cons Δ[..] x A[] 𝟙) C[]]
   → [Ψ ⊢ upd Δ n[] X X A[] A[] 𝟘 𝟙 Δ']
   → [Ψ ⊢ seq_cf Δ' C[]] =
-  / total d (seqcf_rename d) /
+  / total 1 /
   fn s1, up1 ⇒
   let [_ ⊢ U] = up1 in
-  let [_ ⊢ U_symm] = upd_symm up1 in
-  case s1 of
-  | [_,x:obj ⊢ hyp_cf U1 E1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ exh/c E2' _] = [_,x:obj ⊢ E1] in
-      let [_ ⊢ E2] = prune_exh [_ ⊢ E2'] in
-      let [_ ⊢ U2] = upd_symm up1 in
-      [_ ⊢ hyp_cf U2 E2]
-    | [_,x:obj ⊢ upd/n _] ⇒
-      let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E1] in
-      impossible [_ ⊢ H]
-    )
-  | [_,x:obj ⊢ R①_cf E1] ⇒
-    let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E1] in
-    impossible [_ ⊢ H]
-  | [_,x:obj ⊢ L①_cf U1 SQ1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_ ⊢ SQ2] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]) in
-      [_ ⊢ L①_cf U_symm SQ2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_ ⊢ SQ2] = seqcf_rename [_,x:obj ⊢ SQ1] [_ ⊢ U3] in
-      [_ ⊢ L①_cf U4 SQ2]
-    )
-  | [_,x:obj ⊢ R⊗_cf SQ1 SQ2 (mg/c M1 T[])] ⇒
-    let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    let [_ ⊢ merge-upd Ua Ub •/00 M3 _ _ _] =
-      merge_upd_cor [_ ⊢ U] [_ ⊢ M2] [ ⊢ T] in
-    (case [ ⊢ T] of
-    | [ ⊢ •/10] ⇒
-      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ Ub] in
-      let [_ ⊢ SQ1'] = seqcf_rename [_ ⊢ SQ1] [_ ⊢ Ua] in
-      let [_ ⊢ SQ2'] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ2]) in
-      [_ ⊢ R⊗_cf SQ1' SQ2' M3]
-    | [ ⊢ •/01] ⇒
-      let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ Ua] in
-      let [_ ⊢ SQ1'] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]) in
-      let [_ ⊢ SQ2'] = seqcf_rename [_ ⊢ SQ2] [_ ⊢ Ub] in
-      [_ ⊢ R⊗_cf SQ1' SQ2' M3]
-    )
-  | [_,x:obj ⊢ L⊗_cf U1 \y.\z.SQ1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj,y:obj ⊢ SQ2] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top2 [_,y:obj,z:obj,x:obj ⊢ SQ1[..,x,y,z]])) in
-      [_ ⊢ L⊗_cf U_symm \x.\y.SQ2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_,x:obj,y:obj ⊢ SQ2] = seqcf_rename
-        (seqcf_exch_top2 [_,y:obj,z:obj,x:obj ⊢ SQ1[..,x,y,z]])
-        [_,x:obj,y:obj ⊢ upd/n (upd/n U3[..])] in
-      [_ ⊢ L⊗_cf U4 \x.\y.SQ2]
-    )
-  | [_,x:obj ⊢ R-o_cf \y.SQ1] ⇒
-    let [_,x:obj ⊢ SQ2] = seqcf_rename
-      (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ1[..,y,x]]) [_,x:obj ⊢ upd/n U[..]] in
-    [_ ⊢ R-o_cf \x.SQ2]
-  | [_,x:obj ⊢ L-o_cf U1 M1 SQ1 \y.SQ2] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ mg/c M2' •/00] = [_,x:obj ⊢ M1] in
-      let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
-      let [_ ⊢ SQ1'] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]) in
-      let [_,x:obj ⊢ SQ2'] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ2[..,y,x]])) in
-      [_ ⊢ L-o_cf U_symm M2 SQ1' \x.SQ2']
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_,x:obj ⊢ mg/c M2' T[]] = [_,x:obj ⊢ M1] in
-      let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M2'] in
-      let [_ ⊢ merge-upd U3a U3b •/00 M3 _ _ _] =
-        merge_upd_cor [_ ⊢ U3] [_ ⊢ M2] [ ⊢ T] in
-      (case [ ⊢ T] of
-      | [ ⊢ •/10] ⇒
-        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U3b] in
-        let [_ ⊢ SQ1'] = seqcf_rename [_,x:obj ⊢ SQ1] [_ ⊢ U3a] in
-        let [_,x:obj ⊢ SQ2'] = prune_seq_cf
-          (seqcf_str (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ2[..,y,x]])) in
-        [_ ⊢ L-o_cf U4 M3 SQ1' \x.SQ2']
-      | [ ⊢ •/01] ⇒
-        let [_ ⊢ ctx/refl] = upd_refl_cor [_ ⊢ U3a] in
-        let [_ ⊢ SQ1'] = prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]) in
-        let [_,x:obj ⊢ SQ2'] = seqcf_rename
-          (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ2[..,y,x]])
-          [_,x:obj ⊢ upd/n U3b[..]] in
-        [_ ⊢ L-o_cf U4 M3 SQ1' \x.SQ2']
-      )
-    )
-  | [_,x:obj ⊢ R&_cf SQ1 SQ2] ⇒
-    let [_ ⊢ SQ3] = seqcf_rename [_,x:obj ⊢ SQ1] up1 in
-    let [_ ⊢ SQ4] = seqcf_rename [_,x:obj ⊢ SQ2] up1 in
-    [_ ⊢ R&_cf SQ3 SQ4]
-  | [_,x:obj ⊢ L&1_cf U1 \y.SQ1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ SQ2] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ1[..,y,x]])) in
-      [_ ⊢ L&1_cf U_symm \x.SQ2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_,x:obj ⊢ SQ2] = seqcf_rename
-        (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ1[..,y,x]])
-        [_,x:obj ⊢ upd/n U3[..]] in
-      [_ ⊢ L&1_cf U4 \x.SQ2]
-    )
-  | [_,x:obj ⊢ L&2_cf U1 \y.SQ1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ SQ2] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top ([_,x:obj,y:obj ⊢ SQ1[..,y,x]]))) in
-      [_ ⊢ L&2_cf U_symm \x.SQ2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_,x:obj ⊢ SQ2] = seqcf_rename
-        (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ1[..,y,x]])
-        [_,x:obj ⊢ upd/n U3[..]] in
-      [_ ⊢ L&2_cf U4 \x.SQ2]
-    )
-  | [_,x:obj ⊢ R⊕1_cf SQ1] ⇒ let [_ ⊢ SQ2] = seqcf_rename [_,x:obj ⊢ SQ1] up1 in
-    [_ ⊢ R⊕1_cf SQ2]
-  | [_,x:obj ⊢ R⊕2_cf SQ1] ⇒ let [_ ⊢ SQ2] = seqcf_rename [_,x:obj ⊢ SQ1] up1 in
-    [_ ⊢ R⊕2_cf SQ2]
-  | [_,x:obj ⊢ L⊕_cf U1 (\y.SQ1) (\y.SQ2)] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ SQ3] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top ([_,x:obj,y:obj ⊢ SQ1[..,y,x]]))) in
-      let [_,x:obj ⊢ SQ4] = prune_seq_cf
-        (seqcf_str (seqcf_exch_top ([_,x:obj,y:obj ⊢ SQ2[..,y,x]]))) in
-      [_ ⊢ L⊕_cf U_symm (\x.SQ3) (\x.SQ4)]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ upd-pushout U3 U4 _ _] =
-        upd_pushout [_ ⊢ U2] [_ ⊢ U] (lookup_mult_neq [_ ⊢ U2] up1) in
-      let [_,x:obj ⊢ SQ3] = seqcf_rename
-        (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ1[..,y,x]])
-        [_,x:obj ⊢ upd/n U3[..]] in
-      let [_,x:obj ⊢ SQ4] = seqcf_rename
-        (seqcf_exch_top [_,x:obj,y:obj ⊢ SQ2[..,y,x]])
-        [_,x:obj ⊢ upd/n U3[..]] in
-      [_ ⊢ L⊕_cf U4 (\x.SQ3) (\x.SQ4)]
-    )
+  let [_,x:obj ⊢ SQ1] =
+    seqcf_move s1 [_,x:obj ⊢ upd/t _] [_,x:obj ⊢ upd/n U[..]] in
+  prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1])
   ;

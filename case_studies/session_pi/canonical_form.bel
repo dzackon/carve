@@ -1,0 +1,27 @@
+%======================================================%
+% Canonical form property
+%======================================================%
+
+% All processes can be rewritten in canonical form
+
+rec canonical_form : (Ψ:ctx) {P:[Ψ ⊢ proc]} [Ψ ⊢ equiv_can_form P] =
+  / total 1 /
+  mlam P ⇒
+  let [_ ⊢ C] = cong_refl [_ ⊢ P] in
+  case [_ ⊢ P] of
+  | [_ ⊢ null] ⇒ [_ ⊢ equiv-can-form ≡c/null can/null]
+  | [_ ⊢ wait _ _] ⇒ [_ ⊢ equiv-can-form C (can/par (bcan/pref pref/wait))]
+  | [_ ⊢ close _ _] ⇒ [_ ⊢ equiv-can-form C (can/par (bcan/pref pref/close))]
+  | [_ ⊢ inp _ \x. _] ⇒ [_ ⊢ equiv-can-form C (can/par (bcan/pref pref/inp))]
+  | [_ ⊢ out _ _ _] ⇒ [_ ⊢ equiv-can-form C (can/par (bcan/pref pref/out))]
+  | [_ ⊢ par P1 P2] ⇒
+    let [_ ⊢ equiv-can-form C1 E1] = canonical_form [_ ⊢ P1] in
+    let [_ ⊢ equiv-can-form C2 E2] = canonical_form [_ ⊢ P2] in
+    let [_ ⊢ equiv-can-form C3 E3] = canonical_form_lemma3 [_ ⊢ E1] [_ ⊢ E2] in
+    [_ ⊢ equiv-can-form (≡trans (≡trans (≡trans (≡c/par C1)
+      (≡trans ≡par/comm (≡c/par C2))) ≡par/comm) C3) E3]
+  | [_ ⊢ res \x.\y.P1] ⇒
+    let [_,x:obj,y:obj ⊢ equiv-can-form C1 E1] =
+      canonical_form [_,x:obj,y:obj ⊢ P1] in
+    [_ ⊢ equiv-can-form (≡c/res \x.\y.C1) (can/res \x.\y.E1)]
+  ;

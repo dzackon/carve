@@ -1,9 +1,9 @@
 %======================================================%
 % Multiplicities (affine systems)
 %
-% This structure shares its operation with lin; the difference is that
+% This structure shares its operation with linear.bel; the difference is that
 % both multiplicities are harmless, so an unused affine resource may be
-% discarded. One may alternatively simply use lin and omit
+% discarded. One may alternatively simply use linear.bel and omit
 % exhaustedness checks from the leaves of proof derivations.
 %======================================================%
 

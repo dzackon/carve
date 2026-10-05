@@ -42,11 +42,11 @@ rec lt_trans : [ ⊢ lt n₁ n₂] → [ ⊢ lt n₂ n₃] → [ ⊢ lt n₁ n�
   ;
 
 rec leq_trans : [ ⊢ leq n₁ n₂] → [ ⊢ leq n₂ n₃] → [ ⊢ leq n₁ n₃] =
-  / total /
-  fn LEQ1, LEQ2 ⇒ case (LEQ1, LEQ2) of
+  / total 1 /
+  fn l1, l2 ⇒ case (l1, l2) of
   | ([ ⊢ leq/id],[ ⊢ leq/id]) ⇒ [ ⊢ leq/id]
-  | ([ ⊢ leq/id],[ ⊢ leq/lt LT2]) ⇒ LEQ2
-  | ([ ⊢ leq/lt LT1],[ ⊢ leq/id]) ⇒ LEQ1
+  | ([ ⊢ leq/id],[ ⊢ leq/lt LT2]) ⇒ l2
+  | ([ ⊢ leq/lt LT1],[ ⊢ leq/id]) ⇒ l1
   | ([ ⊢ leq/lt LT1],[ ⊢ leq/lt LT2]) ⇒
     let [ ⊢ LT] = lt_trans [ ⊢ LT1] [ ⊢ LT2] in
     [ ⊢ leq/lt LT]
@@ -55,7 +55,7 @@ rec leq_trans : [ ⊢ leq n₁ n₂] → [ ⊢ leq n₂ n₃] → [ ⊢ leq n₁
 % ≠ is commutative
 
 rec neq_comm : [ ⊢ neq n m] → [ ⊢ neq m n] =
-  / total /
+  / total 1 /
   fn n ⇒ case n of
   | [ ⊢ neq/1 LT] ⇒ [ ⊢ neq/2 LT]
   | [ ⊢ neq/2 LT] ⇒ [ ⊢ neq/1 LT]
@@ -64,7 +64,7 @@ rec neq_comm : [ ⊢ neq n m] → [ ⊢ neq m n] =
 % ≠ is irreflexive
 
 rec neq_irreflex : [ ⊢ neq n n] → [ ⊢ false] =
-  / total /
+  / total 1 /
   fn n ⇒ case n of
   | [ ⊢ neq/1 LT] ⇒ lt_irreflex [ ⊢ LT]
   | [ ⊢ neq/2 LT] ⇒ lt_irreflex [ ⊢ LT]
@@ -95,3 +95,17 @@ rec comp_nats : {n:[ ⊢ nat]} {m:[ ⊢ nat]} [ ⊢ comp_nats_res n m] =
       )
     )
   ;
+
+%------------------------------------------------------%
+% Conditional index selection
+%------------------------------------------------------%
+
+% if_eq_else k' n m k₁ k₂ ≡ "if n = m then k' = k₁, otherwise k' = k₂"
+LF if_eq_else : nat → nat → nat → nat → nat → type =
+| if_eq_else/t : if_eq_else k₁ n n k₁ k₂
+| if_eq_else/f : neq n m → if_eq_else k₂ n m k₁ k₂;
+
+% if_lt_else k' n m k₁ k₂ ≡ "k' = k₁ if n < m, otherwise k' = k₂".
+LF if_lt_else : nat → nat → nat → nat → nat → type =
+| if_lt_else/t : lt n m → if_lt_else k₁ n m k₁ k₂
+| if_lt_else/f : lt m (suc n) → if_lt_else k₂ n m k₁ k₂;

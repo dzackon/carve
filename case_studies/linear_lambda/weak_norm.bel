@@ -1,0 +1,151 @@
+%======================================================%
+% Weak normalization via logical relations
+%
+% Adapted from the proof of Andrew Cave
+% (https://github.com/Beluga-lang/Beluga/tree/master/examples/
+%   logrel/weak-norm-total-products-explicit-typing.bel)
+%======================================================%
+
+LF val : obj → type =
+| val/lam : val (lam M)
+| val/bang : val (bang M);
+
+LF halts : obj → type =
+| halts/m : wmstep M V → val V → halts M;
+
+%------------------------------------------------------%
+% The logical relation
+%------------------------------------------------------%
+
+stratified Reduce : {A:[ ⊢ tp]} {M:[ ⊢ obj]} ctype =
+| Red/base : [ ⊢ halts M] → Reduce [ ⊢ base] [ ⊢ M]
+| Red/-o : [ ⊢ halts M]
+  → ({N:[ ⊢ obj]} Reduce [ ⊢ A] [ ⊢ N] → Reduce [ ⊢ B] [ ⊢ app M N])
+  → Reduce [ ⊢ A -o B] [ ⊢ M]
+| Red/! : {M':[ ⊢ obj]} [ ⊢ wmstep M (bang M')] → Reduce [ ⊢ A] [ ⊢ M']
+  → Reduce [ ⊢ ! A] [ ⊢ M];
+
+rec halts_step : {S:[ ⊢ wstep M M']} [ ⊢ halts M'] → [ ⊢ halts M] =
+  / total 1 /
+  mlam S ⇒ fn h ⇒
+  let [ ⊢ halts/m MS' V] = h in
+  [ ⊢ halts/m (wms/onestep S MS') V]
+  ;
+
+% Every reducible term halts
+
+rec reduce_halts : Reduce [ ⊢ A] [ ⊢ M] → [ ⊢ halts M] =
+  / total 1 /
+  fn r ⇒ case r of
+  | Red/base h ⇒ h
+  | Red/-o h f ⇒ h
+  | Red/! [ ⊢ M'] [ ⊢ MS] r' ⇒ [ ⊢ halts/m MS val/bang]
+  ;
+
+% Backward closure under a single wstep
+
+rec bwd_closed : {A:[ ⊢ tp]} {S:[ ⊢ wstep M M']} Reduce [ ⊢ A] [ ⊢ M']
+  → Reduce [ ⊢ A] [ ⊢ M] =
+  / total 1 /
+  mlam A, S ⇒ fn r ⇒ case [ ⊢ A] of
+  | [ ⊢ base] ⇒ let Red/base h = r in Red/base (halts_step [ ⊢ S] h)
+  | [ ⊢ A1 -o A2] ⇒
+    let Red/-o h f = r in
+    Red/-o (halts_step [ ⊢ S] h)
+      (mlam N ⇒ fn rn ⇒ bwd_closed [ ⊢ _] [ ⊢ wstep/app1 S] (f [ ⊢ N] rn))
+  | [ ⊢ ! A1] ⇒
+    let Red/! [ ⊢ M''] [ ⊢ MS] r' = r in
+    Red/! [ ⊢ M''] [ ⊢ wms/onestep S MS] r'
+  ;
+
+% If M reduces to (bang M') and the body is reducible at N[M'], then the
+% whole let-bang is reducible
+
+rec letbang_red : {N:[x:obj ⊢ obj]} [ ⊢ wmstep M (bang M')]
+  → Reduce [ ⊢ B] [ ⊢ N[M']]
+  → Reduce [ ⊢ B] [ ⊢ letbang M (\x.N)] =
+  / total 2 /
+  mlam N ⇒ fn ms, r ⇒ case ms of
+  | [ ⊢ wms/refl] ⇒ bwd_closed [ ⊢ _] [ ⊢ wstep/red!] r
+  | [ ⊢ wms/onestep S MS] ⇒
+    bwd_closed [ ⊢ _] [ ⊢ wstep/letbang1 S] (letbang_red [x:obj ⊢ N] [ ⊢ MS] r)
+  ;
+
+%------------------------------------------------------%
+% Reducible substitutions
+%------------------------------------------------------%
+
+inductive RedSub : (Ψ:ctx) {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
+| Rsub/nil : RedSub [ ⊢ nil] $[ ⊢ ^]
+| Rsub/cons : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
+  → Reduce [ ⊢ A] [ ⊢ X]
+  → RedSub [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]] $[ ⊢ $σ, X];
+
+rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
+  → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
+  → Reduce [ ⊢ A] [ ⊢ X[$σ]] =
+  / total 1 /
+  fn r, u ⇒ case r of
+  | Rsub/nil ⇒ impossible u
+  | Rsub/cons rs1 rd1 ⇒ case u of
+    | [_,x:obj ⊢ upd/t _] ⇒ rd1
+    | [_,x:obj ⊢ upd/n U1] ⇒
+      let [_,x:obj ⊢ U1'] = upd_refl [_,x:obj ⊢ U1] in
+      let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
+      lookup_redsub rs1 [_ ⊢ U2]
+  ;
+
+inductive RedSubMerge : (Ψ:ctx) {Δ₁:[Ψ ⊢ lctx K[]]} {Δ₂:[Ψ ⊢ lctx K[]]}
+{Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
+| Rsub/merge : RedSub [Ψ ⊢ Δ₁] $[ ⊢ $σ] → RedSub [Ψ ⊢ Δ₂] $[ ⊢ $σ]
+  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[ ⊢ $σ];
+
+rec rsub_merge : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
+  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[ ⊢ $σ] =
+  / total 1 /
+  fn rs, mg ⇒ case rs of
+  | Rsub/nil ⇒ let [ ⊢ mg/n] = mg in Rsub/merge Rsub/nil Rsub/nil
+  | Rsub/cons rs' r ⇒
+    let [_,x:obj ⊢ mg/c M1 T[]] = mg in
+    let Prune-Merge [_ ⊢ M1'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
+    let Rsub/merge rs1 rs2 = rsub_merge rs' [_ ⊢ M1'] in
+    Rsub/merge (Rsub/cons rs1 r) (Rsub/cons rs2 r)
+  ;
+
+%------------------------------------------------------%
+% The fundamental lemma
+%------------------------------------------------------%
+
+rec fund : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
+  → Reduce [ ⊢ A] [ ⊢ M[$σ]] =
+  / total 1 /
+  fn d, rs ⇒ case d of
+  | [_ ⊢ oft/var U _] ⇒ lookup_redsub rs [_ ⊢ U]
+  | [_ ⊢ oft/vari U _] ⇒ lookup_redsub rs [_ ⊢ U]
+  | [_ ⊢ oft/lam (\x.D1)] ⇒
+    Red/-o [_ ⊢ halts/m wms/refl val/lam]
+      (mlam _ ⇒ fn r ⇒
+         bwd_closed [ ⊢ _] [_ ⊢ wstep/red]
+           (fund [_,x:obj ⊢ D1] (Rsub/cons rs r)))
+  | [_ ⊢ oft/app D1 D2 M1] ⇒
+    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let Red/-o h f = fund [_ ⊢ D1] rs1 in
+    f [_ ⊢ _] (fund [_ ⊢ D2] rs2)
+  | [_ ⊢ oft/bang _ D1] ⇒
+    Red/! [ ⊢ _] [ ⊢ wms/refl] (fund [_ ⊢ D1] rs)
+  | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
+    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let Red/! [ ⊢ M'] [ ⊢ MS] r1 = fund [_ ⊢ D1] rs1 in
+    letbang_red [x:obj ⊢ _] [ ⊢ MS] (fund [_,x:obj ⊢ D2] (Rsub/cons rs2 r1))
+  ;
+
+%------------------------------------------------------%
+% Weak normalization
+%------------------------------------------------------%
+
+% Weak normalization: every closed well-typed term halts
+
+rec weak_norm : [ ⊢ oft nil M A] → [ ⊢ halts M] =
+  / total 1 /
+  fn d ⇒ reduce_halts (fund d Rsub/nil)
+  ;

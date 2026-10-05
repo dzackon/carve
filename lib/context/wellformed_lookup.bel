@@ -8,14 +8,14 @@
 rec lookup_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   {α:[ ⊢ mult]}
   [Ψ ⊢ lookup_n X (cons Δ X A[] α[])] =
-  / total /
+  / total 1 /
   mlam Δ, X, A, α ⇒
   let [_ ⊢ U1] = upd_refl_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] in [_ ⊢ lookn U1]
   ;
 
 rec notin_ext : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → ([Ψ,x:obj ⊢ lookup_n X[..] Δ[..]] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, ap ⇒
   let [_,x:obj ⊢ lookn U] = ap in
   let [_,x:obj ⊢ U'] = upd_refl [_,x:obj ⊢ U] in
@@ -27,35 +27,35 @@ rec notin_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ,x:obj ⊢ lookup_n X[..] Δ[..]] → [ ⊢ false])
   → [Ψ ⊢ lookup_n X Δ]
   → [ ⊢ false] =
-  / total /
+  / total 1 /
   fn nin, ap ⇒
   let [_,x:obj ⊢ lookn U] = ap in
   nin [_,x:obj,y:obj ⊢ lookn U[..,x]]
   ;
 
 rec notin_nil : (Ψ:ctx) [Ψ ⊢ lookup_n X nil] → [ ⊢ false] =
-  / total /
+  / total 1 /
   fn ap ⇒ let [_ ⊢ lookn U1] = ap in impossible [_ ⊢ U1]
   ;
 
 rec notin_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ lookup_n x Δ[..]]
   → [ ⊢ false] =
-  / total /
+  / total 1 /
   fn ap ⇒ let [_,x:obj ⊢ lookn U1] = ap in upd_contra [_,x:obj ⊢ U1]
   ;
 
 rec notin_swap : (Ψ:ctx) (Δ:[Ψ,x:obj,y:obj ⊢ lctx K[]])
   ([Ψ,x:obj,y:obj ⊢ lookup_n X Δ] → [ ⊢ false])
   → ([Ψ,y:obj,x:obj ⊢ lookup_n X[..,x,y] Δ[..,x,y]] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, l ⇒ let [_,x:obj,y:obj ⊢ L'] = l in nin [_,x:obj,y:obj ⊢ L'[..,y,x]]
   ;
 
 rec notin_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ upd Δ n Y Y A B α β Δ']
   → ([Ψ ⊢ lookup_n X Δ'] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, u, ap ⇒
   let [_ ⊢ lookn U2] = ap in
   let [_ ⊢ lookin U3] = lookup_upd_tpmult (upd_symm u) [_ ⊢ U2] in
@@ -65,7 +65,7 @@ rec notin_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ �
 rec notin_peel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ ⊢ lookup_n X (cons Δ Y B[] β[])] → [ ⊢ false])
   → ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, ap ⇒
   let [_ ⊢ lookn U] = ap in
   impossible nin [_ ⊢ lookn (upd/n U)]
@@ -75,7 +75,7 @@ rec notin_upd_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Z Δ] → 
   → [Ψ ⊢ upd Δ n[] X Y A B α β Δ']
   → ([Ψ ⊢ obj_eq Y Z] → [ ⊢ false])
   → ([Ψ ⊢ lookup_n Z Δ'] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, u, n, ap ⇒
   let [_ ⊢ lookn U2] = ap in
   let [_ ⊢ lookintm U3] = lookup_upd (upd_symm u) [_ ⊢ U2]
@@ -86,7 +86,7 @@ rec notin_upd_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Z Δ] → 
 rec notin_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → ([Ψ ⊢ lookup_n X Δ₁] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, m, ap ⇒
   let [_ ⊢ lookn U] = ap in
   case [_ ⊢ U] of
@@ -102,7 +102,7 @@ rec notin_merge_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ ⊢ lookup_n X Δ₁] → [ ⊢ false])
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, m, lk ⇒
   let [_ ⊢ lookn U] = lk in
   case [_ ⊢ U] of
@@ -117,9 +117,10 @@ rec notin_merge_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 rec notin_to_nmeq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Y Δ] → [ ⊢ false])
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
   → ([Ψ ⊢ obj_eq X Y] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, u, e ⇒
-  let ([_ ⊢ U],[_ ⊢ obj/refl]) = (u,e) in
+  let [_ ⊢ obj/refl] = e in
+  let [_ ⊢ U] = u in
   nin [_ ⊢ lookn U]
   ;
 
@@ -148,7 +149,7 @@ rec notin_changename :
 rec notin_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ exch Δ m Y k Z Δ']
   → ([Ψ ⊢ lookup_n X Δ'] → [ ⊢ false]) =
-  / total /
+  / total 1 /
   fn nin, ex, ap ⇒
   let [_ ⊢ lookn U1] = ap in
   let [_ ⊢ look U2] = exch_lookup (exch_symm ex) [_ ⊢ U1] in

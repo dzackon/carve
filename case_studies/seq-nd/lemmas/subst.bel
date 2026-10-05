@@ -9,13 +9,13 @@ rec subst_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   → [Ψ ⊢ exh Γ]
   → [Ψ ⊢ exh Δ] =
   / total 1 /
-  fn SUB, E ⇒ case SUB of
+  fn sub, e ⇒ case sub of
   | [_ ⊢ wf_subst_empty E1] ⇒ [_ ⊢ E1]
   | [_ ⊢ wf_subst_cons1 _ _ _] ⇒
-    let [_ ⊢ exh/c _ T[]] = E in
+    let [_ ⊢ exh/c _ T[]] = e in
     impossible [ ⊢ T]
   | [_ ⊢ wf_subst_cons0 SUB1 _ _] ⇒
-    let [_ ⊢ exh/c E1 _] = E in
+    let [_ ⊢ exh/c E1 _] = e in
     subst_exh [_ ⊢ SUB1] [_ ⊢ E1]
   ;
 
@@ -64,7 +64,7 @@ rec subst_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
       (wf_subst_cons0 SUB3 CH1 SE3) M2 _ _]
   ;
 
-% If Δ ⊢ σ : Γ and Γ[(x :¹ A) ↦ (x :¹ 𝟘)] = Γ', then there exist e,Δ₁,Δ₂ such
+% If Δ ⊢ σ : Γ and Γ[x :¹ A ↦ x :⁰ A] = Γ', then there exist e,Δ₁,Δ₂ such
 % that Δ₁ ⊢ σ : Γ', Δ₂ ⊢ e ⇐ A, and Δ₁ ⋈ Δ₂ = Δ
 
 LF subst-upd : wf_subst _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
@@ -100,7 +100,7 @@ rec subst_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   [Ψ ⊢ wf_subst Δ σ Γ]
   → {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} [Ψ ⊢ wf_subst (cons Δ X A[] 𝟘) σ Γ] =
   / total 1 /
-  fn SUB ⇒ mlam X, A ⇒ case SUB of
+  fn sub ⇒ mlam X, A ⇒ case sub of
   | [_ ⊢ wf_subst_empty E] ⇒ [_ ⊢ wf_subst_empty (exh/c E hal/0)]
   | [_ ⊢ wf_subst_cons1 SUB1 CH1 M1] ⇒
     let [_ ⊢ SUB1'] = subst_weak [_ ⊢ SUB1] [_ ⊢ X] [ ⊢ A] in
@@ -120,10 +120,10 @@ rec subst_extend : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
     {A:[ ⊢ tp]}
     {α:[ ⊢ mult]}
     [Ψ ⊢ wf_subst (cons Δ X A[] α[]) (scons σ X) (cons Γ X A[] α[])] =
-  / total /
-  fn SUB ⇒ mlam X, A, α ⇒
+  / total 1 /
+  fn sub ⇒ mlam X, A, α ⇒
   let [_ ⊢ SUB1]:[_ ⊢ wf_subst (cons Δ _ _ _) _ _] =
-    subst_weak SUB [_ ⊢ X] [ ⊢ A] in
+    subst_weak sub [_ ⊢ X] [ ⊢ A] in
   let [_ ⊢ merge-getid M E] = merge_getid [_ ⊢ Δ] in
   let [_ ⊢ SE] = merge_same_elts_cor [_ ⊢ M] in
   case [ ⊢ α] of

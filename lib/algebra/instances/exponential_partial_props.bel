@@ -8,7 +8,7 @@
 % Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
-  / total /
+  / total 1 /
   fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
@@ -22,7 +22,7 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
 
 rec ident_0_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • 𝟘 m m2]
                 → [ ⊢ mult_eq m m2] =
-  / total /
+  / total 1 /
   mlam m, m2 ⇒ fn d ⇒ case d of
   | [ ⊢ •/00] ⇒ [ ⊢ mult/refl]
   | [ ⊢ •/01] ⇒ [ ⊢ mult/refl]
@@ -35,7 +35,7 @@ rec mult_ident_0 : Ident [ ⊢ 𝟘] =
 
 rec ident_w_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • ω m m2]
                 → [ ⊢ mult_eq m m2] =
-  / total /
+  / total 1 /
   mlam m, m2 ⇒ fn d ⇒ let [ ⊢ •/ωω] = d in [ ⊢ mult/refl]
   ;
 
@@ -45,7 +45,7 @@ rec mult_ident_w : Ident [ ⊢ ω] =
   ;
 
 rec halident_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → Ident [ ⊢ α] =
-  / total /
+  / total 1 /
   mlam α ⇒ fn h ⇒ case h of
   | [ ⊢ hal/0] ⇒ mult_ident_0
   | [ ⊢ hal/ω] ⇒ mult_ident_w
@@ -59,7 +59,7 @@ rec mult_halident : HalIdent =
 % Every unit element is harmless
 
 rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
-  / total /
+  / total 1 /
   mlam _, _ ⇒ fn d ⇒ case d of
   | [ ⊢ •/00] ⇒ [ ⊢ hal/0]
   | [ ⊢ •/01] ⇒ [ ⊢ hal/0]
@@ -74,7 +74,7 @@ rec mult_unithal : UnitHal =
 % For any α, obtain a harmless identity element β such that β • α = α
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
-  / total /
+  / total 1 /
   mlam α ⇒ case [ ⊢ α] of
   | [ ⊢ 𝟘] ⇒ [ ⊢ get-unit hal/0 •/00]
   | [ ⊢ 𝟙] ⇒ [ ⊢ get-unit hal/0 •/01]
@@ -83,33 +83,28 @@ rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
 
 % Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
 
-rec mult_zsfree : [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
-  / total /
-  fn m, u ⇒ case u of
+rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
+  / total 1 /
+  mlam _, _, _ ⇒ fn m, u ⇒ case u of
   | [ ⊢ hal/0] ⇒ let [ ⊢ •/00] = m in [ ⊢ mult/refl]
   | [ ⊢ hal/ω] ⇒ let [ ⊢ •/ωω] = m in [ ⊢ mult/refl]
   ;
 
-rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
-                 [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
-  / total /
-  mlam _, _, _ ⇒ fn m, u ⇒ mult_zsfree m u
-  ;
-
-rec mult_zsfree_rec : ZsFree =
+rec mult_zsfree : ZsFree =
   / total /
   Is-ZsFree zsfree_prf
   ;
 
 rec mult_zsfree_cor : [ ⊢ • α₁ α₂ 𝟘] → [ ⊢ mult_eq α₁ 𝟘] =
-  / total /
-  fn m ⇒ mult_zsfree m [ ⊢ hal/0]
+  / total 1 /
+  fn m ⇒ mult_zsfree_gen mult_zsfree m [ ⊢ hal/0]
   ;
 
 % Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
-  / total /
+  / total 1 /
   fn m ⇒ case m of
   | [ ⊢ •/00] ⇒ [ ⊢ •/00]
   | [ ⊢ •/01] ⇒ [ ⊢ •/10]
@@ -135,24 +130,19 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
 
 % Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
 
-rec mult_cancel : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
-  / total /
-  fn m1, m2 ⇒ case m1 of
+rec cancel_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
+                 [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
+  / total 1 /
+  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ case m1 of
   | [ ⊢ •/00] ⇒ let [ ⊢ •/00] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/01] ⇒ let [ ⊢ •/01] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/10] ⇒ let [ ⊢ •/10] = m2 in [ ⊢ mult/refl]
   | [ ⊢ •/ωω] ⇒ let [ ⊢ •/ωω] = m2 in [ ⊢ mult/refl]
   ;
 
-rec canc_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
-               [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
-  / total /
-  mlam _, _, _, _ ⇒ fn m1, m2 ⇒ mult_cancel m1 m2
-  ;
-
 rec mult_cancel : Cancl =
   / total /
-  Is-Cancl canc_prf
+  Is-Cancl cancel_prf
   ;
 
 %------------------------------------------------------%
@@ -162,13 +152,13 @@ rec mult_cancel : Cancl =
 % Harmless elements are idempotent
 
 rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
-  / total /
+  / total 1 /
   mlam _ ⇒ fn h ⇒ case h of
   | [ ⊢ hal/0] ⇒ [ ⊢ •/00]
   | [ ⊢ hal/ω] ⇒ [ ⊢ •/ωω]
   ;
 
-rec mult_halidem_rec : HalIdem =
+rec mult_halidem : HalIdem =
   / total /
   Is-HalIdem halidem_prf
   ;
@@ -176,7 +166,7 @@ rec mult_halidem_rec : HalIdem =
 % If hal(α), then there exist α₁, α₂ with α₁ • α₂ = α, hal(α₁) and hal(α₂)
 
 rec mult_get_hal : [ ⊢ hal α] → [ ⊢ get_hal_split α] =
-  / total /
+  / total 1 /
   fn u ⇒ case u of
   | [ ⊢ hal/0] ⇒ [ ⊢ get-hal-split hal/0 hal/0 •/00]
   | [ ⊢ hal/ω] ⇒ [ ⊢ get-hal-split hal/ω hal/ω •/ωω]

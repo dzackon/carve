@@ -1,0 +1,121 @@
+%======================================================%
+% Deleting an exhausted entry from a context
+%
+% "del Δ n Δ'": Δ' is Δ with the entry at position n, which must carry
+% multiplicity 𝟘, removed. We keep this file specific to algebras with a 𝟘
+% instead of generalizing it, since all uses are at that multiplicity.
+%======================================================%
+
+LF del : lctx (suc N) → nat → lctx N → type =
+| del/t : {Δ:lctx N} del (cons Δ X A 𝟘) (suc N) Δ
+| del/n : del Δ n Δ' → del (cons Δ Y B β) n (cons Δ' Y B β);
+
+% The deleted position lies within the context.
+
+rec del_lt : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
+  [Ψ ⊢ del Δ n[] Δ'] → [ ⊢ lt n (suc (suc N[]))] =
+  / total 1 /
+  fn dl ⇒ case dl of
+  | [_ ⊢ del/t _] ⇒ lt_suc [ ⊢ _]
+  | [_ ⊢ del/n DL] ⇒ lt_trans (del_lt [_ ⊢ DL]) (lt_suc [ ⊢ _])
+  ;
+
+% Deleting an entry preserves exhaustedness.
+
+rec del_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
+  [Ψ ⊢ del Δ n[] Δ'] → [Ψ ⊢ exh Δ] → [Ψ ⊢ exh Δ'] =
+  / total 1 /
+  fn dl, e ⇒ case dl of
+  | [_ ⊢ del/t _] ⇒ let [_ ⊢ exh/c E _] = e in [_ ⊢ E]
+  | [_ ⊢ del/n DL] ⇒
+    let [_ ⊢ exh/c E H[]] = e in
+    let [_ ⊢ E'] = del_exh [_ ⊢ DL] [_ ⊢ E] in
+    [_ ⊢ exh/c E' H[]]
+  ;
+
+% Consuming a name is preserved across a deletion. The deleted entry carries 𝟘
+% and the consumed one 𝟙, so the two positions cannot coincide.
+
+LF del_upd_res : del _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
+  | del-upd : upd Δ' m' X Y A B α β Δ₀' → del Δ₀ n Δ₀'
+  → if_lt_else m m' n m' (suc m')
+  → {DL:del Δ n Δ'} {U:upd Δ m X Y A B α β Δ₀}
+      del_upd_res DL U;
+
+rec del_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
+  {DL:[Ψ ⊢ del Δ n[] Δ']}
+  {U:[Ψ ⊢ upd Δ m[] X Y A[] B[] α[] β[] Δ₀]}
+  ([ ⊢ mult_eq α 𝟘] → [ ⊢ false])
+  → [Ψ ⊢ del_upd_res DL U] =
+  / total 1 /
+  mlam DL, U ⇒ fn nz ⇒ case [_ ⊢ DL] of
+  | [_ ⊢ del/t _] ⇒
+    (case [_ ⊢ U] of
+    | [_ ⊢ upd/t _] ⇒ impossible (nz [ ⊢ mult/refl])
+    | [_ ⊢ upd/n U'] ⇒
+      let [ ⊢ LT] = len_upd_lt [_ ⊢ U'] in
+      [_ ⊢ del-upd U' (del/t _) (if_lt_else/t LT[]) _ _]
+    )
+  | [_ ⊢ del/n DL'] ⇒
+    (case [_ ⊢ U] of
+    | [_ ⊢ upd/t _] ⇒
+      let [ ⊢ LT] = del_lt [_ ⊢ DL'] in
+      [_ ⊢ del-upd (upd/t _) (del/n DL') (if_lt_else/f LT[]) _ _]
+    | [_ ⊢ upd/n U'] ⇒
+      let [_ ⊢ del-upd U'' DL'' DP _ _] = del_upd [_ ⊢ DL'] [_ ⊢ U'] nz in
+      [_ ⊢ del-upd (upd/n U'') (del/n DL'') DP _ _]
+    )
+  ;
+
+% Given two two updates U1 and U2 at distinct positions, commute U2 past U1 and
+% past deletion of U1's entry.
+
+LF pushout_delete_res : upd _ _ _ _ _ _ _ _ _ → del _ _ _
+  → upd _ _ _ _ _ _ _ _ _ → type =
+  | pushout-delete : upd Δ₂ m Y Y B B' 𝟙 𝟘 Δ₂'
+  → upd Δ₁' n X X A A' α 𝟘 Δ₂'
+  → del Δ₂' n Δ₃'
+  → upd Δ₃ m' Y Y B B' 𝟙 𝟘 Δ₃'
+  → {U1:upd Δ₁ n X X A A' α 𝟘 Δ₂}
+    {DL:del Δ₂ n Δ₃}
+    {U2:upd Δ₁ m Y Y B B' 𝟙 𝟘 Δ₁'}
+      pushout_delete_res U1 DL U2;
+
+rec pushout_delete : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx (suc N[])])
+  {U1:[Ψ ⊢ upd Δ₁ n[] X X A[] A'[] α[] 𝟘 Δ₂]}
+  {DL:[Ψ ⊢ del Δ₂ n[] Δ₃]}
+  {U2:[Ψ ⊢ upd Δ₁ m[] Y Y B[] B'[] 𝟙 𝟘 Δ₁']}
+  [ ⊢ neq n m]
+  → [Ψ ⊢ pushout_delete_res U1 DL U2] =
+  / total /
+  mlam U1, DL, U2 ⇒ fn nq ⇒
+  let [_ ⊢ upd-pushout U3 U4 _ _] = upd_pushout [_ ⊢ U1] [_ ⊢ U2] nq in
+  let [_ ⊢ del-upd U5 DL' _ _ _] =
+    del_upd [_ ⊢ DL] [_ ⊢ U3] (fn e ⇒ impossible e) in
+  [_ ⊢ pushout-delete U3 U4 DL' U5 U1 DL U2]
+  ;
+
+% A context split is preserved across a deletion. The deleted entry carries
+% 𝟘, which splits only as 𝟘 • 𝟘 (zero-sum-freedom), so the entry is
+% deletable on both sides.
+
+LF del_merge_res : del _ _ _ → merge _ _ _ → type =
+  | del-merge : merge Δ₁' Δ₂' Δ' → del Δ₁ n Δ₁' → del Δ₂ n Δ₂'
+  → {DL:del Δ n Δ'} {M:merge Δ₁ Δ₂ Δ}
+      del_merge_res DL M;
+
+rec del_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
+  {DL:[Ψ ⊢ del Δ n[] Δ']} {M:[Ψ ⊢ merge Δ₁ Δ₂ Δ]}
+  [Ψ ⊢ del_merge_res DL M] =
+  / total 1 /
+  mlam DL, M ⇒ case [_ ⊢ DL] of
+  | [_ ⊢ del/t _] ⇒
+    let [_ ⊢ mg/c M' T[]] = [_ ⊢ M] in
+    let [ ⊢ mult/refl] = mult_zsfree_cor [ ⊢ T] in
+    let [ ⊢ mult/refl] = mult_zsfree_cor (mult_comm [ ⊢ T]) in
+    [_ ⊢ del-merge M' (del/t _) (del/t _) _ _]
+  | [_ ⊢ del/n DL'] ⇒
+    let [_ ⊢ mg/c M' T[]] = [_ ⊢ M] in
+    let [_ ⊢ del-merge M'' DL1 DL2 _ _] = del_merge [_ ⊢ DL'] [_ ⊢ M'] in
+    [_ ⊢ del-merge (mg/c M'' T[]) (del/n DL1) (del/n DL2) _ _]
+  ;

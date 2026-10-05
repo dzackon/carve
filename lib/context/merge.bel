@@ -117,7 +117,7 @@ LF merge_assoc_res2 : merge _ _ _ → merge _ _ _ → type =
 rec merge_assoc_swap : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {M1:[Ψ ⊢ merge Δ₁₂ Δ₃ Δ]}
   {M2:[Ψ ⊢ merge Δ₁ Δ₂ Δ₁₂]}
   [Ψ ⊢ merge_assoc_res2 M1 M2] =
-  / total /
+  / total 1 /
   mlam M1, M2 ⇒
   let [_ ⊢ M2_comm] = merge_comm [_ ⊢ M2] in
   let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2_comm] in

@@ -36,7 +36,7 @@ rec wf_prune : Wf [Ψ,x:obj ⊢ Δ[..]] → Wf [Ψ ⊢ Δ] =
 % Extending a context with a fresh variable preserves well-formedness predicate
 
 rec wf_extcons : Wf [Ψ ⊢ Δ] → Wf [Ψ,x:obj ⊢ cons Δ[..] x _ _] =
-  / total /
+  / total 1 /
   fn wf ⇒ case wf of
   | Wf-Nil ⇒ Wf-Cons Wf-Nil notin_nil
   | Wf-Cons wf1 nin ⇒ Wf-Cons (wf_ext wf) notin_contra
@@ -54,7 +54,7 @@ rec wf_swap : Wf [Ψ,x:obj,y:obj ⊢ Δ] → Wf [Ψ,y:obj,x:obj ⊢ Δ[..,x,y]] 
 % Updating a variable's type and/or multiplicity preserves well-formedness
 
 rec wf_upd : Wf [Ψ ⊢ Δ] → [Ψ ⊢ upd Δ _ X X _ _ _ _ Δ'] → Wf [Ψ ⊢ Δ'] =
-  / total g (wf_upd g _ _ _) /
+  / total 1 /
   fn wf, u ⇒ case wf of
   | Wf-Nil ⇒ impossible u
   | Wf-Cons wf1 nin ⇒
@@ -77,7 +77,7 @@ rec wf_split : Wf [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ �
   ;
 
 rec wf_split_r : Wf [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ₂] =
-  / total /
+  / total 1 /
   fn wf, m ⇒ wf_split wf (merge_comm m)
   ;
 
@@ -92,7 +92,7 @@ rec wf_merge : Wf [Ψ ⊢ Δ₁] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ �
   ;
 
 rec wf_merge_r : Wf [Ψ ⊢ Δ₂] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf [Ψ ⊢ Δ] =
-  / total /
+  / total 1 /
   fn w, m ⇒ wf_merge w (merge_comm m)
   ;
 
@@ -122,7 +122,7 @@ rec wf_merge_l' : Wf' [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf' [Ψ 
   ;
 
 rec wf_split_r' : Wf' [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → Wf' [Ψ ⊢ Δ₂] =
-  / total /
+  / total 1 /
   fn w, m ⇒ wf_merge_l' w (merge_comm m)
   ;
 

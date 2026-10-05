@@ -6,7 +6,8 @@
 % parameter variable drawn from Ψ
 %======================================================%
 
-% Decidable equality of objects: for any M, N drawn from Ψ, either M = N or M ≠ N
+% Decidable equality of objects: for any M, N drawn from Ψ, either M = N or
+% M ≠ N
 
 rec comp_obj : {Ψ:ctx} {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]}
   CompareObjs [Ψ ⊢ M] [Ψ ⊢ N] =
@@ -35,7 +36,7 @@ rec comp_obj : {Ψ:ctx} {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]}
 
 rec prune_obj : {#p:#[Ψ,x:obj ⊢ obj]} ([Ψ,x:obj ⊢ obj_eq #p x] → [ ⊢ false])
   → PruneObj [Ψ,x:obj ⊢ #p] =
-  / total /
+  / total 1 /
   mlam #p ⇒ fn n ⇒
   case [_,x:obj ⊢ #p] of
   | [_,x:obj ⊢ x] ⇒ impossible n [_,x:obj ⊢ obj/refl]

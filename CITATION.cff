@@ -1,0 +1,69 @@
+cff-version: 1.2.0
+message: "If you use CARVe, please cite the paper below."
+title: "CARVe: Contexts as Resource Vectors"
+version: 1.1.0
+type: software
+license: ISC
+authors:
+  - family-names: Zackon
+    given-names: Daniel
+    affiliation: "McGill University"
+    orcid: https://orcid.org/0009-0008-6153-2955
+  - family-names: Sano
+    given-names: Chuta
+    affiliation: "McGill University"
+    orcid: https://orcid.org/0000-0002-8179-2307
+  - family-names: Momigliano
+    given-names: Alberto
+    affiliation: "Università degli Studi di Milano"
+    orcid: https://orcid.org/0000-0003-0942-4777
+  - family-names: Pientka
+    given-names: Brigitte
+    affiliation: "McGill University"
+    orcid: https://orcid.org/0000-0002-2549-4276
+repository-code: 'https://github.com/dzackon/carve/'
+repository-artifact: 'https://zenodo.org/records/14271731'
+keywords:
+  - mechanized meta-theory
+  - substructural type systems
+  - substructural logics
+  - linear logic
+  - verification
+  - Beluga
+preferred-citation:
+  type: conference-paper
+  title: "Split Decisions: Explicit Contexts for Substructural Languages"
+  year: 2025
+  doi: "10.1145/3703595.3705888"
+  isbn: "979-8-4007-1347-7"
+  start: 257
+  end: 271
+  collection-title: >-
+    Proceedings of the 14th ACM SIGPLAN International Conference
+    on Certified Programs and Proofs (CPP 2025)
+  conference:
+    name: >-
+      14th ACM SIGPLAN International Conference on Certified Programs and
+      Proofs (CPP 2025)
+    city: Denver
+    region: Colorado
+    country: US
+  publisher:
+    name: "Association for Computing Machinery"
+  authors:
+    - family-names: Zackon
+      given-names: Daniel
+      affiliation: "McGill University"
+      orcid: https://orcid.org/0009-0008-6153-2955
+    - family-names: Sano
+      given-names: Chuta
+      affiliation: "McGill University"
+      orcid: https://orcid.org/0000-0002-8179-2307
+    - family-names: Momigliano
+      given-names: Alberto
+      affiliation: "Università degli Studi di Milano"
+      orcid: https://orcid.org/0000-0003-0942-4777
+    - family-names: Pientka
+      given-names: Brigitte
+      affiliation: "McGill University"
+      orcid: https://orcid.org/0000-0002-2549-4276

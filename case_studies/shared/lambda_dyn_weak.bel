@@ -1,0 +1,25 @@
+%======================================================%
+% Weak reduction for the linear λ-calculus
+%
+% wstep is weak reduction: the same principal redexes as step, but
+% congruence only in positions that are not under a binder or inside bang.
+%======================================================%
+
+LF wstep : obj → obj → type =
+
+% Principal β-reductions
+| wstep/red : wstep (app (lam M) N) (M N)
+| wstep/red! : wstep (letbang (bang M) N) (N M)
+
+% Congruence rules
+| wstep/app1 : wstep M M' → wstep (app M N) (app M' N)
+| wstep/app2 : wstep N N' → wstep (app M N) (app M N')
+| wstep/letbang1 : wstep M M' → wstep (letbang M N) (letbang M' N);
+
+%------------------------------------------------------%
+% Multi-step weak reduction
+%------------------------------------------------------%
+
+LF wmstep : obj → obj → type =
+| wms/refl : wmstep M M
+| wms/onestep : wstep M M' → wmstep M' M'' → wmstep M M'';

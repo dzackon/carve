@@ -1,0 +1,47 @@
+%======================================================%
+% Lemmas about CP processes
+%======================================================%
+
+% If P does not depend on the variable x then x ∉ P
+
+rec in_proc_contra : (Ψ:ctx) {P:[Ψ ⊢ obj]}
+  [Ψ,x:obj ⊢ in_proc x P[..]] → [ ⊢ false] =
+  / total 1 /
+  mlam P ⇒ fn i ⇒ case [_ ⊢ P] of
+  | [_ ⊢ #p] ⇒ impossible i
+  | [_ ⊢ fwd _ _] ⇒ impossible i
+  | [_ ⊢ close _] ⇒ impossible i
+  | [_ ⊢ wait _ P'] ⇒
+    let [_,x:obj ⊢ inpr/wait_2 IN1] = i in
+    in_proc_contra [_ ⊢ P'] [_,x:obj ⊢ IN1]
+  | [_ ⊢ out _ (\y.P') (\y.Q')] ⇒
+    (case i of
+    | [_,x:obj ⊢ inpr/out_2 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ P'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    | [_,x:obj ⊢ inpr/out_3 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ Q'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    )
+  | [_ ⊢ inp _ (\y.\z.P')] ⇒
+    let [_,x:obj ⊢ inpr/inp_2 \y.\z.IN1] = i in
+    in_proc_contra [_,y:obj,z:obj ⊢ P'] [_,y:obj,z:obj,x:obj ⊢ IN1[..,x,y,z]]
+  | [_ ⊢ pcomp _ (\y.P') (\y.Q')] ⇒
+    (case i of
+    | [_,x:obj ⊢ inpr/pcomp_1 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ P'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    | [_,x:obj ⊢ inpr/pcomp_2 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ Q'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    )
+  | [_ ⊢ inl _ (\y.P')] ⇒
+    let [_,x:obj ⊢ inpr/inl_2 \y.IN1] = i in
+    in_proc_contra [_,y:obj ⊢ P'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+  | [_ ⊢ inr _ (\y.P')] ⇒
+    let [_,x:obj ⊢ inpr/inr_2 \y.IN1] = i in
+    in_proc_contra [_,y:obj ⊢ P'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+  | [_ ⊢ choice _ (\y.P') (\y.Q')] ⇒
+    (case i of
+    | [_,x:obj ⊢ inpr/choice_2 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ P'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    | [_,x:obj ⊢ inpr/choice_3 \y.IN1] ⇒
+      in_proc_contra [_,y:obj ⊢ Q'] [_,y:obj,x:obj ⊢ IN1[..,x,y]]
+    )
+  ;

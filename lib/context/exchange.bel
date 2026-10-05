@@ -13,7 +13,7 @@ rec exch_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   {α:[ ⊢ mult]} {Y:[Ψ ⊢ obj]} {B:[ ⊢ tp]} {β:[ ⊢ mult]}
   [Ψ ⊢ exch (cons (cons Δ X A[] α[]) Y B[] β[]) (suc N[]) X (suc (suc N[])) Y
     (cons (cons Δ Y B[] β[]) X A[] α[])] =
-  / total /
+  / total 1 /
   mlam Δ, _, _, _, _, _, _ ⇒
   let [_ ⊢ _]:[_ ⊢ lctx k[]] = [_ ⊢ Δ] in
   let [ ⊢ LT] = lt_suc [ ⊢ k] in
@@ -54,16 +54,11 @@ rec exch_symm_2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % The exchanged entries carry the updated type/multiplicity when k is one
 % of n,m.
 
-LF if_eq : nat → nat → nat → nat → nat → type =
-  % if_eq k' n m k₁ k₂ ≡ "k' = k₁ if n = m, otherwise k' = k₂"
-  | if_eq/t : if_eq k₁ n n k₁ k₂
-  | if_eq/f : neq n m → if_eq k₂ n m k₁ k₂;
-
 LF exch_upd_res :
   upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
 | exch-upd : upd Δ₁' n X Y A' B' α' β' Δ₂' → upd Δ₂' m Y X B' A' β' α' Δ₃'
   → upd Δ₃ k' Z Z C C' γ γ' Δ₃'
-  → if_eq k' n k m k'' → if_eq k'' m k n k
+  → if_eq_else k' n k m k'' → if_eq_else k'' m k n k
   → {U1:upd Δ₁ n X Y A B α β Δ₂} {U2:upd Δ₂ m Y X B A β α Δ₃}
     {U:upd Δ₁ k Z Z C C' γ γ' Δ₁'}
   exch_upd_res U1 U2 U;
@@ -74,7 +69,7 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
     {E2:[Ψ ⊢ upd Δ₂ m[] Y X B[] A[] β[] α[] Δ₃]}
     {U:[Ψ ⊢ upd Δ₁ k[] Z Z C[] C'[] γ[] γ'[] Δ₁']}
     [Ψ ⊢ exch_upd_res E1 E2 U] =
-  / total /
+  / total 1 /
   fn nq ⇒ mlam E1, E2, U ⇒
   let [_ ⊢ _]:[_ ⊢ upd _ n[] X Y A[] B[] α[] β[] _] = [_ ⊢ E1] in
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = [_ ⊢ E2] in
@@ -89,7 +84,7 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
         lookup_getupd (upd_symm [_ ⊢ E2]) [_ ⊢ Z] [ ⊢ C'] [ ⊢ γ'] in
       let [_ ⊢ E3] = upd_trans (upd_symm [_ ⊢ U]) [_ ⊢ E1] in
       let [_ ⊢ E4] = upd_trans [_ ⊢ E2] [_ ⊢ U'] in
-      [_ ⊢ exch-upd E3 E4 U' if_eq/t (if_eq/f NEQ2[]) _ _ _]
+      [_ ⊢ exch-upd E3 E4 U' if_eq_else/t (if_eq_else/f NEQ2[]) _ _ _]
     )
   | [ ⊢ comp_nats/neq NEQ1] ⇒
     let [_ ⊢ upd-pushout U' E1' _ _] = upd_pushout [_ ⊢ E1] [_ ⊢ U] [ ⊢ NEQ1] in
@@ -105,11 +100,12 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
       let [_ ⊢ upd-pushout U2' U2 _ _] = upd_pushout [_ ⊢ U''] [_ ⊢ U'] nq in
       let [_ ⊢ E5] = upd_trans [_ ⊢ E1'] [_ ⊢ U2] in
       let [_ ⊢ E6] = upd_trans (upd_symm [_ ⊢ U2']) [_ ⊢ E2'] in
-      [_ ⊢ exch-upd E5 E6 U''' (if_eq/f NEQ1[]) if_eq/t _ _ _]
+      [_ ⊢ exch-upd E5 E6 U''' (if_eq_else/f NEQ1[]) if_eq_else/t _ _ _]
     | [ ⊢ comp_nats/neq NEQ2] ⇒
       let [_ ⊢ upd-pushout U'' E2' _ _] =
         upd_pushout [_ ⊢ E2] [_ ⊢ U'] [ ⊢ NEQ2] in
-      [_ ⊢ exch-upd E1' E2' U'' (if_eq/f NEQ1[]) (if_eq/f NEQ2[]) _ _ _]
+      [_ ⊢ exch-upd E1' E2' U''
+        (if_eq_else/f NEQ1[]) (if_eq_else/f NEQ2[]) _ _ _]
     )
   ;
 
@@ -131,7 +127,7 @@ rec exch_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   {U1:[Ψ ⊢ upd Δ n[] X Y A[] B[] α[] β[] Δ'']}
   {U2:[Ψ ⊢ upd Δ'' m[] Y X B[] A[] β[] α[] Δ']} {M:[Ψ ⊢ merge Δ₁ Δ₂ Δ]}
   [Ψ ⊢ exch_merge_res U1 U2 M] =
-  / total /
+  / total 1 /
   mlam U1, U2, M ⇒
   let [_ ⊢ _]:[_ ⊢ upd _ n[] _ _ _ _ _ β[] _] = [_ ⊢ U1] in
   let [_ ⊢ _]:[_ ⊢ upd _ m[] _ _ _ _ _ _ _] = [_ ⊢ U2] in
@@ -171,7 +167,7 @@ rec exch_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exh Δ]
   → [Ψ ⊢ exch Δ n X m Y Δ']
   → [Ψ ⊢ exh Δ'] =
-  / total /
+  / total 1 /
   fn exh1, ex1 ⇒
   let [_ ⊢ exch/u NEQ[] U1 U2] = ex1 in
   let [_ ⊢ lookintm U3] = lookup_upd (upd_symm [_ ⊢ U1]) [_ ⊢ U2] [ ⊢ NEQ] in
@@ -189,7 +185,7 @@ rec exch_lookup : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exch Δ₁ m Y k Z Δ₂]
   → [Ψ ⊢ upd Δ₁ n[] X X' A[] A' α[] α' Δ₁']
   → [Ψ ⊢ lookup X A[] α[] Δ₂] =
-  / total /
+  / total 1 /
   fn e, u ⇒
   let [_ ⊢ exch/u NEQ[] U1 U2] = e in
   let [_ ⊢ U'] = upd_refl u in

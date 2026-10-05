@@ -26,7 +26,7 @@ rec varctx_ext : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ Δ[..]] =
 % Extending a context with a fresh variable preserves VarCtx predicate
 
 rec varctx_extcons : VarCtx [Ψ ⊢ Δ] → VarCtx [Ψ,x:obj ⊢ cons Δ[..] x _ _] =
-  / total /
+  / total 1 /
   fn vc ⇒ VarCtx-Cons (varctx_ext vc)
   ;
 
@@ -50,6 +50,6 @@ rec varctx_split : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → VarC
   ;
 
 rec varctx_split_r : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ] → VarCtx [Ψ ⊢ Δ₂] =
-  / total /
+  / total 1 /
   fn vc, m ⇒ varctx_split vc (merge_comm m)
   ;

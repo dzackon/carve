@@ -21,10 +21,12 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   | [_ ⊢ oft/app D1 D2 M1] ⇒
     (case st of
     | [_ ⊢ s/app1 S1] ⇒
-      let [_ ⊢ D1'] = preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
+      let [_ ⊢ D1'] =
+        preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
       [_ ⊢ oft/app D1' D2 M1]
     | [_ ⊢ s/app2 S2] ⇒
-      let [_ ⊢ D2'] = preservation [_ ⊢ D2] [_ ⊢ S2] (varctx_split_r vc [_ ⊢ M1]) in
+      let [_ ⊢ D2'] =
+        preservation [_ ⊢ D2] [_ ⊢ S2] (varctx_split_r vc [_ ⊢ M1]) in
       [_ ⊢ oft/app D1 D2' M1]
     | [_ ⊢ s/red] ⇒
       (case [_ ⊢ D1] of
@@ -42,7 +44,8 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
     (case st of
     | [_ ⊢ s/letbang1 S1] ⇒
-      let [_ ⊢ D1'] = preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
+      let [_ ⊢ D1'] =
+        preservation [_ ⊢ D1] [_ ⊢ S1] (varctx_split vc [_ ⊢ M1]) in
       [_ ⊢ oft/letbang D1' (\x.D2) M1]
     | [_ ⊢ s/letbang2 \x.S2] ⇒
       let [_,x:obj ⊢ D2'] = preservation [_,x:obj ⊢ D2] [_,x:obj ⊢ S2]

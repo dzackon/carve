@@ -24,7 +24,7 @@ rec relnm_to_encctx :
   | relName/n rn ⇒ Enc/c (relnm_to_encctx rn) [ ⊢ _] [ ⊢ _]
   ;
 
-% Enc [Ψ ⊢ Δ₁ ⋈ Δ₂] [Φ ⊢ σ] iff Enc [Ψ ⊢ Δ₁] [Φ ⊢ σ]
+% If Δ₁ ⋈ Δ₂ = Δ, then Enc [Ψ ⊢ Δ] [Φ ⊢ σ] iff Enc [Ψ ⊢ Δ₁] [Φ ⊢ σ]
 
 rec encctx_merge :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -59,17 +59,17 @@ rec encctx_upd :
   → [Ψ ⊢ upd Δ _ X X A[] A[] _ _ Δ']
   → Enc [Ψ ⊢ Δ'] $[Φ ⊢ $σ] =
   / total 1 /
-  fn e, u ⇒ case u of
+  fn ec, u ⇒ case u of
   | [_ ⊢ upd/t _] ⇒
-    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = e in
+    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = ec in
     Enc/c ec1 [ ⊢ _] [ ⊢ _]
   | [_ ⊢ upd/n U1] ⇒
-    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = e in
+    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = ec in
     let Prune-Upd [_ ⊢ U1'] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1] in
     Enc/c (encctx_upd ec1 [_ ⊢ U1']) [ ⊢ _] [ ⊢ _]
   ;
 
-% Obtain SCP hyp judgment from CP lookup judgment:
+% Obtain SCP hyp judgment from CP look-up judgment:
 % If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and (X : A) ∈ Δ, then (X[σ] : A) ∈ Φ
 
 rec lookup_to_hyp :
@@ -77,15 +77,16 @@ rec lookup_to_hyp :
   → [Ψ ⊢ upd Δ _ X X' A[] A' α α' Δ']
   → [Φ ⊢ hyp X[$σ] A[]] =
   / total 1 /
-  fn e, u ⇒ case u of
-  | [_ ⊢ upd/t _] ⇒ let Enc/c ec1 [ ⊢ _] [ ⊢ _] = e in
+  fn ec, u ⇒ case u of
+  | [_ ⊢ upd/t _] ⇒
+    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = ec in
     [_,b:block x:obj,h:hyp _ _ ⊢ b.2]
   | [_ ⊢ upd/n U1] ⇒
-    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = e in
+    let Enc/c ec1 [ ⊢ _] [ ⊢ _] = ec in
     let [_,x:obj ⊢ U1'] = upd_refl [_,x:obj ⊢ U1] in
     let Prune-Upd [_ ⊢ U1''] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-    let [_ ⊢ hx] = lookup_to_hyp ec1 [_ ⊢ U1''] in
-    [_,b:block x:obj,h:hyp _ _ ⊢ hx[..]]
+    let [_ ⊢ H] = lookup_to_hyp ec1 [_ ⊢ U1''] in
+    [_,b:block x:obj,h:hyp _ _ ⊢ H[..]]
   ;
 
 % If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and exh(Δ), then RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ]
@@ -123,172 +124,262 @@ rec unqlin_to_relnm :
     relName/n (unqlin_to_relnm ec1 [_ ⊢ U1'] (prune_exh [_,x:obj ⊢ E1]))
   ;
 
+% Enc for a context yields Enc for its tail
+
+rec enc_tail :
+  Enc [Ψ,x:obj ⊢ cons Δ[..] x A[] α[]]
+    $[Φ,b:block x:obj,h:hyp x A[] ⊢ $σ[..],b.1]
+  → Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
+  / total 1 /
+  fn ec ⇒ let Enc/c ec1 [ ⊢ _] [ ⊢ _] = ec in ec1
+  ;
+
 %------------------------------------------------------%
 % Extract linearity judgment from CP typing judgment
 %------------------------------------------------------%
 
-% If P ⊢ (x, X :¹ A), then P is linear with respect to x
+% If P ⊢ Δ where x :¹ A is the k-th entry of Δ and the rest of Δ, written
+% Δ', does not mention x, then P is linear with respect to x
+
+rec oft_linear_gen : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx (suc N[])])
+  [Ψ,x:obj ⊢ oft P Δ]
+  → [Ψ,x:obj ⊢ upd Δ k[] x x A[] A[] 𝟙 𝟘 Δ⁰]
+  → [Ψ,x:obj ⊢ del Δ⁰ k[] Δ'[..]]
+  → [Ψ ⊢ linear \x.P] =
+  / total 1 /
+  fn d, u, dl ⇒
+  let [_,x:obj ⊢ U] = u in
+  let [_,x:obj ⊢ DL] = dl in
+  case d of
+  | [_,x:obj ⊢ oft/fwd DU[] U1 U2 E] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,x:obj ⊢ del-upd U2ᵣ _ _ _ _] =
+        del_upd [_,x:obj ⊢ DL] [_,x:obj ⊢ U2] (fn e ⇒ impossible e) in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U2ᵣ] in
+      [_ ⊢ l_fwd2]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      (case comp_look [_,x:obj ⊢ U'] [_,x:obj ⊢ U2] of
+      | [_,x:obj ⊢ look-eq _ _] ⇒ [_ ⊢ l_fwd1]
+      | [_,x:obj ⊢ look-neq NEQ'[] _ _] ⇒
+        let [_,x:obj ⊢ lookintm U7] =
+          lookup_upd [_,x:obj ⊢ U2] [_,x:obj ⊢ U'] (neq_comm [ ⊢ NEQ']) in
+        impossible exh_lookup [_,x:obj ⊢ E] [_,x:obj ⊢ U7]
+      )
+    )
+  | [_,x:obj ⊢ oft/close U1 E] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒ [_ ⊢ l_close]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ lookintm U2] =
+        lookup_upd [_,x:obj ⊢ U1] [_,x:obj ⊢ U] (neq_comm [ ⊢ NEQ]) in
+      impossible exh_lookup [_,x:obj ⊢ E] [_,x:obj ⊢ U2]
+    )
+  | [_,x:obj ⊢ oft/wait U1 O1] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,x:obj ⊢ O1s] = oft_del [_,x:obj ⊢ O1] [_,x:obj ⊢ DL] in
+      let Prune-Oft [_ ⊢ _] [_,x:obj ⊢ _] = prune_oft [_,x:obj ⊢ O1s] in
+      [_ ⊢ l_wait]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_ ⊢ LN] =
+        oft_linear_gen [_,x:obj ⊢ O1] [_,x:obj ⊢ U']
+          [_,x:obj ⊢ DL'] in
+      [_ ⊢ l_wait2 LN]
+    )
+  | [_,x:obj ⊢ oft/out U1 M (\y.O1[..,y,x]) (\y.O2[..,y,x])] ⇒
+    let [_,x:obj ⊢ merge-upd Ua Ub T[] M⁰ _ _ _] =
+      merge_upd_cor [_,x:obj ⊢ U] [_,x:obj ⊢ M] [ ⊢ •/00] in
+    let [_,x:obj ⊢ del-merge M' DLa DLb _ _] =
+      del_merge [_,x:obj ⊢ DL] [_,x:obj ⊢ M⁰] in
+    let Prune-Merge [_ ⊢ _] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M'] in
+    (case [ ⊢ T] of
+    | [ ⊢ •/10] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_refl_cor [_,x:obj ⊢ Ub] in
+      let [_,x:obj ⊢ del-upd U1ᵣ DL' _ _ _] =
+        del_upd [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1] (fn e ⇒ impossible e) in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_,y:obj,x:obj ⊢ O2s] =
+        oft_del [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O2s] in
+      let [_,y:obj ⊢ LN] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ upd/n Ua[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DLa[..,x]] in
+      [_ ⊢ l_out2 \y.LN]
+    | [ ⊢ •/01] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_refl_cor [_,x:obj ⊢ Ua] in
+      let [_,y:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ del/n DLa[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O1s] in
+      (case comp_look [_,x:obj ⊢ Ub] [_,x:obj ⊢ U1] of
+      | [_,x:obj ⊢ look-eq _ _] ⇒
+        let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ Ub] [_,x:obj ⊢ U1] in
+        let [_,y:obj,x:obj ⊢ O2s] =
+          oft_del [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ del/n DLb[..,x]] in
+        let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+          prune_oft [_,y:obj,x:obj ⊢ O2s] in
+        let [_,x:obj ⊢ oft/out _ _ (\y._) (\y.O2e)] = d in
+        let [_,x:obj ⊢ LNx] = oft_linear_gen [_,x:obj,y:obj ⊢ O2e]
+          [_,x:obj,y:obj ⊢ upd/t _] [_,x:obj,y:obj ⊢ del/t _] in
+        let [_ ⊢ LN] = linear_str [_,x:obj ⊢ LNx] in
+        [_ ⊢ l_out LN]
+      | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+        let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+          pushout_delete [_,x:obj ⊢ Ub] [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+        let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+        let [_,y:obj ⊢ LN] =
+          oft_linear_gen [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
+            [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+        [_ ⊢ l_out3 \y.LN]
+      )
+    )
+  | [_,x:obj ⊢ oft/inp U1 (\y.\z.O1[..,y,z,x])] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,y:obj,z:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,z:obj,x:obj ⊢ O1]
+          [_,y:obj,z:obj,x:obj ⊢ del/n (del/n DL[..,x])] in
+      let Prune-Oft [_,y:obj,z:obj ⊢ _] [_,y:obj,z:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,z:obj,x:obj ⊢ O1s] in
+      let [_,x:obj ⊢ oft/inp _ (\y.\z.O1e[..,x,z,y])] = d in
+      let [_,x:obj,z:obj ⊢ LNx] =
+        oft_linear_gen [_,x:obj,z:obj,y:obj ⊢ O1e]
+          [_,x:obj,z:obj,y:obj ⊢ upd/n (upd/t _)]
+          [_,x:obj,z:obj,y:obj ⊢ del/n (del/t _)] in
+      let [_,z:obj ⊢ LN] = linear_str [_,z:obj,x:obj ⊢ LNx[..,x,z]] in
+      [_ ⊢ l_inp \z.LN]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_,y:obj,z:obj ⊢ LN] =
+        oft_linear_gen [_,y:obj,z:obj,x:obj ⊢ O1]
+          [_,y:obj,z:obj,x:obj ⊢ upd/n (upd/n U'[..,x])]
+          [_,y:obj,z:obj,x:obj ⊢ del/n (del/n DL'[..,x])] in
+      [_ ⊢ l_inp2 \y.\z.LN]
+    )
+  | [_,x:obj ⊢ oft/pcomp DU[] M (\y.O1[..,y,x]) (\y.O2[..,y,x])] ⇒
+    let [_,x:obj ⊢ merge-upd Ua Ub T[] M⁰ _ _ _] =
+      merge_upd_cor [_,x:obj ⊢ U] [_,x:obj ⊢ M] [ ⊢ •/00] in
+    let [_,x:obj ⊢ del-merge M' DLa DLb _ _] =
+      del_merge [_,x:obj ⊢ DL] [_,x:obj ⊢ M⁰] in
+    let Prune-Merge [_ ⊢ _] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M'] in
+    (case [ ⊢ T] of
+    | [ ⊢ •/10] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_refl_cor [_,x:obj ⊢ Ub] in
+      let [_,y:obj,x:obj ⊢ O2s] =
+        oft_del [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ del/n DLb[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O2s] in
+      let [_,y:obj ⊢ LN] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ upd/n Ua[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DLa[..,x]] in
+      [_ ⊢ l_pcomp1 \y.LN]
+    | [ ⊢ •/01] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_refl_cor [_,x:obj ⊢ Ua] in
+      let [_,y:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ del/n DLa[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O1s] in
+      let [_,y:obj ⊢ LN] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ upd/n Ub[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DLb[..,x]] in
+      [_ ⊢ l_pcomp2 \y.LN]
+    )
+  | [_,x:obj ⊢ oft/inl U1 (\y.O1[..,y,x])] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,y:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ del/n DL[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O1s] in
+      let [_,x:obj ⊢ oft/inl _ (\y.O1e)] = d in
+      let [_,x:obj ⊢ LN1x] = oft_linear_gen [_,x:obj,y:obj ⊢ O1e]
+        [_,x:obj,y:obj ⊢ upd/t _] [_,x:obj,y:obj ⊢ del/t _] in
+      let [_ ⊢ LN1] = linear_str [_,x:obj ⊢ LN1x] in
+      [_ ⊢ l_inl LN1]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_,y:obj ⊢ LN1] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+      [_ ⊢ l_inl2 (\y.LN1)]
+    )
+  | [_,x:obj ⊢ oft/inr U1 (\y.O1[..,y,x])] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,y:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ del/n DL[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O1s] in
+      let [_,x:obj ⊢ oft/inr _ (\y.O1e)] = d in
+      let [_,x:obj ⊢ LN1x] = oft_linear_gen [_,x:obj,y:obj ⊢ O1e]
+        [_,x:obj,y:obj ⊢ upd/t _] [_,x:obj,y:obj ⊢ del/t _] in
+      let [_ ⊢ LN1] = linear_str [_,x:obj ⊢ LN1x] in
+      [_ ⊢ l_inr LN1]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_,y:obj ⊢ LN1] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+      [_ ⊢ l_inr2 (\y.LN1)]
+    )
+  | [_,x:obj ⊢ oft/choice U1 (\y.O1[..,y,x]) (\y.O2[..,y,x])] ⇒
+    (case comp_look [_,x:obj ⊢ U] [_,x:obj ⊢ U1] of
+    | [_,x:obj ⊢ look-eq _ _] ⇒
+      let [_,x:obj ⊢ ctx/refl] = upd_func [_,x:obj ⊢ U] [_,x:obj ⊢ U1] in
+      let [_,y:obj,x:obj ⊢ O1s] =
+        oft_del [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ del/n DL[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O1s] in
+      let [_,y:obj,x:obj ⊢ O2s] =
+        oft_del [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ del/n DL[..,x]] in
+      let Prune-Oft [_,y:obj ⊢ _] [_,y:obj,x:obj ⊢ _] =
+        prune_oft [_,y:obj,x:obj ⊢ O2s] in
+      let [_,x:obj ⊢ oft/choice _ (\y.O1e) (\y.O2e)] = d in
+      let [_,x:obj ⊢ LN1x] = oft_linear_gen [_,x:obj,y:obj ⊢ O1e]
+        [_,x:obj,y:obj ⊢ upd/t _] [_,x:obj,y:obj ⊢ del/t _] in
+      let [_ ⊢ LN1] = linear_str [_,x:obj ⊢ LN1x] in
+      let [_,x:obj ⊢ LN2x] = oft_linear_gen [_,x:obj,y:obj ⊢ O2e]
+        [_,x:obj,y:obj ⊢ upd/t _] [_,x:obj,y:obj ⊢ del/t _] in
+      let [_ ⊢ LN2] = linear_str [_,x:obj ⊢ LN2x] in
+      [_ ⊢ l_choice LN1 LN2]
+    | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
+      let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
+        pushout_delete [_,x:obj ⊢ U] [_,x:obj ⊢ DL] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
+      let [_,y:obj ⊢ LN1] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O1] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+      let [_,y:obj ⊢ LN2] =
+        oft_linear_gen [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
+          [_,y:obj,x:obj ⊢ del/n DL'[..,x]] in
+      [_ ⊢ l_choice2 (\y.LN1) (\y.LN2)]
+    )
+  ;
+
+% If P ⊢ (Δ, x :¹ A), then P is linear with respect to x
 
 rec oft_linear : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ oft P (cons Δ[..] x A[] 𝟙)]
   → [Ψ ⊢ linear \x.P] =
-  / total d (oft_linear d) /
-  fn d1 ⇒ case d1 of
-  | [_,x:obj ⊢ oft/fwd _ U1 U2 E] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ upd/n U2'] = [_,x:obj ⊢ U2] in
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U2'] in
-      [_ ⊢ l_fwd2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      (case [_,x:obj ⊢ U2] of
-      | [_,x:obj ⊢ upd/t _] ⇒ [_ ⊢ l_fwd1]
-      | [_,x:obj ⊢ upd/n _] ⇒
-        let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E] in
-        impossible [ ⊢ H]
-      )
-    )
-  | [_,x:obj ⊢ oft/close U1 E] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒ [_ ⊢ l_close]
-    | [_,x:obj ⊢ upd/n _] ⇒
-      let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E] in
-      impossible [ ⊢ H]
-    )
-  | [_,x:obj ⊢ oft/wait U1 O1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj ⊢ O2'] = oft_str [_,x:obj ⊢ O1] in
-      let Prune-Oft [_ ⊢ O2] [_,x:obj ⊢ _] = prune_oft [_,x:obj ⊢ O2'] in
-      [_ ⊢ l_wait]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_ ⊢ LN] = oft_linear [_,x:obj ⊢ O1] in
-      [_ ⊢ l_wait2 LN]
-    )
-  | [_,x:obj ⊢ oft/out U1 (mg/c M1 T[]) (\y.O1) (\y.O2)] ⇒
-    let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [ ⊢ •/01] = [ ⊢ T] in
-      let [_,x:obj,y:obj ⊢ O1'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let [_,x:obj,y:obj ⊢ O2'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O1'] in
-      let Prune-Oft [_,x:obj ⊢ O2''] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O2'] in
-      let [_ ⊢ LN2] = oft_linear [_,x:obj ⊢ O2''] in
-      [_ ⊢ l_out LN2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      (case [ ⊢ T] of
-      | [ ⊢ •/10] ⇒
-        let [_,x:obj ⊢ LN] =
-          oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-        let [_,x:obj,y:obj ⊢ O2'] =
-          oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-        let Prune-Oft [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ _] =
-          prune_oft [_,x:obj,y:obj ⊢ O2'] in
-        [_ ⊢ l_out2 \x.LN]
-      | [ ⊢ •/01] ⇒
-        let [_,x:obj,y:obj ⊢ O1'] =
-          oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-        let Prune-Oft [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ _] =
-          prune_oft [_,x:obj,y:obj ⊢ O1'] in
-        let [_,x:obj ⊢ LN] =
-          oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-        [_ ⊢ l_out3 \x.LN]
-      )
-    )
-  | [_,x:obj ⊢ oft/inp U1 \y.\z.O1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj,y:obj,z:obj ⊢ O2'] =
-        oft_str (oft_exch_top2 [_,y:obj,z:obj,x:obj ⊢ O1[..,x,y,z]]) in
-      let Prune-Oft [_,x:obj,y:obj ⊢ O2] [_,x:obj,y:obj,z:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj,z:obj ⊢ O2'] in
-      let [_,x:obj ⊢ LN] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      [_ ⊢ l_inp \x.LN]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_,x:obj,y:obj ⊢ LN] =
-        oft_linear (oft_exch_top2 [_,y:obj,z:obj,x:obj ⊢ O1[..,x,y,z]]) in
-      [_ ⊢ l_inp2 \x.\y.LN]
-    )
-  | [_,x:obj ⊢ oft/pcomp DU[] (mg/c M1 T[]) (\y.O1) (\y.O2)] ⇒
-    let Prune-Merge [_ ⊢ M2] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    (case [ ⊢ T] of
-    | [ ⊢ •/10] ⇒
-      let [_,x:obj ⊢ LN1] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let [_,x:obj,y:obj ⊢ O2'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O2'] in
-      [_ ⊢ l_pcomp1 \x.LN1]
-    | [ ⊢ •/01] ⇒
-      let [_,x:obj,y:obj ⊢ O1'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ _] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O1'] in
-      let [_,x:obj ⊢ LN1] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      [_ ⊢ l_pcomp2 \x.LN1]
-    )
-  | [_,x:obj ⊢ oft/inl U1 \y.O1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj,y:obj ⊢ O2'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ O2] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O2'] in
-      let [_ ⊢ LN] = oft_linear [_,x:obj ⊢ O2] in
-      [_ ⊢ l_inl LN]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_,x:obj ⊢ LN] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      [_ ⊢ l_inl2 \x.LN]
-    )
-  | [_,x:obj ⊢ oft/inr U1 \y.O1] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj,y:obj ⊢ O2'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ O2] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O2'] in
-      let [_ ⊢ LN] = oft_linear [_,x:obj ⊢ O2] in
-      [_ ⊢ l_inr LN]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_,x:obj ⊢ LN] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      [_ ⊢ l_inr2 \x.LN]
-    )
-  | [_,x:obj ⊢ oft/choice U1 (\y.O1) (\y.O2)] ⇒
-    (case [_,x:obj ⊢ U1] of
-    | [_,x:obj ⊢ upd/t _] ⇒
-      let [_,x:obj,y:obj ⊢ O1'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let [_,x:obj,y:obj ⊢ O2'] =
-        oft_str (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      let Prune-Oft [_,x:obj ⊢ O1''] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O1'] in
-      let Prune-Oft [_,x:obj ⊢ O2''] [_,x:obj,y:obj ⊢ _] =
-        prune_oft [_,x:obj,y:obj ⊢ O2'] in
-      let [_ ⊢ LN1] = oft_linear [_,x:obj ⊢ O1''] in
-      let [_ ⊢ LN2] = oft_linear [_,x:obj ⊢ O2''] in
-      [_ ⊢ l_choice LN1 LN2]
-    | [_,x:obj ⊢ upd/n U1'] ⇒
-      let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
-      let [_,x:obj ⊢ LN1] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O1[..,y,x]]) in
-      let [_,x:obj ⊢ LN2] =
-        oft_linear (oft_exch_top [_,x:obj,y:obj ⊢ O2[..,y,x]]) in
-      [_ ⊢ l_choice2 (\x.LN1) (\x.LN2)]
-    )
+  / total 1 /
+  fn d ⇒ oft_linear_gen d [_,x:obj ⊢ upd/t _] [_,x:obj ⊢ del/t _]
   ;
