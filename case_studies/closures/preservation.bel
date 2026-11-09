@@ -2,7 +2,7 @@
 % Type preservation
 %======================================================%
 
-% Type preservation: if η ⊢ M ⇓ W, η : Δ, and Δ ⊢ M : T, then W : T
+% Type preservation: If η ⊢ M ⇓ W, η : Δ, and Δ ⊢ M : T, then W : T.
 
 rec preservation :
   [ ⊢ eval η M W]

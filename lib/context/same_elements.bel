@@ -2,7 +2,7 @@
 % Properties of same_elts judgment
 %======================================================%
 
-% Reflexivity: Δ ≈ Δ
+% Reflexivity: Δ ≈ Δ.
 
 rec same_elts_refl : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ same_elts Δ Δ] =
   / total 1 /
@@ -12,7 +12,7 @@ rec same_elts_refl : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ same_elts Δ Δ] =
     let [_ ⊢ SE] = same_elts_refl [_ ⊢ Δ'] in [_ ⊢ se/c SE]
   ;
 
-% Symmetry: If Δ ≈ Δ', then Δ' ≈ Δ
+% Symmetry: If Δ ≈ Δ', then Δ' ≈ Δ.
 
 rec same_elts_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ']
@@ -23,7 +23,7 @@ rec same_elts_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ se/c SE1] ⇒ let [_ ⊢ SE2] = same_elts_symm [_ ⊢ SE1] in [_ ⊢ se/c SE2]
   ;
 
-% Transitivity: If Δ ≈ Δ' and Δ' ≈ Δ'', then Δ ≈ Δ''
+% Transitivity: If Δ ≈ Δ' and Δ' ≈ Δ'', then Δ ≈ Δ''.
 
 rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ']
@@ -39,9 +39,9 @@ rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Mergeable contexts contain the same elements:
-% (1) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ (and so Δ₂ ≈ Δ by commutativity of merge)
+% (1) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ (and so Δ₂ ≈ Δ by commutativity of merge).
 % (2) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ₂ [corollary of (1) using merge_comm,
-%     same_elts_symm, same_elts_trans]
+%     same_elts_symm, same_elts_trans].
 
 rec merge_same_elts : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -64,7 +64,7 @@ rec merge_same_elts_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Preservation across same_elts
 %------------------------------------------------------%
 
-% Preserve lookup by position, name, and type
+% Preserve look-up by position, name, and type.
 
 rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_int n X A Δ]
@@ -81,7 +81,7 @@ rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       [_ ⊢ lookint (upd/n U2)]
   ;
 
-% Preserve name membership
+% Preserve name membership.
 
 rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_n X Δ]
@@ -94,7 +94,7 @@ rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [_ ⊢ lookn U2]
   ;
 
-% Preserve VarCtx across changes of multiplicity
+% Preserve VarCtx across changes of multiplicity.
 
 rec varctx_same_elts : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ']
   → VarCtx [Ψ ⊢ Δ'] =
@@ -105,7 +105,7 @@ rec varctx_same_elts : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ']
     VarCtx-Cons (varctx_same_elts vc1 [_ ⊢ SE])
   ;
 
-% Preserve well-formedness
+% Preserve well-formedness.
 
 rec wf_same_elts : Wf [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ'] → Wf [Ψ ⊢ Δ'] =
   / total 1 /

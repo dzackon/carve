@@ -10,7 +10,7 @@ LF mult : type =
 LF • : mult → mult → mult → type =
 | •/plus : plus n m k → • (num n) (num m) (num k);
 
-% α is harmless
+% α is harmless.
 
 LF hal : mult → type =
 | hal/z : hal (num zero);

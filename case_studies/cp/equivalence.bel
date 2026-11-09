@@ -146,7 +146,7 @@ rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] �
     [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)]
   ;
 
-% The relations Enc and Dec used by the two translations are interderivable
+% The relations Enc and Dec used by the two translations are interderivable.
 
 rec enc2dec :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]

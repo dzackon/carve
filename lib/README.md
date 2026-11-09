@@ -33,9 +33,8 @@ Below is a more detailed breakdown:
 | `lib/context/update_wf.bel` | Optional name-based update lemmas requiring Wf |
 | `lib/context/merge*.bel` | Lemmas about merge |
 | `lib/context/exchange.bel` | Lemmas about exchange |
-| `lib/context/delete.bel` | Deleting an entry of multiplicity 𝟘 |
 | `lib/context/exhausted.bel` | Lemmas about exhaustedness |
-| `lib/context/linear_lookup.bel` | Look-up corollaries for linear / affine systems |
+| `lib/context/zero_one/` | Context lemmas that name the constants 𝟘 and 𝟙 |
 | `lib/context/same_elements.bel` | Lemmas about contexts containing the same elements |
 | `lib/context/wellformed*.bel, varctx.bel` | Lemmas about well-formedness predicates |
 | `case_studies/shared/lambda_*.bel` | Types, terms and dynamics shared by the λ-calculus studies |

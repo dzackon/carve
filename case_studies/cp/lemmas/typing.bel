@@ -6,7 +6,7 @@
 % Appearance of names in processes
 %------------------------------------------------------%
 
-% If P ⊢ Δ and x appears linearly in Δ, then x ∈ P
+% If P ⊢ Δ and x appears linearly in Δ, then x ∈ P.
 
 rec oft_lin_in : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P Δ]
@@ -103,7 +103,7 @@ rec oft_lin_in : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % A linear name must occur, specialized to the second-topmost entry:
-% (Δ, x :¹ A, y :β B) cannot type a process that does not mention x
+% (Δ, x :¹ A, y :β B) cannot type a process that does not mention x.
 
 rec oft_lin_absurd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj,y:obj ⊢ oft P[..,y] (cons (cons Δ[..] x A[] 𝟙) y B[] β[])]
@@ -185,10 +185,7 @@ rec prune_oft : {O:[Ψ,x:obj ⊢ oft P Δ[..]]} PruneOft [Ψ,x:obj ⊢ O] =
     Prune-Oft [_ ⊢ oft/choice U' (\y.O1') (\y.O2')] [_,x:obj ⊢ _]
   ;
 
-% Exchange lemma:
-% If P ⊢ Δ and Δ[(n, x) ↔ (m, y)] = Δ', P ⊢ Δ'
-% (Plus two corollaries as helper lemmas for permuting the topmost elements of a
-% context)
+% Exchange lemma: If P ⊢ Δ and Δ[(n, x) ↔ (m, y)] = Δ', then P ⊢ Δ'.
 
 rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P Δ]
@@ -262,6 +259,8 @@ rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ oft/choice U2 (\x.O1') (\x.O2')]
   ;
 
+% Corollary: exchange the two topmost entries.
+
 rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P (cons (cons Δ X A[] α[]) Y B[] β[])]
   → [Ψ ⊢ oft P (cons (cons Δ Y B[] β[]) X A[] α[])] =
@@ -269,6 +268,8 @@ rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   fn d ⇒ oft_exch d
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
+
+% Corollary: move the third-topmost entry to the top.
 
 rec oft_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[])]
@@ -344,9 +345,9 @@ rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
   ;
 
 % Strengthening lemmas (instances of deletion):
-% (1) If P ⊢ (Δ, x :⁰ A), then P ⊢ Δ
-% (2) if P ⊢ (Δ, x :⁰ A, y :¹ B), then P ⊢ (Δ, y :¹ B) [corollary of (1) using
-% exchange lemma]
+% (1) If P ⊢ (Δ, x :⁰ A), then P ⊢ Δ.
+% (2) If P ⊢ (Δ, x :⁰ A, y :¹ B), then P ⊢ (Δ, y :¹ B) [corollary of (1) using
+%     exchange lemma].
 
 rec oft_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P (cons Δ X A[] 𝟘)]
@@ -367,7 +368,7 @@ rec oft_str_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Weakening lemma:
-% If P ⊢ Δ, then P ⊢ (Δ, x :⁰ A) for any x, A
+% If P ⊢ Δ, then P ⊢ (Δ, x :⁰ A) for any x, A.
 
 rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft P Δ]
@@ -414,8 +415,8 @@ rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ oft/choice (upd/n U1) (\x.O1') (\x.O2')]
   ;
 
-% Corollary: weakening below the topmost entry.
-% If P ⊢ (Δ, y :β B), then P ⊢ (Δ, x :⁰ A, y :β B) for any A
+% Corollary (weakening below the topmost entry):
+% If P ⊢ (Δ, y :β B), then P ⊢ (Δ, x :⁰ A, y :β B) for any A.
 
 rec oft_weak_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,y:obj ⊢ oft P (cons Δ[..] y B[] β[])]
@@ -431,7 +432,7 @@ rec oft_weak_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Main lemmas
 %------------------------------------------------------%
 
-% Commutativity of cut: if (pcomp A P Q) ⊢ Δ and A ⊥ A', then
+% Commutativity of cut: If (pcomp A P Q) ⊢ Δ and A ⊥ A', then
 % (pcomp A' Q P) ⊢ Δ.
 
 rec oft_comm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
@@ -448,11 +449,13 @@ rec oft_comm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [_ ⊢ oft/pcomp DU2[] M2 (\x.O2) (\x.O1)]
   ;
 
-% Associativity of cut, left to right.
+% Associativity of cut, left to right
 
 rec oft_assoc : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ oft (pcomp B[] (\y.pcomp A[] (\z.P[..,z]) (\x.Q[..,x,y])) (\y.R[..,y])) Δ]
-  → [Ψ ⊢ oft (pcomp A[] (\z.P[..,z]) (\x.pcomp B[] (\y.Q[..,x,y]) (\y.R[..,y]))) Δ] =
+  [Ψ ⊢ oft (pcomp B[] (\y.pcomp A[] (\z.P[..,z]) (\x.Q[..,x,y]))
+              (\y.R[..,y])) Δ]
+  → [Ψ ⊢ oft (pcomp A[] (\z.P[..,z])
+                   (\x.pcomp B[] (\y.Q[..,x,y]) (\y.R[..,y]))) Δ] =
   / total 1 /
   fn d ⇒
   let [_ ⊢ oft/pcomp DU1[] M1 (\x.oft/pcomp DU2[] (mg/c M2' T1[]) (\y.O1)
@@ -470,11 +473,13 @@ rec oft_assoc : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       (\y.O2') (\y.O3'))]
   ;
 
-% Associativity of cut, right to left.
+% Associativity of cut, right to left
 
 rec oft_assoc_inv : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
-  [Ψ ⊢ oft (pcomp A[] (\z.P[..,z]) (\x.pcomp B[] (\y.Q[..,x,y]) (\y.R[..,y]))) Δ]
-  → [Ψ ⊢ oft (pcomp B[] (\y.pcomp A[] (\z.P[..,z]) (\x.Q[..,x,y])) (\y.R[..,y])) Δ] =
+  [Ψ ⊢ oft (pcomp A[] (\z.P[..,z])
+              (\x.pcomp B[] (\y.Q[..,x,y]) (\y.R[..,y]))) Δ]
+  → [Ψ ⊢ oft (pcomp B[] (\y.pcomp A[] (\z.P[..,z]) (\x.Q[..,x,y]))
+                   (\y.R[..,y])) Δ] =
   / total 1 /
   fn d ⇒
   let [_ ⊢ oft/pcomp DU1[] M1 (\x.O1) (\x.oft/pcomp DU2[] (mg/c M2' T1[])
@@ -526,7 +531,8 @@ rec oft_cong : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ oft/out U M (\x.O1) (\x.O2')]
   | [_ ⊢ ≡c/inp \x.\y.C1] ⇒
     let [_ ⊢ oft/inp U (\x.\y.O)] = d in
-    let [_,x:obj,y:obj ⊢ O'] = oft_cong [_,x:obj,y:obj ⊢ O] [_,x:obj,y:obj ⊢ C1] in
+    let [_,x:obj,y:obj ⊢ O'] =
+      oft_cong [_,x:obj,y:obj ⊢ O] [_,x:obj,y:obj ⊢ C1] in
     [_ ⊢ oft/inp U (\x.\y.O')]
   | [_ ⊢ ≡c/pcomp1 \x.C1] ⇒
     let [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] = d in
@@ -556,6 +562,8 @@ rec oft_cong : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ ≡sym C1] ⇒ oft_cong_symm d [_ ⊢ C1]
   | [_ ⊢ ≡trans C1 C2] ⇒ oft_cong (oft_cong d [_ ⊢ C1]) [_ ⊢ C2]
 
+% If Q ⊢ Δ and P ≡ Q, then P ⊢ Δ.
+
 and rec oft_cong_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft Q Δ]
   → [Ψ ⊢ P ≡ Q]
@@ -579,7 +587,8 @@ and rec oft_cong_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ oft/out U M (\x.O1) (\x.O2')]
   | [_ ⊢ ≡c/inp \x.\y.C1] ⇒
     let [_ ⊢ oft/inp U (\x.\y.O)] = d in
-    let [_,x:obj,y:obj ⊢ O'] = oft_cong_symm [_,x:obj,y:obj ⊢ O] [_,x:obj,y:obj ⊢ C1] in
+    let [_,x:obj,y:obj ⊢ O'] =
+      oft_cong_symm [_,x:obj,y:obj ⊢ O] [_,x:obj,y:obj ⊢ C1] in
     [_ ⊢ oft/inp U (\x.\y.O')]
   | [_ ⊢ ≡c/pcomp1 \x.C1] ⇒
     let [_ ⊢ oft/pcomp DU[] M (\x.O1) (\x.O2)] = d in
@@ -610,7 +619,7 @@ and rec oft_cong_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ ≡trans C1 C2] ⇒ oft_cong_symm (oft_cong_symm d [_ ⊢ C2]) [_ ⊢ C1]
   ;
 
-% Renaming lemma: if P ⊢ Δ₁ where x :¹ A is the k-th entry of Δ₁, the rest of
+% Renaming lemma: If P ⊢ Δ₁ where x :¹ A is the k-th entry of Δ₁, the rest of
 % Δ₁, written Δ₁', does not mention x, and X :⁰ A is the n-th entry, then P[X/x]
 % is typable in the context where the k-th entry is x :⁰ A and the n-th is
 % X :¹ A.
@@ -728,7 +737,8 @@ rec oft_rename_gen : (Ψ:ctx) (Δ₁:[Ψ,x:obj ⊢ lctx (suc N[])])
         [_,x:obj ⊢ oft/out V M₂ (\y.O1[..,y,x]) (\y.O2[..,y,x])]
       | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
         let [_,x:obj ⊢ pushout-delete U1⁰ UK' DL' U1ᵣ _ _ _] =
-          pushout_delete [_,x:obj ⊢ UKb] [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+          pushout_delete [_,x:obj ⊢ UKb] [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1]
+            [ ⊢ NEQ] in
         let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
         let [_,x:obj ⊢ upd-pushout U1' UN' _ _] =
           upd_pushout [_,x:obj ⊢ UNb] [_,x:obj ⊢ U1⁰]
@@ -875,7 +885,7 @@ rec oft_rename_gen : (Ψ:ctx) (Δ₁:[Ψ,x:obj ⊢ lctx (suc N[])])
   ;
 
 % Renaming lemma:
-% If P ⊢ (Δ, x :¹ A), then P[y/x] ⊢ Δ[y :⁰ A ↦ₙ y :¹ A]
+% If P ⊢ (Δ, x :¹ A), then P[y/x] ⊢ Δ[y :⁰ A ↦ₙ y :¹ A].
 
 rec oft_rename : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ oft P (cons Δ[..] x A[] 𝟙)]

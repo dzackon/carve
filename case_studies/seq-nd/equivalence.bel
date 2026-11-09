@@ -2,10 +2,10 @@
 % Equivalence of the two calculi
 %======================================================%
 
-% Equivalence of linear sequent calculus and natural deduction calculus
-% (1) If Γ ⊢ A and Δ ⊢ σ : Γ, then Δ ⊢ e ⟸ A for some e
-% (2) If Δ ⊢ e ⟸ C, then Δ ⊢ C
-% (3) If Δ₁ ⊢ s ⟹ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C
+% Equivalence of linear sequent calculus and natural deduction calculus.
+% (1) If Γ ⊢ A and Δ ⊢ σ : Γ, then Δ ⊢ e ⟸ A for some e.
+% (2) If Δ ⊢ e ⟸ C, then Δ ⊢ C.
+% (3) If Δ₁ ⊢ s ⟹ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C.
 
 LF inhabit : lctx _ → tp → type =
 | inh : chk Δ _ C → inhabit Δ C;

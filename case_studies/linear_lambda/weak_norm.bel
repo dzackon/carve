@@ -3,12 +3,16 @@
 %
 % Adapted from the proof of Andrew Cave
 % (https://github.com/Beluga-lang/Beluga/tree/master/examples/
-%   logrel/weak-norm-total-products-explicit-typing.bel)
+%   logrel/weak-norm-total-products-explicit-typing.bel).
 %======================================================%
+
+% V is a value.
 
 LF val : obj → type =
 | val/lam : val (lam M)
 | val/bang : val (bang M);
+
+% M halts: it reduces to a value.
 
 LF halts : obj → type =
 | halts/m : wmstep M V → val V → halts M;
@@ -25,6 +29,8 @@ stratified Reduce : {A:[ ⊢ tp]} {M:[ ⊢ obj]} ctype =
 | Red/! : {M':[ ⊢ obj]} [ ⊢ wmstep M (bang M')] → Reduce [ ⊢ A] [ ⊢ M']
   → Reduce [ ⊢ ! A] [ ⊢ M];
 
+% If M reduces to M' in one step and M' halts, then M halts.
+
 rec halts_step : {S:[ ⊢ wstep M M']} [ ⊢ halts M'] → [ ⊢ halts M] =
   / total 1 /
   mlam S ⇒ fn h ⇒
@@ -32,7 +38,7 @@ rec halts_step : {S:[ ⊢ wstep M M']} [ ⊢ halts M'] → [ ⊢ halts M] =
   [ ⊢ halts/m (wms/onestep S MS') V]
   ;
 
-% Every reducible term halts
+% Every reducible term halts.
 
 rec reduce_halts : Reduce [ ⊢ A] [ ⊢ M] → [ ⊢ halts M] =
   / total 1 /
@@ -59,7 +65,7 @@ rec bwd_closed : {A:[ ⊢ tp]} {S:[ ⊢ wstep M M']} Reduce [ ⊢ A] [ ⊢ M']
   ;
 
 % If M reduces to (bang M') and the body is reducible at N[M'], then the
-% whole let-bang is reducible
+% whole let-bang is reducible.
 
 rec letbang_red : {N:[x:obj ⊢ obj]} [ ⊢ wmstep M (bang M')]
   → Reduce [ ⊢ B] [ ⊢ N[M']]
@@ -81,6 +87,8 @@ inductive RedSub : (Ψ:ctx) {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
   → Reduce [ ⊢ A] [ ⊢ X]
   → RedSub [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]] $[ ⊢ $σ, X];
 
+% If RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] and (X : A) ∈ Δ, then X[$σ] is reducible at type A.
+
 rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
   → Reduce [ ⊢ A] [ ⊢ X[$σ]] =
@@ -94,6 +102,9 @@ rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
       let Prune-Upd [_ ⊢ U2] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
       lookup_redsub rs1 [_ ⊢ U2]
   ;
+
+% If RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] and Δ₁ ⋈ Δ₂ = Δ, then RedSub [Ψ ⊢ Δ₁] $[ ⊢ $σ]
+% and RedSub [Ψ ⊢ Δ₂] $[ ⊢ $σ].
 
 inductive RedSubMerge : (Ψ:ctx) {Δ₁:[Ψ ⊢ lctx K[]]} {Δ₂:[Ψ ⊢ lctx K[]]}
 {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
@@ -143,7 +154,7 @@ rec fund : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
 % Weak normalization
 %------------------------------------------------------%
 
-% Weak normalization: every closed well-typed term halts
+% Weak normalization: every closed well-typed term halts.
 
 rec weak_norm : [ ⊢ oft nil M A] → [ ⊢ halts M] =
   / total 1 /

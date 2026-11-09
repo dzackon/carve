@@ -1,11 +1,11 @@
 %======================================================%
 % Well-formedness under renaming update
 %
-% wf_upd_neq is separated from wellformed.bel because it calls comp_obj, which
-% requires `obj` to have no constructors (see lib/syntax/obj_as_var.bel).
+% These properties are separated from wellformed.bel because they call comp_obj,
+% which requires `obj` to have no constructors (see lib/syntax/obj_as_var.bel).
 %======================================================%
 
-% Updating to a fresh name preserves well-formedness
+% Updating to a fresh name preserves well-formedness.
 
 rec wf_upd_neq :
   Wf [Ψ ⊢ Δ]
@@ -28,4 +28,36 @@ rec wf_upd_neq :
         | Obj-Eq ⇒ impossible nin (lookup_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
         | Obj-Neq NEQ2 ⇒ Wf-Cons (wf_upd_neq wf1 [_ ⊢ U1] (notin_peel nin))
           (notin_upd_neq nin1 [_ ⊢ U1] NEQ2)
+  ;
+
+% Exchanging two context entries preserves well-formedness.
+
+rec wf_exch : Wf [Ψ ⊢ Δ] → [Ψ ⊢ exch Δ n X m Y Δ'] → Wf [Ψ ⊢ Δ'] =
+  / total 1 /
+  fn wf, ex ⇒
+  let [_ ⊢ exch/u NEQ[] U1 U2] = ex in
+  case [_ ⊢ U1] of
+  | [_ ⊢ upd/t _] ⇒
+    let Wf-Cons wf1 nin = wf in
+    (case [_ ⊢ U2] of
+    | [_ ⊢ upd/t _] ⇒ impossible neq_irreflex [ ⊢ NEQ]
+    | [_ ⊢ upd/n U2'] ⇒
+      let Is-Var = wf_isvar wf1 [_ ⊢ U2'] in
+      let wf2 = wf_upd_neq wf1 [_ ⊢ U2'] nin in
+      let nin2 =
+        notin_changename [_ ⊢ U2'] wf1 (notin_to_nmeq nin [_ ⊢ U2']) in
+      Wf-Cons wf2 nin2
+    )
+  | [_ ⊢ upd/n U1'] ⇒
+    let Wf-Cons wf1 nin = wf in
+    (case [_ ⊢ U2] of
+    | [_ ⊢ upd/t _] ⇒
+      let Is-Var = wf_isvar wf [_ ⊢ U1] in
+      let nin2 =
+        notin_changename [_ ⊢ U1'] wf1 (notin_to_nmeq nin [_ ⊢ U1']) in
+      Wf-Cons (wf_upd_neq wf1 [_ ⊢ U1'] nin) nin2
+    | [_ ⊢ upd/n U2'] ⇒
+      let nin2 = notin_exch nin [_ ⊢ exch/u NEQ[] U1' U2'] in
+      Wf-Cons (wf_exch wf1 [_ ⊢ exch/u NEQ[] U1' U2']) nin2
+    )
   ;

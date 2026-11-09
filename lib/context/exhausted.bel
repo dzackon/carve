@@ -6,7 +6,7 @@
 % Pruning lemmas
 %------------------------------------------------------%
 
-% "Prune" LF context to remove dependencies
+% "Prune" LF context to remove dependencies.
 
 rec prune_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ,x:obj ⊢ exh Δ[..]] → [Ψ ⊢ exh Δ] =
   / total 1 /
@@ -20,7 +20,7 @@ rec prune_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ,x:obj ⊢ exh Δ[..]] → [�
 % Interaction with updating
 %------------------------------------------------------%
 
-% Variables in an exhausted context must have harmless multiplicity
+% Variables in an exhausted context must have harmless multiplicity.
 
 rec exh_lookup : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exh Δ]
@@ -32,9 +32,9 @@ rec exh_lookup : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ upd/n U] ⇒ let [_ ⊢ exh/c E M] = e in exh_lookup [_ ⊢ E] [_ ⊢ U]
   ;
 
-% Changing type of an element of an exhausted context preserves exhaustedness
-% (1) If exh(Δ) and hal(β), then exh(Δ[x :α A ↦ₙ y :β B])
-% (2) If exh(Δ), then exh(Δ[x :α A ↦ₙ y :α B]) [corollary of (1) and exh_lookup]
+% Changing type of an element of an exhausted context preserves exhaustedness:
+% (1) If exh(Δ) and hal(β), then exh(Δ[x :α A ↦ₙ y :β B]).
+% (2) If exh(Δ), then exh(Δ[x :α A ↦ₙ y :α B]) [corollary of (1) and exh_lookup].
 
 rec exh_upd_hal : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exh Δ]

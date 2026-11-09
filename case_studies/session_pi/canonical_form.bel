@@ -2,7 +2,7 @@
 % Canonical form property
 %======================================================%
 
-% All processes can be rewritten in canonical form
+% All processes can be rewritten in canonical form.
 
 rec canonical_form : (Ψ:ctx) {P:[Ψ ⊢ proc]} [Ψ ⊢ equiv_can_form P] =
   / total 1 /

@@ -3,7 +3,7 @@
 % (graded systems)
 %======================================================%
 
-% Totality: For any α₁, α₂, there exists an α such that α₁ • α₂ = α
+% Totality: For any α₁, α₂, there exists an α such that α₁ • α₂ = α.
 
 rec total_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂] =
   / total 1 /
@@ -19,7 +19,7 @@ rec mult_total : Total =
   Is-Total total_prf
   ;
 
-% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
+% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'.
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
   / total 1 /
@@ -31,8 +31,8 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
   ;
 
 % Identity elements:
-% (1) num zero is an identity element
-% (2) every harmless element is an identity element
+% (1) num zero is an identity element.
+% (2) every harmless element is an identity element.
 
 rec ident_z_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • (num zero) m m2]
                 → [ ⊢ mult_eq m m2] =
@@ -55,7 +55,7 @@ rec mult_halident : HalIdent =
   Hal-Ident halident_prf
   ;
 
-% Every unit element is harmless
+% Every unit element is harmless.
 
 rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
   / total 1 /
@@ -69,14 +69,14 @@ rec mult_unithal : UnitHal =
   Unit-Hal unithal_prf
   ;
 
-% For any β, obtain a harmless identity element α such that α • β = β
+% For any β, obtain a harmless identity element α such that α • β = β.
 
 rec mult_get_id : {β:[ ⊢ mult]} [ ⊢ get_unit β] =
   / total 1 /
   mlam α ⇒ let [ ⊢ num n] = [ ⊢ α] in [ ⊢ get-unit hal/z (•/plus pl/z)]
   ;
 
-% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
+% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α.
 
 rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
                  [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
@@ -92,7 +92,7 @@ rec mult_zsfree : ZsFree =
   Is-ZsFree zsfree_prf
   ;
 
-% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
+% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α.
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total 1 /
@@ -102,7 +102,7 @@ rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   [ ⊢ •/plus P2]
   ;
 
-% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
+% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α.
 
 rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
                  [ ⊢ mult_assoc_res M1 M2] =
@@ -114,7 +114,7 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
   [ ⊢ mult-assoc (•/plus P3) (•/plus P4) _ _]
   ;
 
-% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
+% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'.
 
 rec cancel_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
                  [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
@@ -135,7 +135,7 @@ rec mult_cancel : Cancl =
 % Properties of harmless elements
 %------------------------------------------------------%
 
-% Harmless elements are idempotent
+% Harmless elements are idempotent.
 
 rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
   / total 1 /

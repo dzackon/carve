@@ -3,16 +3,17 @@
 %======================================================%
 
 % Admissibility of cut in the cut-free sequent calculus:
-% If Δ₁ ⊢ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C
+% If Δ₁ ⊢ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C.
 
 rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ seq_cf Δ₁ A[]]
   → [Ψ,x:obj ⊢ seq_cf (cons Δ₂[..] x A[] 𝟙) C[]]
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
   → [Ψ ⊢ seq_cf Δ C[]] =
-  % Remark: Beluga's totality checker cannot check termination in this case because
-  % the cut formula is implicit and the helpers (seqcf_weak, seqcf_exch_top, etc.)
-  % preserve inference height without recording it in their types.
+  % Remark: Beluga's totality checker cannot check termination in this case
+  % because the cut formula is implicit and the helpers (seqcf_weak,
+  % seqcf_exch_top, etc.) preserve inference height without recording it in
+  % their types.
   / trust /
   fn s1, s2, mg ⇒
   let ([_ ⊢ M1],[_ ⊢ M1_comm]) = (mg,merge_comm mg) in
@@ -162,7 +163,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     (case [_,x:obj ⊢ U1] of
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_ ⊢ R⊗_cf SQ2 SQ3 M2] = s1 in
-      % left and hyp rules already covered, others impossible
+      % Left and hyp rules already covered, others impossible
       let [_ ⊢ merge-assoc M3 M4 _ _] = merge_assoc [_ ⊢ M1] [_ ⊢ M2] in
       let SQ4' = cut_admis (seqcf_weak [_,x:obj ⊢ SQ3[..]] [_ ⊢ _] [ ⊢ _])
         (prune_seq_cf (seqcf_str (seqcf_exch_top2 [_,x:obj,y:obj,z:obj ⊢
@@ -189,7 +190,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       let [_ ⊢ merge-assoc2 M3 M4 _ _] =
         merge_assoc_swap [_ ⊢ M1_comm] [_ ⊢ M2'] in
       let [_ ⊢ R-o_cf \x.SQ3] = s1 in
-        % left and hyp rules already covered, others impossible
+        % Left and hyp rules already covered, others impossible
       let SQ4 = cut_admis (prune_seq_cf (seqcf_str [_,x:obj ⊢ SQ1]))
         [_,x:obj ⊢ SQ3] [_ ⊢ M3] in
       cut_admis SQ4
@@ -223,7 +224,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     (case [_,x:obj ⊢ U1] of
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_ ⊢ R&_cf SQ2 _] = s1 in
-      % left and hyp rules already covered, others impossible
+      % Left and hyp rules already covered, others impossible
       cut_admis [_ ⊢ SQ2]
         (seqcf_str_cor [_,x:obj,y:obj ⊢ SQ1]) mg
     | [_,x:obj ⊢ upd/n U1'] ⇒
@@ -242,7 +243,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     (case [_,x:obj ⊢ U1] of
     | [_,x:obj ⊢ upd/t _] ⇒
       let [_ ⊢ R&_cf _ SQ3] = s1 in
-      % left and hyp rules already covered, others impossible
+      % Left and hyp rules already covered, others impossible
       cut_admis [_ ⊢ SQ3]
         (seqcf_str_cor [_,x:obj,y:obj ⊢ SQ1]) mg
     | [_,x:obj ⊢ upd/n U1'] ⇒
@@ -285,7 +286,7 @@ rec cut_admis : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Cut elimination for the linear sequent calculus:
-% every derivation can be turned into a cut-free one
+% every derivation can be turned into a cut-free one.
 
 rec cut_elim : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ seq Δ C] → [Ψ ⊢ seq_cf Δ C] =
   / total 1 /

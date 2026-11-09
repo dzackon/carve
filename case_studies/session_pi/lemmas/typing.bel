@@ -2,7 +2,7 @@
 % Properties of typing judgment
 %
 % oft_cong and oft_cong_symm may be found in cong.bel; typed_pref_compatible and
-% typed_pref_mismatch_contra may be found in prefix_compatibility.bel
+% typed_pref_mismatch_contra may be found in prefix_compatibility.bel.
 %======================================================%
 
 % Pruning: if the context does not mention x, neither do the process nor
@@ -49,7 +49,7 @@ rec prune_oft : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {D:[Ψ,x:obj ⊢ oft Δ[..] P]}
     Prune-Oft [_ ⊢ oft/res DU[] \a.\b.D1'] [_,x:obj ⊢ _]
   ;
 
-% If Δ ⊢ P, x :α T ∈ Δ, and x ∉ fv(P), then α = 𝟘
+% If Δ ⊢ P, (x :α T) ∈ Δ, and x ∉ fv(P), then α = 𝟘.
 
 rec oft_notin_fv : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx K[]]) {P:[Ψ ⊢ proc]}
   [Ψ,x:obj ⊢ oft Δ P[..]] → [Ψ,x:obj ⊢ upd Δ n[] x Y T[] S[] α[] β[] Δ']
@@ -104,9 +104,7 @@ rec oft_notin_fv : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx K[]]) {P:[Ψ ⊢ proc]}
       [_,y:obj,z:obj,x:obj ⊢ upd/n (upd/n U[..,x])]
   ;
 
-% Exchange lemma: If Δ ⊢ P and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ P
-% (plus two corollaries as helper lemmas for permuting the topmost elements of a
-% context)
+% Exchange lemma: If Δ ⊢ P and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ P.
 
 rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P]
@@ -154,6 +152,8 @@ rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     [_ ⊢ oft/res DU[] \x.\y.D2]
   ;
 
+% Corollary: exchange the two topmost entries.
+
 rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ oft (cons (cons Δ X A[] α[]) Y B[] β[]) P]
   → [Ψ ⊢ oft (cons (cons Δ Y B[] β[]) X A[] α[]) P] =
@@ -161,6 +161,8 @@ rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   fn d ⇒ oft_exch d
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
+
+% Corollary: move the third-topmost entry to the top.
 
 rec oft_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) P]
@@ -217,7 +219,7 @@ rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
     [_ ⊢ oft/res DU[] \x.\y.D2]
   ;
 
-% Strengthening lemma: If Δ, x :⁰ T ⊢ P, then x ∉ fv(P) and Δ ⊢ P
+% Strengthening lemma: If (Δ, x :⁰ T) ⊢ P, then x ∉ fv(P) and Δ ⊢ P.
 
 inductive StrTop : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {D:[Ψ ⊢ oft Δ P]} ctype =
 | Str-Top : [Ψ ⊢ oft Δ P]
@@ -231,7 +233,7 @@ rec oft_str : {D:[Ψ,x:obj ⊢ oft (cons Δ[..] x A[] 𝟘) P]} StrTop [Ψ,x:obj
   Str-Top [_ ⊢ D2] [_,x:obj ⊢ _]
   ;
 
-% Weakening lemma: If Δ ⊢ P, then Δ, x :⁰ T ⊢ P
+% Weakening lemma: If Δ ⊢ P, then (Δ, x :⁰ T) ⊢ P.
 
 rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P]
@@ -262,7 +264,7 @@ rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     [_,x:obj ⊢ oft/res DU[] \y.\z.D2]
   ;
 
-% If Δ ⊢ P, then Δ[x :⁰ T ↦ y :⁰ S] ⊢ P for any y,S
+% If Δ ⊢ P, then Δ[x :⁰ T ↦ y :⁰ S] ⊢ P for any y, S.
 
 rec oft_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P]
@@ -311,7 +313,7 @@ rec oft_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 
 % Renaming lemma: If Δ₁ ⊢ P where x :¹ T is the k-th entry of Δ₁, the rest of
 % Δ₁, written Δ₁', does not mention x, and X :⁰ T' is the n-th entry,
-% then P[X/x] is typable in the context where the k-th entry is x :⁰ T⁰ and the
+% then P[X/x] is typable in the context where the k-th entry is x :⁰ T and the
 % n-th is X :¹ T.
 
 rec oft_rename_gen : (Ψ:ctx) (Δ₁:[Ψ,x:obj ⊢ lctx (suc K[])])
@@ -497,7 +499,7 @@ rec oft_rename_gen : (Ψ:ctx) (Δ₁:[Ψ,x:obj ⊢ lctx (suc K[])])
   ;
 
 % Substitution / renaming lemma:
-% If Δ, x :¹ T ⊢ P, then Δ[y :⁰ T ↦ₙ y :¹ T] ⊢ P[y/x]
+% If (Δ, x :¹ T) ⊢ P, then Δ[y :⁰ T ↦ₙ y :¹ T] ⊢ P[y/x].
 
 rec oft_rename : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft (cons Δ[..] x T[] 𝟙) P]
@@ -516,8 +518,8 @@ rec oft_rename : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [_ ⊢ D2]
   ;
 
-% If (Δ, x :α T) ⊢ P and P is prefixed at x, then α = 𝟙
- 
+% If (Δ, x :α T) ⊢ P and P is prefixed at x, then α = 𝟙.
+
 rec pref_lin : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft (cons Δ[..] x T[] α[]) P] → [Ψ,x:obj ⊢ pref x P]
   → [ ⊢ mult_eq α 𝟙] =
@@ -548,9 +550,9 @@ rec pref_lin : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
       | [_,y:obj ⊢ upd/t _] ⇒ [ ⊢ mult/refl]
       | [_,y:obj ⊢ upd/n U2'] ⇒ impossible upd_contra [_,y:obj ⊢ U2']))
   ;
- 
-% If Δ ⊢ P, x :¹ T ∈ Δ, and P is prefixed at x, then the prefix matches T
-% (specialized to the second-topmost entry for use in safety_lemma)
+
+% If Δ ⊢ P, (x :¹ T) ∈ Δ, and P is prefixed at x, then the prefix matches T
+% (specialized to the second-topmost entry for use in safety_lemma).
 
 rec oft_pref_tp : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj,y:obj ⊢ oft (cons (cons Δ[..] x T[] 𝟙) y T'[] 𝟘) P[..,x]]

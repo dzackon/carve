@@ -6,8 +6,8 @@
 % Structural properties of typing judgment
 %------------------------------------------------------%
 
-% Pruning: if the context does not mention x, neither does the term nor the
-% type of a typing derivation
+% Pruning: If the context does not mention x, neither does the term nor the
+% type of a typing derivation.
 
 inductive PruneOft : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   {D:[Ψ,x:obj ⊢ oft Δ[..] M A[]]} ctype =
@@ -49,7 +49,7 @@ rec prune_oft : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {D:[Ψ,x:obj ⊢ oft Δ[..] M A[
   ;
 
 % Exchange lemma:
-% If Δ ⊢ M : A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ M : A
+% If Δ ⊢ M : A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ M : A.
 
 rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M C]
@@ -94,6 +94,8 @@ rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     [_ ⊢ oft/letbang D1' (\x.D2') M2]
   ;
 
+% Corollary: exchange the two topmost entries.
+
 rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft (cons (cons Δ X A[] α[]) Y B[] β[]) M C]
   → [Ψ ⊢ oft (cons (cons Δ Y B[] β[]) X A[] α[]) M C] =
@@ -102,7 +104,7 @@ rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
 
-% Deletion lemma: an entry with multiplicity 𝟘 can be removed from the context
+% Deletion lemma: an entry with multiplicity 𝟘 can be removed from the context.
 
 rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
   [Ψ ⊢ oft Δ M A[]] → [Ψ ⊢ del Δ n[] Δ'] → [Ψ ⊢ oft Δ' M A[]] =
@@ -139,8 +141,8 @@ rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
     [_ ⊢ oft/letbang D1' (\x.D2') M2]
   ;
 
-% Strengthening of used assumptions: If Δ, x :⁰ A ⊢ M : C, then (a) M does not
-% depend on x and (b) Δ ⊢ M : C
+% Strengthening of used assumptions: If (Δ, x :⁰ A) ⊢ M : C, then (a) M does not
+% depend on x and (b) Δ ⊢ M : C.
 
 inductive StrTop : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {D:[Ψ ⊢ oft Δ M A[]]} ctype =
 | Str-Top : [Ψ ⊢ oft Δ M A[]]
@@ -154,8 +156,8 @@ rec oft_str_0 : {D:[Ψ,x:obj ⊢ oft (cons Δ[..] x B[] 𝟘) M A[]]}
   let Prune-Oft [_ ⊢ D2] [_,x:obj ⊢ _] = prune_oft [_,x:obj ⊢ D1] in
   Str-Top [_ ⊢ D2] [_,x:obj ⊢ _]
   ;
- 
-% If x :ω A ∈ Δ and M does not mention x, then M is still typable when that
+
+% If (x :ω A) ∈ Δ and M does not mention x, then M is still typable when that
 % entry is changed to x :⁰ A.
 
 rec oft_drop_w : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx K[]])
@@ -204,8 +206,8 @@ rec oft_drop_w : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx K[]])
     [_,x:obj ⊢ oft/letbang D1' (\y.D2'[..,y,x]) M2]
   ;
 
-% Intuitionistic strengthening: if Δ, x :ω A ⊢ M : C and x ∉ fv(M), then
-% Δ ⊢ M : C
+% Intuitionistic strengthening: If (Δ, x :ω A) ⊢ M : C and x ∉ fv(M), then
+% Δ ⊢ M : C.
 
 rec oft_str_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft (cons Δ[..] x A[] ω) M[..] C[]]
@@ -215,11 +217,11 @@ rec oft_str_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   let [_,x:obj ⊢ D1] = oft_drop_w d [_,x:obj ⊢ upd/t _] in
   let Str-Top [_ ⊢ D2] [_,x:obj ⊢ _] = oft_str_0 [_,x:obj ⊢ D1] in
   [_ ⊢ D2]
-   ;
+  ;
 
 % Intuitionistic weakening lemmas:
-% (1) If Δ ⊢ M : C and hal(α), then Δ, x :α A ⊢ M : C for any A
-% (2) If Δ ⊢ M : C and hal(α), then Δ[x :⁰ A ↦ₙ y :α A'] ⊢ M : C for any y,A'
+% (1) If Δ ⊢ M : C and hal(α), then (Δ, x :α A) ⊢ M : C for any A.
+% (2) If Δ ⊢ M : C and hal(α), then Δ[x :⁰ A ↦ₙ y :α A'] ⊢ M : C for any y, A'.
 
 rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M C[]]
@@ -298,7 +300,7 @@ rec oft_weak_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ;
 
 % Environment weakening lemma (dereliction): If Δ ⊢ M : C, then
-% Δ[x :¹ A ↦ x :ω A] ⊢ M : C
+% Δ[x :¹ A ↦ x :ω A] ⊢ M : C.
 
 rec oft_weak_env : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M C[]]
@@ -358,10 +360,10 @@ rec oft_weak_env : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 % Linear cut lemma
 %------------------------------------------------------%
 
-% Linear cut with the substituted variable x anywhere in the context: 
+% Linear cut with the substituted variable x anywhere in the context:
 % If (a) Δ₁ ⊢ M : C, (b) x :¹ A is the k-th entry of Δ₁, and the rest of Δ₁,
 % written Δ₁', does not mention x, (c) Δ₂ ⊢ N : A, and (d) Δ₁' ⋈ Δ₂ = Δ, then
-% Δ ⊢ [N/x]M : C
+% Δ ⊢ [N/x]M : C.
 
 rec substitution_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft Δ₁ M C[]]
@@ -457,8 +459,8 @@ rec substitution_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     )
   ;
 
-% Corollary (linear cut): If (a) Δ₁, x :¹ A ⊢ M : C, (b) Δ₂ ⊢ N : A, and (c) Δ₁ ⋈ Δ₂ =
-% Δ, then Δ ⊢ [N/x]M : C
+% Corollary (linear cut): If (a) (Δ₁, x :¹ A) ⊢ M : C, (b) Δ₂ ⊢ N : A, and
+% (c) Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C.
 
 rec substitution : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x A[] 𝟙) M C[]]
@@ -477,7 +479,7 @@ rec substitution : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
 % Intuitionistic cut with the substituted variable x anywhere in the context:
 % If (a) Δ₁ ⊢ M : C, (b) x :ω A is the k-th entry of Δ₁, and the rest of Δ₁,
 % written Δ₁', does not mention x, (c) Δ₂ ⊢ N : A, (d) exh(Δ₂), and (e)
-% Δ₁' ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C
+% Δ₁' ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C.
 
 rec substitution_w_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft Δ₁ M C[]]
@@ -568,8 +570,8 @@ rec substitution_w_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     [_ ⊢ oft/letbang D1' (\y.D2') M2]
   ;
 
-% Intuitionistic cut: If (a) Δ₁, x :ω A ⊢ M : C, (b) Δ₂ ⊢ N : A, (c)
-% exh(Δ₂), and (d) Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C
+% Intuitionistic cut: If (a) (Δ₁, x :ω A) ⊢ M : C, (b) Δ₂ ⊢ N : A, (c)
+% exh(Δ₂), and (d) Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ [N/x]M : C.
 
 rec substitution_w : (Ψ:ctx) (Δ:[Ψ ⊢ lctx k[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x A[] ω) M C[]]

@@ -13,7 +13,7 @@ LF • : mult → mult → mult → type =
 | •/10 : • 𝟙 𝟘 𝟙
 | •/01 : • 𝟘 𝟙 𝟙;
 
-% α is harmless
+% α is harmless.
 
 LF hal : mult → type =
 | hal/0 : hal 𝟘;

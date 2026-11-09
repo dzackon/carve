@@ -5,7 +5,7 @@
 
 % Identity properties:
 
-% (1) If Δ₁ ⋈ Δ₂ = Δ, then exh(Δ₁) iff Δ₂ = Δ
+% (1) If Δ₁ ⋈ Δ₂ = Δ, then exh(Δ₁) iff Δ₂ = Δ.
 
 rec merge_id : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdent
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -51,7 +51,7 @@ rec merge_isid_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) UnitHal
   fn uh, m ⇒ merge_isid uh (merge_comm m)
   ;
 
-% (2) If exh(Δ), then Δ₁ ⋈ Δ₂ = Δ iff Δ₁ = Δ₂ = Δ
+% (2) If exh(Δ), then Δ₁ ⋈ Δ₂ = Δ iff Δ₁ = Δ₂ = Δ.
 
 LF merge_ident : merge _ _ _ → type =
 | mg_ident : {M:merge Δ Δ Δ} merge_ident M;
@@ -70,6 +70,8 @@ rec merge_zsfree : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) ZsFree
     [_ ⊢ mg_ident _]
   ;
 
+% If harmless elements are idempotent and exh(Δ), then Δ ⋈ Δ = Δ.
+
 rec merge_id_from_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdem
   → [Ψ ⊢ exh Δ] → [Ψ ⊢ merge Δ Δ Δ] =
   / total 2 /
@@ -81,7 +83,7 @@ rec merge_id_from_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) HalIdem
     [_ ⊢ mg/c M T[]]
   ;
 
-% (3) For any Δ, there exists a Δ' such that exh(Δ') and Δ' ⋈ Δ = Δ ⋈ Δ' = Δ
+% (3) For any Δ, there exists a Δ' such that exh(Δ') and Δ' ⋈ Δ = Δ ⋈ Δ' = Δ.
 
 LF get_id_mg : lctx _ → type =
 | get-id-mg : exh Δ' → merge Δ' Δ Δ → get_id_mg Δ;

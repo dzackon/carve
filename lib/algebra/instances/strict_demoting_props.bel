@@ -3,9 +3,9 @@
 % (strict systems)
 %======================================================%
 
-% Remark: • is not total since 𝟙 • 𝟙 is undefined
+% Remark: • is not total since 𝟙 • 𝟙 is undefined.
 
-% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'
+% Functionality: If α₁ • α₂ = α and α₁ • α₂ = α', then α = α'.
 
 rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ ⊢ mult_eq α α'] =
   / total 1 /
@@ -16,8 +16,8 @@ rec mult_func : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂ α'] → [ �
   ;
 
 % Identity elements:
-% (1) ω is an identity element
-% (2) every harmless element is an identity element
+% (1) ω is an identity element.
+% (2) every harmless element is an identity element.
 
 rec ident_w_prf : {m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • ω m m2]
                 → [ ⊢ mult_eq m m2] =
@@ -42,7 +42,7 @@ rec mult_halident : HalIdent =
   Hal-Ident halident_prf
   ;
 
-% Every unit element is harmless
+% Every unit element is harmless.
 
 rec unithal_prf : {α₁:[ ⊢ mult]} {α:[ ⊢ mult]} [ ⊢ • α₁ α α] → [ ⊢ hal α₁] =
   / total 1 /
@@ -56,7 +56,7 @@ rec mult_unithal : UnitHal =
   Unit-Hal unithal_prf
   ;
 
-% For any α, obtain a harmless identity element β such that β • α = α
+% For any α, obtain a harmless identity element β such that β • α = α.
 
 rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
   / total 1 /
@@ -65,7 +65,7 @@ rec mult_get_id : {α:[ ⊢ mult]} [ ⊢ get_unit α] =
   | [ ⊢ ω] ⇒ [ ⊢ get-unit hal/ω •/ωω]
   ;
 
-% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α
+% Zero-sum-freedom: If α₁ • α₂ = α and α is harmless, then α₁ = α.
 
 rec zsfree_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}
                  [ ⊢ • α₁ α₂ α] → [ ⊢ hal α] → [ ⊢ mult_eq α₁ α] =
@@ -81,7 +81,7 @@ rec mult_zsfree : ZsFree =
   Is-ZsFree zsfree_prf
   ;
 
-% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α
+% Commutativity: If α₁ • α₂ = α, then α₂ • α₁ = α.
 
 rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   / total 1 /
@@ -91,7 +91,7 @@ rec mult_comm : [ ⊢ • α₁ α₂ α] → [ ⊢ • α₂ α₁ α] =
   | [ ⊢ •/ωω] ⇒ m
   ;
 
-% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α
+% Associativity: If (α₁ • α₂) • α₃ = α, then α₁ • (α₂ • α₃) = α.
 
 rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α₃ α]}
                  [ ⊢ mult_assoc_res M1 M2] =
@@ -106,7 +106,7 @@ rec mult_assoc : {M1:[ ⊢ • α₁ α₂ α₁₂]} {M2:[ ⊢ • α₁₂ α�
     | [ ⊢ •/ωω] ⇒ [ ⊢ mult-assoc •/ωω •/ωω _ _]
   ;
 
-% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'
+% Cancellativity: If α₁ • α₂ = α and α₁ • α₂' = α, then α₂ = α₂'.
 
 rec cancel_prf : {α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
                  [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'] =
@@ -126,7 +126,7 @@ rec mult_cancel : Cancl =
 % Properties of harmless elements
 %------------------------------------------------------%
 
-% Harmless elements are idempotent
+% Harmless elements are idempotent.
 
 rec halidem_prf : {α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α] =
   / total 1 /

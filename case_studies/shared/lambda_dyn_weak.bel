@@ -1,8 +1,9 @@
 %======================================================%
 % Weak reduction for the linear λ-calculus
 %
-% wstep is weak reduction: the same principal redexes as step, but
-% congruence only in positions that are not under a binder or inside bang.
+% The relation `wstep` is weak reduction: the same principal redexes as
+% `step`, but congruence only in positions that are not under a binder or
+% inside a bang.
 %======================================================%
 
 LF wstep : obj → obj → type =

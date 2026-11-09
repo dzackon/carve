@@ -2,7 +2,7 @@
 % Properties of simultaneous substitution
 %======================================================%
 
-% If Δ ⊢ σ : Γ and exh(Γ), then exh(Δ)
+% If Δ ⊢ σ : Γ and exh(Γ), then exh(Δ).
 
 rec subst_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   [Ψ ⊢ wf_subst Δ σ Γ]
@@ -19,8 +19,8 @@ rec subst_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
     subst_exh [_ ⊢ SUB1] [_ ⊢ E1]
   ;
 
-% If Δ ⊢ σ : Γ and Γ₁ ⋈ Γ₂ = Γ, then there exist Δ₁,Δ₂ such that
-% Δ₁ ⊢ σ : Γ₁, Δ₂ ⊢ σ : Γ₂, and Δ₁ ⋈ Δ₂ = Δ
+% If Δ ⊢ σ : Γ and Γ₁ ⋈ Γ₂ = Γ, then there exist Δ₁, Δ₂ such that
+% Δ₁ ⊢ σ : Γ₁, Δ₂ ⊢ σ : Γ₂, and Δ₁ ⋈ Δ₂ = Δ.
 
 LF subst-merge : wf_subst _ _ _ → merge _ _ _ → type =
   sub-mg : wf_subst Δ₁ σ Γ₁ → wf_subst Δ₂ σ Γ₂ → merge Δ₁ Δ₂ Δ
@@ -64,8 +64,8 @@ rec subst_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
       (wf_subst_cons0 SUB3 CH1 SE3) M2 _ _]
   ;
 
-% If Δ ⊢ σ : Γ and Γ[x :¹ A ↦ x :⁰ A] = Γ', then there exist e,Δ₁,Δ₂ such
-% that Δ₁ ⊢ σ : Γ', Δ₂ ⊢ e ⇐ A, and Δ₁ ⋈ Δ₂ = Δ
+% If Δ ⊢ σ : Γ and Γ[x :¹ A ↦ x :⁰ A] = Γ', then there exist e, Δ₁, Δ₂ such
+% that Δ₁ ⊢ σ : Γ', Δ₂ ⊢ e ⇐ A, and Δ₁ ⋈ Δ₂ = Δ.
 
 LF subst-upd : wf_subst _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
   sub-up : wf_subst Δ₁ σ Γ' → chk Δ₂ _ A → merge Δ₁ Δ₂ Δ
@@ -94,7 +94,7 @@ rec subst_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
     [_ ⊢ sub-up (wf_subst_cons0 SUB2 CH1 SE2) CH2 M2 _ _]
   ;
 
-% If Δ ⊢ σ : Γ, then (Δ, x :⁰ A) ⊢ σ : Γ for any x,A
+% If Δ ⊢ σ : Γ, then (Δ, x :⁰ A) ⊢ σ : Γ for any x, A.
 
 rec subst_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   [Ψ ⊢ wf_subst Δ σ Γ]
@@ -112,7 +112,7 @@ rec subst_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
     [_ ⊢ wf_subst_cons0 SUB1' CH1' (se/c SE1)]
   ;
 
-% If Δ ⊢ σ : Γ, then (Δ, x :α A) ⊢ (σ, x) : (Γ, x :α A) for any x,α,A
+% If Δ ⊢ σ : Γ, then (Δ, x :α A) ⊢ (σ, x) : (Γ, x :α A) for any x, α, A.
 
 rec subst_extend : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Γ:[Ψ ⊢ lctx M[]])
   [Ψ ⊢ wf_subst Δ σ Γ]

@@ -6,7 +6,7 @@
 % Properties of RelUsed, RelName, and Dec
 %------------------------------------------------------%
 
-% If RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ], then Δ is exhausted
+% If RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ], then exh(Δ).
 
 rec relus_exh : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
   / total 1 /
@@ -18,7 +18,7 @@ rec relus_exh : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Ψ ⊢ exh Δ] =
   ;
 
 % If RelName [Ψ ⊢ x] [Ψ ⊢ Δ] [Φ ⊢ σ] and (x : A) ∈ Φ, then x is the unique
-% linear element of Δ
+% linear element of Δ.
 
 LF unqlin : obj → tp → lctx _ → type =
 | unql : upd Δ _ X X A A 𝟙 𝟘 Δ' → exh Δ' → unqlin X A Δ;
@@ -39,7 +39,7 @@ rec relnm_unqlin :
   ;
 
 % Obtain a hyp judgment from a look-up in the explicit context, given
-% (1) a RelUsed, (2) a RelName, or (3) a Dec relation
+% (1) a RelUsed, (2) a RelName, or (3) a Dec relation.
 
 rec relus_lookup_hyp :
   RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ]

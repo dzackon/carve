@@ -6,7 +6,7 @@
 % Properties of Enc judgment
 %------------------------------------------------------%
 
-% Obtain Enc judgment from RelUsed and RelName judgments
+% Obtain Enc judgment from RelUsed and RelName judgments.
 
 rec relus_to_encctx : RelUsed [Ψ ⊢ Δ] $[Φ ⊢ $σ] → Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
   / total 1 /
@@ -24,7 +24,7 @@ rec relnm_to_encctx :
   | relName/n rn ⇒ Enc/c (relnm_to_encctx rn) [ ⊢ _] [ ⊢ _]
   ;
 
-% If Δ₁ ⋈ Δ₂ = Δ, then Enc [Ψ ⊢ Δ] [Φ ⊢ σ] iff Enc [Ψ ⊢ Δ₁] [Φ ⊢ σ]
+% If Δ₁ ⋈ Δ₂ = Δ, then Enc [Ψ ⊢ Δ] [Φ ⊢ σ] iff Enc [Ψ ⊢ Δ₁] [Φ ⊢ σ].
 
 rec encctx_merge :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -52,7 +52,7 @@ rec encctx_merge_l :
     Enc/c (encctx_merge_l ec1 [_ ⊢ M1']) [ ⊢ _] [ ⊢ _]
   ;
 
-% Updating multiplicities in the explicit context preserves the Enc relation
+% Updating multiplicities in the explicit context preserves the Enc relation.
 
 rec encctx_upd :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -70,7 +70,7 @@ rec encctx_upd :
   ;
 
 % Obtain SCP hyp judgment from CP look-up judgment:
-% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and (X : A) ∈ Δ, then (X[σ] : A) ∈ Φ
+% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and (X : A) ∈ Δ, then (X[σ] : A) ∈ Φ.
 
 rec lookup_to_hyp :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -89,7 +89,7 @@ rec lookup_to_hyp :
     [_,b:block x:obj,h:hyp _ _ ⊢ H[..]]
   ;
 
-% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and exh(Δ), then RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ]
+% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and exh(Δ), then RelUsed [Ψ ⊢ Δ] [Φ ⊢ σ].
 
 rec exh_to_relus :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -103,8 +103,8 @@ rec exh_to_relus :
     relUsed/c (exh_to_relus ec1 (prune_exh [_,x:obj ⊢ E1]))
   ;
 
-% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and X:A is the unique linear element of Δ, then RelName
-% [Ψ ⊢ X] [Ψ ⊢ Δ] [Φ ⊢ σ]
+% If Enc [Ψ ⊢ Δ] [Φ ⊢ σ] and X : A is the unique linear element of Δ, then
+% RelName [Ψ ⊢ X] [Ψ ⊢ Δ] [Φ ⊢ σ].
 
 rec unqlin_to_relnm :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -124,7 +124,7 @@ rec unqlin_to_relnm :
     relName/n (unqlin_to_relnm ec1 [_ ⊢ U1'] (prune_exh [_,x:obj ⊢ E1]))
   ;
 
-% Enc for a context yields Enc for its tail
+% Enc for a context yields Enc for its tail.
 
 rec enc_tail :
   Enc [Ψ,x:obj ⊢ cons Δ[..] x A[] α[]]
@@ -139,7 +139,7 @@ rec enc_tail :
 %------------------------------------------------------%
 
 % If P ⊢ Δ where x :¹ A is the k-th entry of Δ and the rest of Δ, written
-% Δ', does not mention x, then P is linear with respect to x
+% Δ', does not mention x, then P is linear with respect to x.
 
 rec oft_linear_gen : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx (suc N[])])
   [Ψ,x:obj ⊢ oft P Δ]
@@ -235,7 +235,8 @@ rec oft_linear_gen : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx (suc N[])])
         [_ ⊢ l_out LN]
       | [_,x:obj ⊢ look-neq NEQ[] _ _] ⇒
         let [_,x:obj ⊢ pushout-delete U1⁰ U' DL' U1ᵣ _ _ _] =
-          pushout_delete [_,x:obj ⊢ Ub] [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1] [ ⊢ NEQ] in
+          pushout_delete [_,x:obj ⊢ Ub] [_,x:obj ⊢ DLb] [_,x:obj ⊢ U1]
+            [ ⊢ NEQ] in
         let Prune-Upd [_ ⊢ _] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1ᵣ] in
         let [_,y:obj ⊢ LN] =
           oft_linear_gen [_,y:obj,x:obj ⊢ O2] [_,y:obj,x:obj ⊢ upd/n U'[..,x]]
@@ -375,7 +376,7 @@ rec oft_linear_gen : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx (suc N[])])
     )
   ;
 
-% If P ⊢ (Δ, x :¹ A), then P is linear with respect to x
+% If P ⊢ (Δ, x :¹ A), then P is linear with respect to x.
 
 rec oft_linear : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ oft P (cons Δ[..] x A[] 𝟙)]

@@ -6,8 +6,8 @@
 % Structural properties of typing judgment
 %------------------------------------------------------%
 
-% Pruning: if the context does not mention x, neither does the term nor the
-% type of a typing derivation
+% Pruning: If the context does not mention x, neither does the term nor the
+% type of a typing derivation.
 
 inductive PruneOft : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   {O:[Ψ,x:obj ⊢ oft Δ[..] M A[]]} ctype =
@@ -34,7 +34,7 @@ rec prune_oft : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {O:[Ψ,x:obj ⊢ oft Δ[..] M A[
   ;
 
 % Exchange lemma:
-% If Δ ⊢ M : A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ M : A
+% If Δ ⊢ M : A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ M : A.
 
 rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M A]
@@ -59,6 +59,8 @@ rec oft_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     [_ ⊢ oft/app O1' O2' M2]
   ;
 
+% Corollary: exchange the two topmost entries.
+
 rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft (cons (cons Δ Y B[] β[]) Z C[] γ[]) M A]
   → [Ψ ⊢ oft (cons (cons Δ Z C[] γ[]) Y B[] β[]) M A] =
@@ -67,7 +69,7 @@ rec oft_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
 
-% Deletion lemma: an entry with multiplicity 𝟘 can be removed from the context
+% Deletion lemma: an entry with multiplicity 𝟘 can be removed from the context.
 
 rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
   [Ψ ⊢ oft Δ M A[]] → [Ψ ⊢ del Δ n[] Δ'] → [Ψ ⊢ oft Δ' M A[]] =
@@ -90,7 +92,7 @@ rec oft_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
   ;
 
 % Strengthening lemma:
-% If Δ, x :⁰ B ⊢ M : A, then (1) M does not depend on x and (2) Δ ⊢ M : A
+% If (Δ, x :⁰ B) ⊢ M : A, then (a) M does not depend on x and (b) Δ ⊢ M : A.
 
 inductive StrTop : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) {O:[Ψ ⊢ oft Δ M A[]]} ctype =
 | Str-Top : [Ψ ⊢ oft Δ M A[]]
@@ -106,7 +108,7 @@ rec oft_str : {O:[Ψ,x:obj ⊢ oft (cons Δ[..] x B[] 𝟘) M A[]]}
   ;
 
 % Weakening lemma:
-% If Δ ⊢ M : A, then Δ, x :⁰ B ⊢ M : A for any B
+% If Δ ⊢ M : A, then (Δ, x :⁰ B) ⊢ M : A for any B.
 
 rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ M A[]]
@@ -129,7 +131,7 @@ rec oft_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
 %------------------------------------------------------%
 
 % Typing is preserved under merge:
-% If Δ₁ ⊢ M : A and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ M : A
+% If Δ₁ ⊢ M : A and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ M : A.
 
 rec oft_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ₁ M A]
@@ -153,8 +155,8 @@ rec oft_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ;
 
 % Substitution lemma:
-% If (1) Δ₁ ⊢ M : A where x :¹ B is the k-th entry of Δ₁ and the rest of Δ₁,
-% written Δ₁', does not mention x, (2) Δ₂ ⊢ N : B, and (3) Δ₁' ⋈ Δ₂ = Δ, then
+% If (a) Δ₁ ⊢ M : A where x :¹ B is the k-th entry of Δ₁ and the rest of Δ₁,
+% written Δ₁', does not mention x, (b) Δ₂ ⊢ N : B, and (c) Δ₁' ⋈ Δ₂ = Δ, then
 % Δ ⊢ [N/x]M : A.
 
 rec substitution_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
@@ -217,8 +219,8 @@ rec substitution_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     )
   ;
 
-% Corollary: If (1) Δ₁, x :¹ B ⊢ M : A, (2) Δ₂ ⊢ N : B, and (3) Δ₁ ⋈ Δ₂ = Δ,
-% then Δ ⊢ [N/x]M : A
+% Corollary: If (a) (Δ₁, x :¹ B) ⊢ M : A, (b) Δ₂ ⊢ N : B, and (c) Δ₁ ⋈ Δ₂ = Δ,
+% then Δ ⊢ [N/x]M : A.
 
 rec substitution : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ oft (cons Δ₁[..] x B[] 𝟙) M A[]]

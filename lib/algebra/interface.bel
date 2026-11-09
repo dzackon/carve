@@ -11,23 +11,23 @@ LF mult_eq : mult → mult → type =
 % Result packaging
 %------------------------------------------------------%
 
-% Totality witness: some α with α₁ • α₂ = α exists
+% Totality witness: some α with α₁ • α₂ = α exists.
 
 LF get_mult : mult → mult → type =
 | get-mult : • α₁ α₂ α → get_mult α₁ α₂;
 
-% Unit witness: some harmless β with β • α = α exists
+% Unit witness: some harmless β with β • α = α exists.
 
 LF get_unit : mult → type =
 | get-unit : hal β → • β α α → get_unit α;
 
-% Harmless split witness: hal α₁, hal α₂ with α₁ • α₂ = α
+% Harmless split witness: hal(α₁), hal(α₂) with α₁ • α₂ = α.
 
 LF get_hal_split : mult → type =
 | get-hal-split : hal α₁ → hal α₂ → • α₁ α₂ α → get_hal_split α;
 
 % Associativity witness: given M1 : α₁ • α₂ = α₁₂ and M2 : α₁₂ • α₃ = α,
-% packages α₂ • α₃ = α₂₃ and α₁ • α₂₃ = α
+% packages α₂ • α₃ = α₂₃ and α₁ • α₂₃ = α.
 
 LF mult_assoc_res : • _ _ _ → • _ _ _ → type =
 | mult-assoc : • α₂ α₃ α₂₃ → • α₁ α₂₃ α
@@ -37,41 +37,41 @@ LF mult_assoc_res : • _ _ _ → • _ _ _ → type =
 % Conditional algebraic properties
 %------------------------------------------------------%
 
-% e is a left identity for •
+% e is a left identity for •.
 
 inductive Ident : {e:[ ⊢ mult]} ctype =
 | Is-Id : ({m:[ ⊢ mult]} {m2:[ ⊢ mult]} [ ⊢ • e m m2] → [ ⊢ mult_eq m m2])
         → Ident [ ⊢ e];
 
-% Every harmless element is an identity element
+% Every harmless element is an identity element.
 
 inductive HalIdent : ctype =
 | Hal-Ident : ({α:[ ⊢ mult]} [ ⊢ hal α] → Ident [ ⊢ α]) → HalIdent;
 
-% Every harmless element is idempotent
+% Every harmless element is idempotent.
 
 inductive HalIdem : ctype =
 | Is-HalIdem : ({α:[ ⊢ mult]} [ ⊢ hal α] → [ ⊢ • α α α]) → HalIdem;
 
-% Every unit element is a harmless element
+% Every unit element is a harmless element.
 
 inductive UnitHal : ctype =
 | Unit-Hal : ({α₁:[ ⊢ mult]} {α:[ ⊢ mult]}  [ ⊢ • α₁ α α] → [ ⊢ hal α₁])
            → UnitHal;
 
-% • is total
+% • is total.
 
 inductive Total : ctype =
 | Is-Total : ({α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} [ ⊢ get_mult α₁ α₂]) → Total;
 
-% • is cancellative
+% • is cancellative.
 
 inductive Cancl : ctype =
 | Is-Cancl : ({α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α₂':[ ⊢ mult]} {α:[ ⊢ mult]}
               [ ⊢ • α₁ α₂ α] → [ ⊢ • α₁ α₂' α] → [ ⊢ mult_eq α₂ α₂'])
            → Cancl;
 
-% • is zero-sum-free w.r.t. harmless elements
+% • is zero-sum-free w.r.t. harmless elements.
 
 inductive ZsFree : ctype =
 | Is-ZsFree : ({α₁:[ ⊢ mult]} {α₂:[ ⊢ mult]} {α:[ ⊢ mult]}

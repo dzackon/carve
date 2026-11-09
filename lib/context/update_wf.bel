@@ -9,7 +9,7 @@
 
 % Uniqueness of look-up (or left-uniqueness of update):
 % If (x :α A) ∈ₙ Δ, (x :α' A') ∈ₘ Δ and Δ is well-formed, then n = m,
-% α = α', and A = A'
+% α = α', and A = A'.
 
 LF nat_tp_mult_eq : nat → nat → tp → tp → mult → mult → type =
 | nat-tp-mult-refl : nat_tp_mult_eq n n A A α α;
@@ -35,7 +35,7 @@ rec lookup_unique_obj :
     )
   ;
 
-% If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ, and Δ is well-formed, then n ≠ m iff x ≠ y
+% If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ, and Δ is well-formed, then n ≠ m iff x ≠ y.
 
 rec lookup_neq_nat2var : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A[] A' α[] α' Δ']
@@ -56,7 +56,7 @@ rec lookup_neq_nat2var : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 
 % Functionality (or right-uniqueness):
 % If Δ[x :α A ↦ₙ y :β B] = Δ', Δ[x :α A ↦ₘ y :β B] = Δ'', and Δ is well-formed,
-% then Δ' = Δ'' [corollary of upd_func using lookup_unique_obj]
+% then Δ' = Δ'' [corollary of upd_func using lookup_unique_obj].
 
 rec upd_func_obj :
   [Ψ ⊢ upd Δ n[] X Y A[] B α[] β Δ']
@@ -72,7 +72,7 @@ rec upd_func_obj :
 % Transitivity:
 % Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂][x₂ :α₂ A₂ ↦ₘ x₃ :α₃ A₃] =
 % Δ[x₁ :α₁ A₁ ↦ₙ x₃ :α₃ A₃] if the "intermediate context" is well-formed
-% [corollary of upd_trans using lookup_unique_obj]
+% [corollary of upd_trans using lookup_unique_obj].
 
 rec upd_trans_obj :
   [Ψ ⊢ upd Δ₁ n[] X₁ X₂ A₁[] A₂[] α₁[] α₂[] Δ₂]

@@ -2,7 +2,7 @@
 % Properties of session types
 %======================================================%
 
-% Duality is symmetric
+% Duality is symmetric.
 
 rec dual_symm : [ ⊢ dual T T'] → [ ⊢ dual T' T] =
   / total 1 /

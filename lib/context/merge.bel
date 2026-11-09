@@ -8,9 +8,9 @@
 
 % "Prune" LF context to remove dependencies:
 % (1) Obtain from [Ψ,x:obj ⊢ merge Δ₁ Δ₂ Δ[..]] that neither
-%     Δ₁ nor Δ₂ depend on x
+%     Δ₁ nor Δ₂ depend on x.
 % (2) Obtain from [Ψ,x:obj ⊢ merge Δ₁[..] Δ₂ Δ] that neither
-%     Δ₂ nor Δ depend on x
+%     Δ₂ nor Δ depend on x.
 
 inductive PruneMerge : (Ψ:ctx) (Δ:[Ψ,x:obj ⊢ lctx N[]])
   {M:[Ψ,x:obj ⊢ merge Δ₁ Δ₂ Δ]} ctype =
@@ -42,7 +42,7 @@ rec prune_merge_l : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
 % Algebraic properties
 %------------------------------------------------------%
 
-% Functionality: If Δ₁ ⋈ Δ₂ = Δ and Δ₁ ⋈ Δ₂ = Δ', then Δ = Δ'
+% Functionality: If Δ₁ ⋈ Δ₂ = Δ and Δ₁ ⋈ Δ₂ = Δ', then Δ = Δ'.
 
 rec merge_func : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -58,7 +58,7 @@ rec merge_func : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ ctx/refl]
   ;
 
-% Commutativity: If Δ₁ ⋈ Δ₂ = Δ, then Δ₂ ⋈ Δ₁ = Δ
+% Commutativity: If Δ₁ ⋈ Δ₂ = Δ, then Δ₂ ⋈ Δ₁ = Δ.
 
 rec merge_comm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -72,7 +72,7 @@ rec merge_comm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     [_ ⊢ mg/c M2 T2[]]
   ;
 
-% Existence of identity context, i.e., Δ ⋈ 0Δ = Δ for any Δ
+% Existence of identity context, i.e., Δ ⋈ 0Δ = Δ for any Δ.
 
 LF merge_getid_res : lctx _ → type =
 | merge-getid : merge Δ Δ' Δ → exh Δ' → merge_getid_res Δ;
@@ -88,10 +88,10 @@ rec merge_getid : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ merge_getid_res Δ] =
     [_ ⊢ merge-getid (mg/c M T2[]) (exh/c E U1[])]
   ;
 
-% Associativity
-% (1) If (Δ₁ ⋈ Δ₂) ⋈ Δ₃ = Δ, then Δ₁ ⋈ (Δ₂ ⋈ Δ₃)
+% Associativity:
+% (1) If (Δ₁ ⋈ Δ₂) ⋈ Δ₃ = Δ, then Δ₁ ⋈ (Δ₂ ⋈ Δ₃).
 % (2) If (Δ₁ ⋈ Δ₂) ⋈ Δ₃ = Δ, then (Δ₁ ⋈ Δ₃) ⋈ Δ₂
-%     [corollary of (1) using commutativity]
+%     [corollary of (1) using commutativity].
 
 LF merge_assoc_res : merge _ _ _ → merge _ _ _ → type =
   merge-assoc : merge Δ₂ Δ₃ Δ₂₃ → merge Δ₁ Δ₂₃ Δ
@@ -129,11 +129,11 @@ rec merge_assoc_swap : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) {M1:[Ψ ⊢ merge Δ₁�
 % Interaction with update
 %------------------------------------------------------%
 
-% Preservation of lookup under merge:
+% Preservation of look-up under merge:
 % (1) If (x :α A) ∈ₙ (Δ₁ ⋈ Δ₂), then (x :α₁ A) ∈ₙ Δ₁ and (x :α₂ A) ∈ₙ Δ₂ for
-%     some α₁,α₂ such that α₁ • α₂ = α
+%     some α₁, α₂ such that α₁ • α₂ = α.
 % (2) If (x :α₁ A) ∈ₙ Δ₁ and Δ₁ ⋈ Δ₂ = Δ, then (x :α₂ A) ∈ₙ Δ₂, (x :α A) ∈ₙ Δ
-%     for α₁,α₂ such that α₁ • α₂ = α
+%     for α₁, α₂ such that α₁ • α₂ = α.
 
 LF merge_lookup_res : upd Δ _ _ _ _ _ _ _ _ → merge _ _ Δ → type =
   merge-lookup : upd Δ₁ n X _ A _ α₁ _ _ → upd Δ₂ n X _ A _ α₂ _ _ → • α₁ α₂ α
@@ -179,7 +179,7 @@ rec merge_lookup2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 
 % Distributivity of updating over ⋈:
 % Δ₁[x :α₁ A ↦ₙ x' :β₁ B] ⋈ Δ₂[x :α₂ A ↦ₙ x' :β₂ B] =
-% (Δ₁ ⋈ Δ₂)[x :(α₁•α₂) A ↦ₙ x' :(β₁•β₂) B]
+% (Δ₁ ⋈ Δ₂)[x :(α₁•α₂) A ↦ₙ x' :(β₁•β₂) B].
 
 rec merge_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -212,11 +212,11 @@ rec merge_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Useful corollaries
 %------------------------------------------------------%
 
-% (1) If Δ[x :α A ↦ₙ x' :α' A'] = Δ' and Δ₁ ⋈ Δ₂ = Δ, then for any α₁',α₂' with
-%     α₁' • α₂' = α', there exist α₁,α₂,Δ₁',Δ₂' such that α₁ • α₂ = α,
+% (1) If Δ[x :α A ↦ₙ x' :α' A'] = Δ' and Δ₁ ⋈ Δ₂ = Δ, then for any α₁', α₂' with
+%     α₁' • α₂' = α', there exist α₁, α₂, Δ₁', Δ₂' such that α₁ • α₂ = α,
 %     Δ₁[x :α₁ A ↦ₙ x' :α₁' A'] = Δ₁', Δ₂[x :α₂ A ↦ₙ x' :α₂' A'] = Δ₂', and
-%     Δ₁' ⋈ Δ₂' = Δ'
-% (2) Same but starting with Δ₁ (or Δ₂ using commutativity)
+%     Δ₁' ⋈ Δ₂' = Δ'.
+% (2) Same but starting with Δ₁ (or Δ₂ using commutativity).
 
 LF merge_upd_res : upd Δ _ _ _ _ _ _ α _ → merge _ _ Δ → • _ _ α → type =
   merge-upd : upd Δ₁ n X X' A A' α₁ α₁' Δ₁' → upd Δ₂ n X X' A A' α₂ α₂' Δ₂'

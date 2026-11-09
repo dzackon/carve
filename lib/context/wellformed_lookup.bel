@@ -5,6 +5,8 @@
 % in Δ") used to prove the properties of wellformed.bel.
 %======================================================%
 
+% X occurs in (Δ, X :α A).
+
 rec lookup_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   {α:[ ⊢ mult]}
   [Ψ ⊢ lookup_n X (cons Δ X A[] α[])] =
@@ -12,6 +14,8 @@ rec lookup_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   mlam Δ, X, A, α ⇒
   let [_ ⊢ U1] = upd_refl_top [_ ⊢ Δ] [_ ⊢ X] [ ⊢ A] [ ⊢ α] in [_ ⊢ lookn U1]
   ;
+
+% If X ∉ Δ, then X ∉ Δ in the LF context extended with a fresh variable.
 
 rec notin_ext : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → ([Ψ,x:obj ⊢ lookup_n X[..] Δ[..]] → [ ⊢ false]) =
@@ -23,6 +27,8 @@ rec notin_ext : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ �
   nin [_ ⊢ lookn U'']
   ;
 
+% If X ∉ Δ in the LF context extended with a fresh variable, then X ∉ Δ.
+
 rec notin_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ,x:obj ⊢ lookup_n X[..] Δ[..]] → [ ⊢ false])
   → [Ψ ⊢ lookup_n X Δ]
@@ -33,10 +39,14 @@ rec notin_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   nin [_,x:obj,y:obj ⊢ lookn U[..,x]]
   ;
 
+% No name occurs in the empty context.
+
 rec notin_nil : (Ψ:ctx) [Ψ ⊢ lookup_n X nil] → [ ⊢ false] =
   / total 1 /
   fn ap ⇒ let [_ ⊢ lookn U1] = ap in impossible [_ ⊢ U1]
   ;
+
+% A fresh variable x does not occur in a context that does not depend on x.
 
 rec notin_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj ⊢ lookup_n x Δ[..]]
@@ -45,12 +55,16 @@ rec notin_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   fn ap ⇒ let [_,x:obj ⊢ lookn U1] = ap in upd_contra [_,x:obj ⊢ U1]
   ;
 
+% Non-membership is preserved by swapping the two topmost LF variables.
+
 rec notin_swap : (Ψ:ctx) (Δ:[Ψ,x:obj,y:obj ⊢ lctx K[]])
   ([Ψ,x:obj,y:obj ⊢ lookup_n X Δ] → [ ⊢ false])
   → ([Ψ,y:obj,x:obj ⊢ lookup_n X[..,x,y] Δ[..,x,y]] → [ ⊢ false]) =
   / total 1 /
   fn nin, l ⇒ let [_,x:obj,y:obj ⊢ L'] = l in nin [_,x:obj,y:obj ⊢ L'[..,y,x]]
   ;
+
+% If X ∉ Δ and Δ[y :α A ↦ₙ y :β B] = Δ', then X ∉ Δ'.
 
 rec notin_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ upd Δ n Y Y A B α β Δ']
@@ -62,6 +76,8 @@ rec notin_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ �
   nin [_ ⊢ lookn U3]
   ;
 
+% If X ∉ (Δ, y :β B), then X ∉ Δ.
+
 rec notin_peel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ ⊢ lookup_n X (cons Δ Y B[] β[])] → [ ⊢ false])
   → ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false]) =
@@ -70,6 +86,8 @@ rec notin_peel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   let [_ ⊢ lookn U] = ap in
   impossible nin [_ ⊢ lookn (upd/n U)]
   ;
+
+% If Z ∉ Δ, Δ[x :α A ↦ₙ y :β B] = Δ', and y ≠ Z, then Z ∉ Δ'.
 
 rec notin_upd_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Z Δ] → [ ⊢ false])
   → [Ψ ⊢ upd Δ n[] X Y A B α β Δ']
@@ -82,6 +100,8 @@ rec notin_upd_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Z Δ] → 
     (lookup_neq_var2nat (upd_symm u) [_ ⊢ U2] n) in
   nin [_ ⊢ lookn U3]
   ;
+
+% If X ∉ Δ and Δ₁ ⋈ Δ₂ = Δ, then X ∉ Δ₁.
 
 rec notin_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -97,6 +117,8 @@ rec notin_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n X Δ] → [ 
     let [_ ⊢ merge-lookup2 _ U3 _ _ _] = merge_lookup2 [_ ⊢ U1] [_ ⊢ M1] in
     nin [_ ⊢ lookn (upd/n U3)]
   ;
+
+% If X ∉ Δ₁ and Δ₁ ⋈ Δ₂ = Δ, then X ∉ Δ.
 
 rec notin_merge_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ([Ψ ⊢ lookup_n X Δ₁] → [ ⊢ false])
@@ -114,6 +136,8 @@ rec notin_merge_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     nin [_ ⊢ lookn (upd/n U2)]
   ;
 
+% If Y ∉ Δ and (X :α A) ∈ₙ Δ, then X ≠ Y.
+
 rec notin_to_nmeq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Y Δ] → [ ⊢ false])
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
   → ([Ψ ⊢ obj_eq X Y] → [ ⊢ false]) =
@@ -123,6 +147,8 @@ rec notin_to_nmeq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]]) ([Ψ ⊢ lookup_n Y Δ] → 
   let [_ ⊢ U] = u in
   nin [_ ⊢ lookn U]
   ;
+
+% If Δ is well-formed, Δ[x :α A ↦ₙ y :β B] = Δ', and x ≠ y, then x ∉ Δ'.
 
 rec notin_changename :
   [Ψ ⊢ upd Δ _ X Y _ _ _ _ Δ']
@@ -145,6 +171,8 @@ rec notin_changename :
     | [_ ⊢ upd/t _] ⇒ nin [_ ⊢ lookn U]
     | [_ ⊢ upd/n U2'] ⇒ notin_changename [_ ⊢ U] wf1 n [_ ⊢ lookn U2']
   ;
+
+% If X ∉ Δ and Δ[(m, y) ↔ (k, z)] = Δ', then X ∉ Δ'.
 
 rec notin_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) ([Ψ ⊢ lookup_n X Δ] → [ ⊢ false])
   → [Ψ ⊢ exch Δ m Y k Z Δ']

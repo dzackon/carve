@@ -2,7 +2,7 @@
 % Type safety
 %======================================================%
 
-% If Δ ⊢ P, then P is not in error form
+% If Δ ⊢ P, then P is not in error form.
 
 rec safety_form : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P] → [Ψ ⊢ error_form P] → [ ⊢ false] =
@@ -36,7 +36,7 @@ rec safety_form : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
     safety_form [_,x:obj,y:obj ⊢ D1] [_,x:obj,y:obj ⊢ E]
   ;
 
-% If Δ ⊢ P, then P is not a run-time error
+% If Δ ⊢ P, then P is not a runtime error.
 
 rec safety : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P] → [Ψ ⊢ runtime_error P] → [ ⊢ false] =
@@ -46,12 +46,12 @@ rec safety : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   safety_form (oft_cong [_ ⊢ C] d) [_ ⊢ E]
   ;
 
-% Corollary: No process reachable from a well-typed process has a
-% prefix-mismatch error
+% Corollary: no process reachable from a well-typed process has a
+% prefix-mismatch error.
 
 rec safety_reachable : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ oft Δ P] → [Ψ ⊢ P ⇛* Q] → [Ψ ⊢ runtime_error Q]
   → [ ⊢ false] =
-  / total /
+  / total 1 /
   fn d, r, e ⇒ safety (preservation_multi r d) e
   ;

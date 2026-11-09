@@ -2,7 +2,7 @@
 % Properties of addition
 %======================================================%
 
-% Addition is total
+% Addition is total.
 
 LF get_plus : nat → nat → type =
 | get-plus : plus n m l → get_plus n m;
@@ -16,7 +16,7 @@ rec plus_total : {n:[ ⊢ nat]} {m:[ ⊢ nat]} [ ⊢ get_plus n m] =
     [ ⊢ get-plus (pl/s P)]
   ;
 
-% Addition is functional
+% Addition is functional.
 
 rec plus_func : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂ n'] → [ ⊢ nat_eq n n'] =
   / total 1 /
@@ -29,7 +29,7 @@ rec plus_func : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂ n'] → [ ⊢ n
   ;
 
 % Addition is cancellative (the case for n₁ can be obtained through
-% commutativity, see plus_comm below)
+% commutativity, see plus_comm below).
 
 rec plus_cancel : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂' n] → [ ⊢ nat_eq n₂ n₂'] =
   / total 1 /
@@ -38,7 +38,7 @@ rec plus_cancel : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ n₂' n] → [ ⊢
   | [ ⊢ pl/s P1] ⇒ let [ ⊢ pl/s P2] = p2 in plus_cancel [ ⊢ P1] [ ⊢ P2]
   ;
 
-% Symmetric case for pl/z: n + 0 = n
+% Symmetric case for pl/z: n + 0 = n.
 
 rec plus_get_id : {n:[ ⊢ nat]} [ ⊢ plus n zero n] =
   / total 1 /
@@ -47,7 +47,7 @@ rec plus_get_id : {n:[ ⊢ nat]} [ ⊢ plus n zero n] =
   | [ ⊢ suc n'] ⇒ let [ ⊢ P] = plus_get_id [ ⊢ n'] in [ ⊢ pl/s P]
   ;
 
-% Symmetric case for pl/s: n₁ + n₂ = n implies n₁ + (n₂ + 1) = (n + 1)
+% Symmetric case for pl/s: n₁ + n₂ = n implies n₁ + (n₂ + 1) = (n + 1).
 
 rec plus_suc_reverse : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ (suc n₂) (suc n)] =
   / total 1 /
@@ -56,7 +56,7 @@ rec plus_suc_reverse : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₁ (suc n₂) (s
   | [ ⊢ pl/s P1] ⇒ let [ ⊢ P2] = plus_suc_reverse [ ⊢ P1] in [ ⊢ pl/s P2]
   ;
 
-% Addition is commutative
+% Addition is commutative.
 
 rec plus_comm : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₂ n₁ n] =
   / total 1 /
@@ -65,7 +65,7 @@ rec plus_comm : [ ⊢ plus n₁ n₂ n] → [ ⊢ plus n₂ n₁ n] =
   | [ ⊢ pl/s P] ⇒ plus_suc_reverse (plus_comm [ ⊢ P])
   ;
 
-% Addition is associative
+% Addition is associative.
 
 LF plus_assoc_res : plus _ _ _ → plus _ _ _ → type =
 | plus-assoc : plus n₂ n₃ n₂₃ → plus n₁ n₂₃ n
@@ -82,7 +82,7 @@ rec plus_assoc : {P1:[ ⊢ plus n₁ n₂ n₁₂]} {P2:[ ⊢ plus n₁₂ n₃ 
     [ ⊢ plus-assoc P3 (pl/s P4) _ _]
   ;
 
-% n + m = k is impossible when k < m
+% n + m = k is impossible when k < m.
 
 rec plus_lt_absurd : [ ⊢ plus n m k] → [ ⊢ lt k m] → [ ⊢ false] =
   / total 1 /
