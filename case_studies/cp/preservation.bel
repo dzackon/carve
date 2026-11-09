@@ -31,13 +31,10 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       let [_,x:obj ⊢ exh/c E1 _] = [_,x:obj ⊢ E] in
       let [_ ⊢ ctx/refl] =
         merge_id mult_halident [_ ⊢ M] (prune_exh [_ ⊢ E1]) in
-      (case [_,x:obj ⊢ U2] of
-      | [_,x:obj ⊢ upd/t _] ⇒
-        let [_,x:obj ⊢ O2'] = oft_str [_,x:obj ⊢ O2] in
-        let Prune-Oft [_ ⊢ O1] [_,x:obj ⊢ _] = prune_oft [_,x:obj ⊢ O2'] in
-        [_ ⊢ O1]
-      | [_,x:obj ⊢ upd/n U2] ⇒ impossible upd_contra [_,x:obj ⊢ U2]
-      )
+      let [_,x:obj ⊢ upd-istop _] = upd_var_istop [_,x:obj ⊢ U2] in
+      let [_,x:obj ⊢ O2'] = oft_str [_,x:obj ⊢ O2] in
+      let Prune-Oft [_ ⊢ O1] [_,x:obj ⊢ _] = prune_oft [_,x:obj ⊢ O2'] in
+      [_ ⊢ O1]
     | [_,x:obj ⊢ upd/n U1] ⇒
       let [_,x:obj ⊢ exh/c _ H[]] = [_,x:obj ⊢ E] in
       impossible [ ⊢ H]
@@ -92,10 +89,7 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     let Prune-Upd [_ ⊢ U1] [_,x:obj ⊢ _] = prune_upd [_,x:obj ⊢ U1'] in
     (case [ ⊢ T] of
     | [ ⊢ •/10] ⇒
-      let [_ ⊢ M2_comm] = merge_comm [_ ⊢ M2] in
-      let [_ ⊢ merge-assoc M3 M_comm _ _] =
-        merge_assoc [_ ⊢ M1] [_ ⊢ M2_comm] in
-      let [_ ⊢ M] = merge_comm [_ ⊢ M_comm] in
+      let [_ ⊢ merge-assoc2 M3 M _ _] = merge_assoc_swap [_ ⊢ M1] [_ ⊢ M2] in
       % Typing judgments
       let [_ ⊢ _]:[_ ⊢ upd _ _ _ _ (B1[] ⊗ _) _ _ _ _] = [_ ⊢ U1] in
       let [_,x:obj,y:obj ⊢ O1'[..,y,x]] = oft_exch_top [_,x:obj,y:obj ⊢ O1] in

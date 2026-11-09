@@ -6,7 +6,7 @@ For an overview of the library structure, refer to [lib/README.md](lib/README.md
 
 # Installation and execution
 
-This mechanization is compatible with Beluga version 1.1.3. Beluga may be installed using the OCaml package manager ([`opam`](https://opam.ocaml.org/doc/Install.html)):
+This library is compatible with Beluga version 1.1.3. Beluga may be installed using the OCaml package manager ([`opam`](https://opam.ocaml.org/doc/Install.html)):
 
 ```sh
 opam install beluga.1.1.3
@@ -14,8 +14,8 @@ opam install beluga.1.1.3
 
 It may also be built and installed from source following the instructions at https://github.com/Beluga-lang/Beluga.
 
-Once installed, Beluga can be run on the file `run_all.cfg`. The expected total runtime is approximately 0m13s.
+Once installed, Beluga can be run on the file `all.cfg`. The expected total runtime is approximately 0m14s.
 
 ```sh
-beluga run_all.cfg
+beluga all.cfg
 ```

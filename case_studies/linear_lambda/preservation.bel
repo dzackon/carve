@@ -1,5 +1,5 @@
 %======================================================%
-% Theorems
+% Type preservation
 %======================================================%
 
 % Type preservation for the linear λ-calculus
@@ -61,4 +61,16 @@ rec preservation : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
         substitution_w [_,x:obj ⊢ D2] [_ ⊢ D1'] [_ ⊢ E1] (merge_comm [_ ⊢ M1])
       )
     )
+  ;
+
+% Preservation over multi-step reduction: if · ⊢ M : A and M ⟶* M', then
+% · ⊢ M' : A.
+
+rec preservation_multi : [ ⊢ oft nil M A] → [ ⊢ mstep M M']
+  → [ ⊢ oft nil M' A] =
+  / total 2 /
+  fn d, ms ⇒ case ms of
+  | [ ⊢ ms/refl] ⇒ d
+  | [ ⊢ ms/onestep S MS] ⇒
+    preservation_multi (preservation d [ ⊢ S] VarCtx-Nil) [ ⊢ MS]
   ;

@@ -2,7 +2,7 @@
 % Properties of same_elts judgment
 %======================================================%
 
-% Reflexivity: Δ ≈ Δ
+% Reflexivity: Δ ≈ Δ.
 
 rec same_elts_refl : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ same_elts Δ Δ] =
   / total 1 /
@@ -12,7 +12,7 @@ rec same_elts_refl : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} [Ψ ⊢ same_elts Δ Δ] =
     let [_ ⊢ SE] = same_elts_refl [_ ⊢ Δ'] in [_ ⊢ se/c SE]
   ;
 
-% Symmetry: If Δ ≈ Δ', then Δ' ≈ Δ
+% Symmetry: If Δ ≈ Δ', then Δ' ≈ Δ.
 
 rec same_elts_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ']
@@ -23,7 +23,7 @@ rec same_elts_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ se/c SE1] ⇒ let [_ ⊢ SE2] = same_elts_symm [_ ⊢ SE1] in [_ ⊢ se/c SE2]
   ;
 
-% Transitivity: If Δ ≈ Δ' and Δ' ≈ Δ'', then Δ ≈ Δ''
+% Transitivity: If Δ ≈ Δ' and Δ' ≈ Δ'', then Δ ≈ Δ''.
 
 rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ']
@@ -39,9 +39,11 @@ rec same_elts_trans : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Mergeable contexts contain the same elements:
-% (1) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ (and so Δ₂ ≈ Δ by commutativity of merge)
+% (1) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ (and so Δ₂ ≈ Δ by commutativity of merge).
 % (2) If Δ₁ ⋈ Δ₂ = Δ, then Δ₁ ≈ Δ₂ [corollary of (1) using merge_comm,
-%     same_elts_symm, same_elts_trans]
+%     same_elts_symm, same_elts_trans].
+% (3) If Δ₁ ⋈ Δ₂ = Δ, Δ ≈ Δ' and Δ₁' ⋈ Δ₂' = Δ', then Δ₁ ≈ Δ₁' [by (1)].
+% (4) If Δ₁ ⋈ Δ₂ = Δ and Δ₁ ⋈ Δ₂' = Δ', then Δ₂ ≈ Δ₂' [by (2)].
 
 rec merge_same_elts : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -60,11 +62,40 @@ rec merge_same_elts_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     (same_elts_symm (merge_same_elts (merge_comm m)))
   ;
 
+rec merge2_same_elts_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ merge Δ₁' Δ₂' Δ']
+  → [Ψ ⊢ same_elts Δ₁ Δ₁'] =
+  / total /
+  fn m1, se, m2 ⇒
+  same_elts_trans (merge_same_elts m1)
+    (same_elts_trans se (same_elts_symm (merge_same_elts m2)))
+  ;
+
+rec merge2_same_elts_r : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ merge Δ₁ Δ₂ Δ] → [Ψ ⊢ merge Δ₁ Δ₂' Δ'] → [Ψ ⊢ same_elts Δ₂ Δ₂'] =
+  / total /
+  fn m1, m2 ⇒
+  same_elts_trans (same_elts_symm (merge_same_elts_cor m1))
+    (merge_same_elts_cor m2)
+  ;
+
+% Updating only a multiplicity preserves names and types.
+
+rec upd_same_elts : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  [Ψ ⊢ upd Δ n X X A A α β Δ'] → [Ψ ⊢ same_elts Δ Δ'] =
+  / total 1 /
+  fn u ⇒ case u of
+  | [_ ⊢ upd/t Δ] ⇒
+    let [_ ⊢ SE] = same_elts_refl [_ ⊢ Δ] in [_ ⊢ se/c SE]
+  | [_ ⊢ upd/n U] ⇒
+    let [_ ⊢ SE] = upd_same_elts [_ ⊢ U] in [_ ⊢ se/c SE]
+  ;
+
 %------------------------------------------------------%
 % Preservation across same_elts
 %------------------------------------------------------%
 
-% Preserve lookup by position, name, and type
+% Preserve look-up by position, name, and type.
 
 rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_int n X A Δ]
@@ -81,7 +112,7 @@ rec same_elts_lookup_int : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
       [_ ⊢ lookint (upd/n U2)]
   ;
 
-% Preserve name membership
+% Preserve name membership.
 
 rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ same_elts Δ Δ'] → [Ψ ⊢ lookup_n X Δ]
@@ -94,7 +125,7 @@ rec same_elts_lookup_n : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [_ ⊢ lookn U2]
   ;
 
-% Preserve VarCtx across changes of multiplicity
+% Preserve VarCtx across changes of multiplicity.
 
 rec varctx_same_elts : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ']
   → VarCtx [Ψ ⊢ Δ'] =
@@ -105,7 +136,7 @@ rec varctx_same_elts : VarCtx [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ']
     VarCtx-Cons (varctx_same_elts vc1 [_ ⊢ SE])
   ;
 
-% Preserve well-formedness
+% Preserve well-formedness.
 
 rec wf_same_elts : Wf [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ'] → Wf [Ψ ⊢ Δ'] =
   / total 1 /
@@ -114,4 +145,24 @@ rec wf_same_elts : Wf [Ψ ⊢ Δ] → [Ψ ⊢ same_elts Δ Δ'] → Wf [Ψ ⊢ �
   | Wf-Cons wf1 nin ⇒ let [_ ⊢ se/c SE] = se in
     Wf-Cons (wf_same_elts wf1 [_ ⊢ SE])
       (fn l ⇒ nin (same_elts_lookup_n (same_elts_symm [_ ⊢ SE]) l))
+  ;
+
+% Exhausted contexts with the same names and types are equal when harmless
+% multiplicities are unique.
+
+rec exh_same_elts_eq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  HalUnique
+  → [Ψ ⊢ same_elts Δ Δ']
+  → [Ψ ⊢ exh Δ]
+  → [Ψ ⊢ exh Δ']
+  → [Ψ ⊢ ctx_eq Δ Δ'] =
+  / total 2 /
+  fn hu, se, e1, e2 ⇒ case se of
+  | [_ ⊢ se/n] ⇒ [_ ⊢ ctx/refl]
+  | [_ ⊢ se/c SE] ⇒
+    let [_ ⊢ exh/c E1 H1[]] = e1 in
+    let [_ ⊢ exh/c E2 H2[]] = e2 in
+    let [ ⊢ mult/refl] = mult_halunique_gen hu [ ⊢ H1] [ ⊢ H2] in
+    let [_ ⊢ ctx/refl] = exh_same_elts_eq hu [_ ⊢ SE] [_ ⊢ E1] [_ ⊢ E2] in
+    [_ ⊢ ctx/refl]
   ;

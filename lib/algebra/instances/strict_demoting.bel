@@ -13,7 +13,7 @@ LF • : mult → mult → mult → type =
 | •/ω1 : • ω 𝟙 𝟙
 | •/ωω : • ω ω ω;
 
-% α is harmless
+% α is harmless.
 
 LF hal : mult → type =
 | hal/ω : hal ω;

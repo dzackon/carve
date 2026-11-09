@@ -1,0 +1,59 @@
+%======================================================%
+% Progress
+%
+% A closed well-typed term is a value or can take a step,
+% for both strong and weak reduction.
+%======================================================%
+
+% M is a value or steps (weak reduction)
+
+LF val_or_wstep : obj → type =
+| vows/val : val M → val_or_wstep M
+| vows/step : wstep M M' → val_or_wstep M;
+
+% M is a value or steps (strong reduction)
+
+LF val_or_step : obj → type =
+| vos/val : val M → val_or_step M
+| vos/step : step M M' → val_or_step M;
+
+% If · ⊢ M : A, then M is a value or M ⟶ʷ M'.
+
+rec progress_w : [ ⊢ oft nil M A] → [ ⊢ val_or_wstep M] =
+  / total 1 /
+  fn d ⇒ case d of
+  | [ ⊢ oft/var U _] ⇒ impossible [ ⊢ U]
+  | [ ⊢ oft/vari U _] ⇒ impossible [ ⊢ U]
+  | [ ⊢ oft/lam \x.D1] ⇒ [ ⊢ vows/val val/lam]
+  | [ ⊢ oft/app D1 D2 mg/n] ⇒
+    (case progress_w [ ⊢ D1] of
+    | [ ⊢ vows/step S1] ⇒ [ ⊢ vows/step (wstep/app1 S1)]
+    | [ ⊢ vows/val val/lam] ⇒ [ ⊢ vows/step wstep/red]
+    | [ ⊢ vows/val val/bang] ⇒
+      (case [ ⊢ D1] of
+      | [ ⊢ oft/var U _] ⇒ impossible [ ⊢ U]
+      | [ ⊢ oft/vari U _] ⇒ impossible [ ⊢ U]
+      )
+    )
+  | [ ⊢ oft/bang E1 D1] ⇒ [ ⊢ vows/val val/bang]
+  | [ ⊢ oft/letbang D1 (\x.D2) mg/n] ⇒
+    (case progress_w [ ⊢ D1] of
+    | [ ⊢ vows/step S1] ⇒ [ ⊢ vows/step (wstep/letbang1 S1)]
+    | [ ⊢ vows/val val/bang] ⇒ [ ⊢ vows/step wstep/red!]
+    | [ ⊢ vows/val val/lam] ⇒
+      (case [ ⊢ D1] of
+      | [ ⊢ oft/var U _] ⇒ impossible [ ⊢ U]
+      | [ ⊢ oft/vari U _] ⇒ impossible [ ⊢ U]
+      )
+    )
+  ;
+
+% If · ⊢ M : A, then M is a value or M ⟶ M'.
+
+rec progress : [ ⊢ oft nil M A] → [ ⊢ val_or_step M] =
+  / total 1 /
+  fn d ⇒ case progress_w d of
+  | [ ⊢ vows/val V] ⇒ [ ⊢ vos/val V]
+  | [ ⊢ vows/step S] ⇒
+    let [ ⊢ S'] = wstep_step [ ⊢ S] in [ ⊢ vos/step S']
+  ;

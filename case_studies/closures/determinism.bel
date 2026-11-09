@@ -1,0 +1,19 @@
+%======================================================%
+% Determinism of evaluation
+%======================================================%
+
+% Evaluation is deterministic: if η ⊢ M ⇓ W and η ⊢ M ⇓ W', then W = W'.
+
+rec eval_det : [ ⊢ eval η M W] → [ ⊢ eval η M W'] → [ ⊢ val_eq W W'] =
+  / total 1 /
+  fn d1, d2 ⇒ case d1 of
+  | [ ⊢ eval/var L1] ⇒
+    let [ ⊢ eval/var L2] = d2 in
+    lookup_func [ ⊢ L1] [ ⊢ L2]
+  | [ ⊢ eval/abs] ⇒ let [ ⊢ eval/abs] = d2 in [ ⊢ val/refl]
+  | [ ⊢ eval/app D1 D2 D3] ⇒
+    let [ ⊢ eval/app E1 E2 E3] = d2 in
+    let [ ⊢ val/refl] = eval_det [ ⊢ D1] [ ⊢ E1] in
+    let [ ⊢ val/refl] = eval_det [ ⊢ D2] [ ⊢ E2] in
+    eval_det [ ⊢ D3] [ ⊢ E3]
+  ;

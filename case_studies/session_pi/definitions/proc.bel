@@ -15,29 +15,28 @@ LF proc : type =
 
 % Structural congruence
 
-LF ≡ : proc → proc → type =
-% axioms
-| ≡par/comm : ≡ (par P Q) (par Q P)
-| ≡par/assoc : ≡ (par (par P Q) R) (par P (par Q R))
-| ≡par/null : {P:proc} ≡ (par P null) P
-| ≡res/par : ≡ (par (res P) Q) (res \x.\y.par (P x y) Q)
-| ≡res/swapB : ≡ (res \w.\x.res \y.\z.P w x y z) (res \y.\z.res \w.\x.P w x y z)
-| ≡res/swapC : ≡ (res \x.\y.P x y) (res \y.\x.P x y)
-% congruence rules
-| ≡c/null : ≡ null null
-| ≡c/wait : ≡ P P' → ≡ (wait X P) (wait X P')
-| ≡c/close : ≡ P P' → ≡ (close X P) (close X P')
-| ≡c/inp : ({x:obj} ≡ (P x) (P' x)) → ≡ (inp X P) (inp X P')
-| ≡c/out : ≡ P P' → ≡ (out X Y P) (out X Y P')
-| ≡c/par : ≡ P P' → ≡ (par P Q) (par P' Q)
-| ≡c/res : ({x:obj} {y:obj} ≡ (P x y) (P' x y)) → ≡ (res P) (res P')
-% symmetry, transitivity
-| ≡sym : ≡ P Q → ≡ Q P
-| ≡trans : ≡ P Q → ≡ Q R → ≡ P R
-;
 --infix ≡ 11 left.
+LF ≡ : proc → proc → type =
+% Axioms
+| ≡par/comm : (par P Q) ≡ (par Q P)
+| ≡par/assoc : (par (par P Q) R) ≡ (par P (par Q R))
+| ≡par/null : {P:proc} (par P null) ≡ P
+| ≡res/par : (par (res P) Q) ≡ (res \x.\y.par (P x y) Q)
+| ≡res/swapB : (res \w.\x.res \y.\z.P w x y z) ≡ (res \y.\z.res \w.\x.P w x y z)
+| ≡res/swapC : (res \x.\y.P x y) ≡ (res \y.\x.P x y)
+% Congruence rules
+| ≡c/null : null ≡ null
+| ≡c/wait : P ≡ P' → (wait X P) ≡ (wait X P')
+| ≡c/close : P ≡ P' → (close X P) ≡ (close X P')
+| ≡c/inp : ({x:obj} (P x) ≡ (P' x)) → (inp X P) ≡ (inp X P')
+| ≡c/out : P ≡ P' → (out X Y P) ≡ (out X Y P')
+| ≡c/par : P ≡ P' → (par P Q) ≡ (par P' Q)
+| ≡c/res : ({x:obj} {y:obj} (P x y) ≡ (P' x y)) → (res P) ≡ (res P')
+% Symmetry, transitivity
+| ≡sym : P ≡ Q → Q ≡ P
+| ≡trans : P ≡ Q → Q ≡ R → P ≡ R;
 
-% Process P is prefixed at variable x
+% Process P is prefixed at variable x.
 
 LF pref : obj → proc → type =
 | pref/wait : pref X (wait X _)
@@ -45,7 +44,7 @@ LF pref : obj → proc → type =
 | pref/inp : pref X (inp X _)
 | pref/out : pref X (out X _ _);
 
-% P is prefixed at x by an action that matches the session type T
+% P is prefixed at x by an action that matches the session type T.
 
 LF pref_tp : obj → proc → tp → type =
 | pt/wait : pref_tp X (wait X _) end?
@@ -72,7 +71,7 @@ LF can_form : proc → type =
 | can/par : can_par P → can_form P
 | can/res : ({x:obj} {y:obj} can_form (P x y)) → can_form (res P);
 
-% P is congruent to P' in canonical form
+% P is congruent to P' in canonical form.
 
 LF equiv_can_par : proc → type =
 | equiv-can-par : P ≡ P' → can_par P' → equiv_can_par P;
@@ -84,7 +83,7 @@ LF equiv_can_form : proc → type =
 % Prefix compatibility
 %------------------------------------------------------%
 
-% P and Q have complementary outer prefixes at the bound endpoints x and y
+% P and Q have complementary outer prefixes at the bound endpoints x and y.
 
 LF pref_compatible : (obj → obj → proc) → (obj → obj → proc) → type =
 | compat/close_wait :
@@ -97,7 +96,7 @@ LF pref_compatible : (obj → obj → proc) → (obj → obj → proc) → type 
   pref_compatible (\x.\y. inp x (P x y)) (\x.\y. out y (Z x y) (Q x y));
 
 % Eight representative incompatible prefix pairs. The four omitted reversed
-% mixed pairs are covered by exchanging endpoints and parallel components
+% mixed pairs are covered by exchanging endpoints and parallel components.
 
 LF pref_mismatch : (obj → obj → proc) → (obj → obj → proc) → type =
 | mm/wait_wait : pref_mismatch (\x.\y. wait x (P x y)) (\x.\y. wait y (Q x y))
@@ -115,14 +114,14 @@ LF pref_mismatch : (obj → obj → proc) → (obj → obj → proc) → type =
 
 % P is in error form: it has incompatible prefixes on the two endpoints of one
 % restriction, with an arbitrary parallel remainder and additional enclosing
-% restrictions
+% restrictions.
 
 LF error_form : proc → type =
 | err/par : pref_mismatch P Q
   → error_form (res \x.\y.par (par (P x y) (Q x y)) (R x y))
 | err/res : ({x:obj} {y:obj} error_form (P x y)) → error_form (res P);
 
-% P is a runtime error: it is congruent to a prefix-mismatch error form
+% P is a runtime error: it is congruent to a prefix-mismatch error form.
 
 LF runtime_error : proc → type =
 | runtime-error : P ≡ P' → error_form P' → runtime_error P;

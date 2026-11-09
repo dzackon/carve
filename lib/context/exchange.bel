@@ -7,7 +7,7 @@
 %------------------------------------------------------%
 
 % Permute the topmost elements of a context:
-% (Δ, x:α A, y :β B)[(|Δ| + 1, x) ↔ (|Δ| + 2, y)] = (Δ, y :β B, x:α A)
+% (Δ, x :α A, y :β B)[(|Δ| + 1, x) ↔ (|Δ| + 2, y)] = (Δ, y :β B, x :α A).
 
 rec exch_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   {α:[ ⊢ mult]} {Y:[Ψ ⊢ obj]} {B:[ ⊢ tp]} {β:[ ⊢ mult]}
@@ -21,8 +21,8 @@ rec exch_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]}
   ;
 
 % Symmetry properties:
-% (1) If Δ[(n, x) ↔ (m, y)][(m, x) ↔ (n, y)] = Δ
-% (2) If Δ[(n, x) ↔ (m, y)] = Δ', then Δ[(m, y) ↔ (n, x)] = Δ'
+% (1) If Δ[(n, x) ↔ (m, y)][(m, x) ↔ (n, y)] = Δ.
+% (2) If Δ[(n, x) ↔ (m, y)] = Δ', then Δ[(m, y) ↔ (n, x)] = Δ'.
 
 rec exch_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exch Δ n X m Y Δ']
@@ -48,11 +48,11 @@ rec exch_symm_2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % A name-preserving update commutes with exchange, with its position possibly
-% changed. For the distinct exchanged positions n,m, an update at k before
+% changed. For the distinct exchanged positions n, m, an update at k before
 % exchange becomes an update at k' afterwards:
 %   k' = m if k = n; k' = n if k = m; otherwise k' = k.
 % The exchanged entries carry the updated type/multiplicity when k is one
-% of n,m.
+% of n, m.
 
 LF exch_upd_res :
   upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
@@ -113,7 +113,7 @@ rec exch_upd : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
 % Interaction with merge
 %------------------------------------------------------%
 
-% Δ₁[(n, x) ↔ (m, y)] ⋈ Δ₂[(n, x) ↔ (m, y)] = (Δ₁ ⋈ Δ₂)[(n, x) ↔ (m, y)]
+% Δ₁[(n, x) ↔ (m, y)] ⋈ Δ₂[(n, x) ↔ (m, y)] = (Δ₁ ⋈ Δ₂)[(n, x) ↔ (m, y)].
 
 LF exch_merge_res :
   upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → merge _ _ _ → type =
@@ -161,7 +161,7 @@ rec exch_merge : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Interaction with exhaustedness
 %------------------------------------------------------%
 
-% Permuting elements of a context preserves exhaustedness
+% Permuting elements of a context preserves exhaustedness.
 
 rec exch_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exh Δ]
@@ -176,10 +176,10 @@ rec exch_exh : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 %------------------------------------------------------%
-% Lookup properties
+% Look-up properties
 %------------------------------------------------------%
 
-% If (X :α A) ∈ Δ, then (X :α A) ∈ Δ[(m, y) ↔ (k, z)]
+% If (X :α A) ∈ Δ, then (X :α A) ∈ Δ[(m, y) ↔ (k, z)].
 
 rec exch_lookup : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ exch Δ₁ m Y k Z Δ₂]

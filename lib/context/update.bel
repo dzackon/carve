@@ -8,7 +8,7 @@
 
 % "Prune" LF context to remove dependencies:
 % Obtain from [Ψ,x:obj ⊢ upd Δ[..] n[] X X A₁[..] A₂[..] α₁[..] α₂[..] Δ'] that
-% neither X nor Δ' depend on x
+% neither X nor Δ' depend on x.
 
 inductive PruneUpd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   {U:[Ψ,x:obj ⊢ upd Δ[..] n[] X X' A[..] A'[..] α[..] α'[..] Δ']} ctype =
@@ -30,7 +30,7 @@ rec prune_upd : {U:[Ψ,x:obj ⊢ upd Δ[..] n[] X X A[..] A'[..] α[..] α'[..] 
 % Basic properties
 %------------------------------------------------------%
 
-% Obtain the identity update judgment on the top-most element of a given context
+% Obtain an update judgment on the topmost element of a given context.
 
 rec upd_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {X':[Ψ ⊢ obj]}
   {A:[ ⊢ tp]} {A':[ ⊢ tp]} {α:[ ⊢ mult]} {α':[ ⊢ mult]}
@@ -40,14 +40,18 @@ rec upd_top : (Ψ:ctx) {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {X':[Ψ ⊢ obj]}
   mlam _, _, _, _, _, _, _ ⇒ [_ ⊢ upd/t _]
   ;
 
+% Obtain the identity update judgment on the topmost element of a given
+% context.
+
 rec upd_refl_top : (Ψ:ctx)
   {Δ:[Ψ ⊢ lctx N[]]} {X:[Ψ ⊢ obj]} {A:[ ⊢ tp]} {α:[ ⊢ mult]}
-  [Ψ ⊢ upd (cons Δ X A[] α[]) (suc N[]) X X A[] A[] α[] α[] (cons Δ X A[] α[])] =
+  [Ψ ⊢ upd (cons Δ X A[] α[]) (suc N[]) X X A[] A[] α[] α[]
+    (cons Δ X A[] α[])] =
   / total 1 /
   mlam _, _, _, _ ⇒ [_ ⊢ upd/t _]
   ;
 
-% If (x :α A) ∈ₙ Δ, obtain the result of changing the entry to (y :β B)
+% If (x :α A) ∈ₙ Δ, obtain the result of changing the entry to (y :β B).
 
 LF get_upd : lctx _ → nat → obj → obj → tp → tp → mult → mult → type =
   get-upd : upd Δ n X X' A A' α α' Δ' → get_upd Δ n X X' A A' α α';
@@ -67,7 +71,7 @@ rec lookup_getupd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Context size
 %------------------------------------------------------%
 
-% If n ∈ Δ then 0 < n < |Δ| + 1
+% If n ∈ Δ, then 0 < n < |Δ| + 1.
 
 rec lookup_is_suc : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A A' α α' Δ']
@@ -87,8 +91,8 @@ rec len_upd_lt : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ upd/n U1] ⇒ lt_trans (len_upd_lt [_ ⊢ U1]) (lt_suc [ ⊢ _])
   ;
 
-% Practical corollary: A context of length n cannot have an entry at position
-% n + 1
+% Practical corollary: a context of length n cannot have an entry at position
+% n + 1.
 
 rec len_upd_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ (suc N[]) X X' A A' α α' Δ']
@@ -101,7 +105,7 @@ rec len_upd_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Look-up properties
 %------------------------------------------------------%
 
-% One cannot update a name not bound in the context
+% One cannot update a name not bound in the context.
 
 rec upd_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ upd Δ[..] n x X A₁ A₂ α₁ α₂ Δ']
@@ -111,7 +115,7 @@ rec upd_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Corollary: If (Δ, x :α A)[x :α' A' ↦ y :β B] = Δ' and x is not bound in Δ,
-% then A' = A, α' = α, and Δ' = (Δ, y :β B)
+% then A' = A, α' = α, and Δ' = (Δ, y :β B).
 
 LF upd_istop : upd _ _ _ _ _ _ _ _ _ → type =
 | upd-istop : {U:upd (cons Δ X A α) n X X' A A' α α' (cons Δ X' A' α')}
@@ -127,7 +131,7 @@ rec upd_var_istop : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Uniqueness of look-up (or left-uniqueness of update):
-% If (x :α A), (x' :α' A') ∈ₙ Δ then x = x', α = α', and A = A'
+% If (x :α A), (x' :α' A') ∈ₙ Δ, then x = x', α = α', and A = A'.
 
 LF obj_tp_mult_eq : obj → obj → tp → tp → mult → mult → type =
 | obj-tp-mult-refl : obj_tp_mult_eq X X A A α α;
@@ -147,6 +151,8 @@ rec lookup_unique : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     | [_ ⊢ upd/t _] ⇒ impossible len_upd_contra [_ ⊢ U1']
     | [_ ⊢ upd/n U2'] ⇒ lookup_unique [_ ⊢ U1'] [_ ⊢ U2'])
   ;
+
+% If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ, and x ≠ y, then n ≠ m.
 
 rec lookup_neq_var2nat : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A A' α α' Δ']
@@ -175,7 +181,7 @@ rec lookup_neq_var2nat : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 %------------------------------------------------------%
 
 % Functionality (or right-uniqueness):
-% If Δ[x :α A ↦ₙ y :β B] = Δ' and Δ[x :α A ↦ₙ y :β B] = Δ'', then Δ' = Δ''
+% If Δ[x :α A ↦ₙ y :β B] = Δ' and Δ[x :α A ↦ₙ y :β B] = Δ'', then Δ' = Δ''.
 
 rec upd_func : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n X Y A B α β Δ']
@@ -197,7 +203,7 @@ rec upd_func : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
     )
   ;
 
-% Reflexivity: Δ[x :α A ↦ x :α A] = Δ
+% Reflexivity: Δ[x :α A ↦ x :α A] = Δ.
 
 rec upd_refl : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n X X' A A' α α' Δ']
@@ -208,6 +214,8 @@ rec upd_refl : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ upd/n U] ⇒ let [_ ⊢ U1] = upd_refl [_ ⊢ U] in [_ ⊢ upd/n U1]
   ;
 
+% Corollary: If Δ[x :α A ↦ₙ x :α A] = Δ', then Δ' = Δ.
+
 rec upd_refl_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n X X A A α α Δ']
   → [Ψ ⊢ ctx_eq Δ' Δ] =
@@ -215,7 +223,7 @@ rec upd_refl_cor : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   fn u ⇒ upd_func u (upd_refl u)
   ;
 
-% Symmetry: If Δ[x :α A ↦ₙ y :β B] = Δ', then Δ'[y :β B ↦ₙ x :α A] = Δ
+% Symmetry: If Δ[x :α A ↦ₙ y :β B] = Δ', then Δ'[y :β B ↦ₙ x :α A] = Δ.
 
 rec upd_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n X X' A A' α α' Δ']
@@ -228,7 +236,7 @@ rec upd_symm : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 
 % Transitivity:
 % Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂][x₂ :α₂ A₂ ↦ₙ x₃ :α₃ A₃] =
-% Δ[x₁ :α₁ A₁ ↦ₙ x₃ :α₃ A₃]
+% Δ[x₁ :α₁ A₁ ↦ₙ x₃ :α₃ A₃].
 
 rec upd_trans : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ₁ n X₁ X₂ A₁ A₂ α₁ α₂ Δ₂]
@@ -319,7 +327,7 @@ rec upd_conf : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
 
 % Preservation of look-up under update:
 % If (x :α A) ∈ₙ Δ, (y :β B) ∈ₘ Δ and n ≠ m, then
-% (x :α A) ∈ₙ Δ[y :β B ↦ₘ y' :β' B'] for any y',B',β'
+% (x :α A) ∈ₙ Δ[y :β B ↦ₘ y' :β' B'] for any y', B', β'.
 
 rec lookup_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] Y Y' B B' β β' Δ']
@@ -351,11 +359,11 @@ rec lookup_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Practical corollaries:
 % (1) If Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂][y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ' and n ≠ m, then
 %     Δ[y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ'' and Δ''[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂] = Δ'
-%     for some Δ''
+%     for some Δ''.
 % (2) If Δ[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂] = Δ', Δ[y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ'', and
 %     n ≠ m, then
 %     Δ'[y₁ :β₁ B₁ ↦ₘ y₂ :β₂ B₂] = Δ''' and Δ''[x₁ :α₁ A₁ ↦ₙ x₂ :α₂ A₂] = Δ'''
-%     for some Δ'''
+%     for some Δ'''.
 
 LF upd_changeorder_res : upd _ _ _ _ _ _ _ _ Δ → upd Δ _ _ _ _ _ _ _ _ → type =
   | upd-changeorder : upd Δ₁ m Y Y' B B' β β' Δ₂' → upd Δ₂' n X X' A A' α α' Δ₃
@@ -403,8 +411,8 @@ rec upd_pushout : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx N[]])
 %------------------------------------------------------%
 
 % Corollaries:
-% (1) If (x :α A) ∈ₙ Δ, then x ∈ₙ Δ[y :β B ↦ₘ y :β' B']
-% (2) If (x :α A) ∈ₙ Δ, then (x :α' A) ∈ₙ Δ[y :β B ↦ₘ y :β' B] for some α'
+% (1) If (x :α A) ∈ₙ Δ, then x ∈ₙ Δ[y :β B ↦ₘ y :β' B'].
+% (2) If (x :α A) ∈ₙ Δ, then (x :α' A) ∈ₙ Δ[y :β B ↦ₘ y :β' B] for some α'.
 
 rec lookup_upd_tpmult : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ m Y Y B B' β β' Δ']
@@ -449,14 +457,13 @@ rec lookup_upd_mult : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Compare two update judgments: either they are updating the same location or
-% not
+% not.
 
 LF comp_look_res : upd _ _ _ _ _ _ _ _ _ → upd _ _ _ _ _ _ _ _ _ → type =
   | look-eq : {U1:upd _ n X _ A _ α _ _} {U2:upd _ n X _ A _ α _ _}
     comp_look_res U1 U2
   | look-neq : neq n m
-  → {U1:upd _ n _ _ _ _ _ _ _} {U2:upd _ m _ _ _ _ _ _ _} comp_look_res U1 U2
-  ;
+  → {U1:upd _ n _ _ _ _ _ _ _} {U2:upd _ m _ _ _ _ _ _ _} comp_look_res U1 U2;
 
 rec comp_look : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   {U1:[Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']}

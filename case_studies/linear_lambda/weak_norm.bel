@@ -3,15 +3,8 @@
 %
 % Adapted from the proof of Andrew Cave
 % (https://github.com/Beluga-lang/Beluga/tree/master/examples/
-%   logrel/weak-norm-total-products-explicit-typing.bel)
+%   logrel/weak-norm-total-products-explicit-typing.bel).
 %======================================================%
-
-LF val : obj → type =
-| val/lam : val (lam M)
-| val/bang : val (bang M);
-
-LF halts : obj → type =
-| halts/m : wmstep M V → val V → halts M;
 
 %------------------------------------------------------%
 % The logical relation
@@ -25,6 +18,8 @@ stratified Reduce : {A:[ ⊢ tp]} {M:[ ⊢ obj]} ctype =
 | Red/! : {M':[ ⊢ obj]} [ ⊢ wmstep M (bang M')] → Reduce [ ⊢ A] [ ⊢ M']
   → Reduce [ ⊢ ! A] [ ⊢ M];
 
+% If M reduces to M' in one step and M' halts, then M halts.
+
 rec halts_step : {S:[ ⊢ wstep M M']} [ ⊢ halts M'] → [ ⊢ halts M] =
   / total 1 /
   mlam S ⇒ fn h ⇒
@@ -32,7 +27,7 @@ rec halts_step : {S:[ ⊢ wstep M M']} [ ⊢ halts M'] → [ ⊢ halts M] =
   [ ⊢ halts/m (wms/onestep S MS') V]
   ;
 
-% Every reducible term halts
+% Every reducible term halts.
 
 rec reduce_halts : Reduce [ ⊢ A] [ ⊢ M] → [ ⊢ halts M] =
   / total 1 /
@@ -59,7 +54,7 @@ rec bwd_closed : {A:[ ⊢ tp]} {S:[ ⊢ wstep M M']} Reduce [ ⊢ A] [ ⊢ M']
   ;
 
 % If M reduces to (bang M') and the body is reducible at N[M'], then the
-% whole let-bang is reducible
+% whole let-bang is reducible.
 
 rec letbang_red : {N:[x:obj ⊢ obj]} [ ⊢ wmstep M (bang M')]
   → Reduce [ ⊢ B] [ ⊢ N[M']]
@@ -81,6 +76,8 @@ inductive RedSub : (Ψ:ctx) {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
   → Reduce [ ⊢ A] [ ⊢ X]
   → RedSub [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]] $[ ⊢ $σ, X];
 
+% If RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] and (X : A) ∈ Δ, then X[$σ] is reducible at type A.
+
 rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
   → Reduce [ ⊢ A] [ ⊢ X[$σ]] =
@@ -95,21 +92,19 @@ rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
       lookup_redsub rs1 [_ ⊢ U2]
   ;
 
-inductive RedSubMerge : (Ψ:ctx) {Δ₁:[Ψ ⊢ lctx K[]]} {Δ₂:[Ψ ⊢ lctx K[]]}
-{Δ:[Ψ ⊢ lctx K[]]} {$σ:$[ ⊢ Ψ]} ctype =
-| Rsub/merge : RedSub [Ψ ⊢ Δ₁] $[ ⊢ $σ] → RedSub [Ψ ⊢ Δ₂] $[ ⊢ $σ]
-  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[ ⊢ $σ];
+% If RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] and Δ₁ ⋈ Δ₂ = Δ, then RedSub [Ψ ⊢ Δ₁] $[ ⊢ $σ]
+% and RedSub [Ψ ⊢ Δ₂] $[ ⊢ $σ].
 
 rec rsub_merge : RedSub [Ψ ⊢ Δ] $[ ⊢ $σ] → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
-  → RedSubMerge [Ψ ⊢ Δ₁] [Ψ ⊢ Δ₂] [Ψ ⊢ Δ] $[ ⊢ $σ] =
+  → (RedSub [Ψ ⊢ Δ₁] $[ ⊢ $σ] * RedSub [Ψ ⊢ Δ₂] $[ ⊢ $σ]) =
   / total 1 /
   fn rs, mg ⇒ case rs of
-  | Rsub/nil ⇒ let [ ⊢ mg/n] = mg in Rsub/merge Rsub/nil Rsub/nil
+  | Rsub/nil ⇒ let [ ⊢ mg/n] = mg in (Rsub/nil, Rsub/nil)
   | Rsub/cons rs' r ⇒
     let [_,x:obj ⊢ mg/c M1 T[]] = mg in
     let Prune-Merge [_ ⊢ M1'] [_,x:obj ⊢ _] = prune_merge [_,x:obj ⊢ M1] in
-    let Rsub/merge rs1 rs2 = rsub_merge rs' [_ ⊢ M1'] in
-    Rsub/merge (Rsub/cons rs1 r) (Rsub/cons rs2 r)
+    let (rs1, rs2) = rsub_merge rs' [_ ⊢ M1'] in
+    (Rsub/cons rs1 r, Rsub/cons rs2 r)
   ;
 
 %------------------------------------------------------%
@@ -128,13 +123,13 @@ rec fund : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
          bwd_closed [ ⊢ _] [_ ⊢ wstep/red]
            (fund [_,x:obj ⊢ D1] (Rsub/cons rs r)))
   | [_ ⊢ oft/app D1 D2 M1] ⇒
-    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let (rs1, rs2) = rsub_merge rs [_ ⊢ M1] in
     let Red/-o h f = fund [_ ⊢ D1] rs1 in
     f [_ ⊢ _] (fund [_ ⊢ D2] rs2)
   | [_ ⊢ oft/bang _ D1] ⇒
     Red/! [ ⊢ _] [ ⊢ wms/refl] (fund [_ ⊢ D1] rs)
   | [_ ⊢ oft/letbang D1 (\x.D2) M1] ⇒
-    let Rsub/merge rs1 rs2 = rsub_merge rs [_ ⊢ M1] in
+    let (rs1, rs2) = rsub_merge rs [_ ⊢ M1] in
     let Red/! [ ⊢ M'] [ ⊢ MS] r1 = fund [_ ⊢ D1] rs1 in
     letbang_red [x:obj ⊢ _] [ ⊢ MS] (fund [_,x:obj ⊢ D2] (Rsub/cons rs2 r1))
   ;
@@ -143,7 +138,7 @@ rec fund : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[ ⊢ $σ]
 % Weak normalization
 %------------------------------------------------------%
 
-% Weak normalization: every closed well-typed term halts
+% Weak normalization: every closed well-typed term halts.
 
 rec weak_norm : [ ⊢ oft nil M A] → [ ⊢ halts M] =
   / total 1 /

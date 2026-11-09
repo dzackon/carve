@@ -4,6 +4,14 @@
 % "del Δ n Δ'": Δ' is Δ with the entry at position n, which must carry
 % multiplicity 𝟘, removed. We keep this file specific to algebras with a 𝟘
 % instead of generalizing it, since all uses are at that multiplicity.
+%
+% Requires of the algebra:
+%   - distinct constructors named 𝟘 and 𝟙 of mult (pushout_delete refutes
+%     mult_eq 𝟙 𝟘 by impossible);
+%   - mult_zsfree_cor : [ ⊢ • α₁ α₂ 𝟘] → [ ⊢ mult_eq α₁ 𝟘], from the
+%     instance's _props file: 𝟘 splits only as 𝟘 • 𝟘 (used by del_merge,
+%     with mult_comm).
+% Checks with the linear, affine, partial and total exponential algebras.
 %======================================================%
 
 LF del : lctx (suc N) → nat → lctx N → type =
@@ -67,7 +75,7 @@ rec del_upd : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
     )
   ;
 
-% Given two two updates U1 and U2 at distinct positions, commute U2 past U1 and
+% Given two updates U1 and U2 at distinct positions, commute U2 past U1 and
 % past deletion of U1's entry.
 
 LF pushout_delete_res : upd _ _ _ _ _ _ _ _ _ → del _ _ _
@@ -87,7 +95,7 @@ rec pushout_delete : (Ψ:ctx) (Δ₁:[Ψ ⊢ lctx (suc N[])])
   {U2:[Ψ ⊢ upd Δ₁ m[] Y Y B[] B'[] 𝟙 𝟘 Δ₁']}
   [ ⊢ neq n m]
   → [Ψ ⊢ pushout_delete_res U1 DL U2] =
-  / total /
+  / total 1 /
   mlam U1, DL, U2 ⇒ fn nq ⇒
   let [_ ⊢ upd-pushout U3 U4 _ _] = upd_pushout [_ ⊢ U1] [_ ⊢ U2] nq in
   let [_ ⊢ del-upd U5 DL' _ _ _] =

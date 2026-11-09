@@ -1,0 +1,30 @@
+%======================================================%
+% Properties of reduction for the linear λ-calculus
+%======================================================%
+
+% Every weak step is a strong step.
+
+rec wstep_step : (Ψ:ctx) [Ψ ⊢ wstep M M'] → [Ψ ⊢ step M M'] =
+  / total 1 /
+  fn st ⇒ case st of
+  | [_ ⊢ wstep/red] ⇒ [_ ⊢ s/red]
+  | [_ ⊢ wstep/red!] ⇒ [_ ⊢ s/red!]
+  | [_ ⊢ wstep/app1 S] ⇒
+    let [_ ⊢ S'] = wstep_step [_ ⊢ S] in [_ ⊢ s/app1 S']
+  | [_ ⊢ wstep/app2 S] ⇒
+    let [_ ⊢ S'] = wstep_step [_ ⊢ S] in [_ ⊢ s/app2 S']
+  | [_ ⊢ wstep/letbang1 S] ⇒
+    let [_ ⊢ S'] = wstep_step [_ ⊢ S] in [_ ⊢ s/letbang1 S']
+  ;
+
+% Every weak multi-step is a strong multi-step.
+
+rec wmstep_mstep : (Ψ:ctx) [Ψ ⊢ wmstep M M'] → [Ψ ⊢ mstep M M'] =
+  / total 1 /
+  fn st ⇒ case st of
+  | [_ ⊢ wms/refl] ⇒ [_ ⊢ ms/refl]
+  | [_ ⊢ wms/onestep S1 S2] ⇒
+    let [_ ⊢ S1'] = wstep_step [_ ⊢ S1] in
+    let [_ ⊢ S2'] = wmstep_mstep [_ ⊢ S2] in
+    [_ ⊢ ms/onestep S1' S2']
+  ;

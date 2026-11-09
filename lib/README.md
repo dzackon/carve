@@ -5,14 +5,14 @@ collects a topic's definitions and the lemmas about them. [`lib`](../lib/)
 contains the general infrastructure and [`case_studies`](../case_studies/) the
 case studies using it. [`config`](../config/) contains configuration files to
 run the case studies and test the common infrastructure against different
-multiplicity structures; for convenience, [`run_all.cfg`](../run_all.cfg) is
+multiplicity structures; for convenience, [`all.cfg`](../all.cfg) is
 available to execute all of the tests.
 
 Below is a more detailed breakdown:
 
 | File or directory | Description |
 | --- | --- |
-| `run_all.cfg` | Top-level entry point: runs every configuration below |
+| `all.cfg` | Top-level entry point: runs every configuration below |
 | `config/algebra/*.cfg` | The common infrastructure, checked against each multiplicity structure |
 | `config/case_studies/*.cfg` | One configuration per case study |
 | `config/fragments/` | Shared pieces included by the configurations above (not run on their own) |
@@ -33,12 +33,11 @@ Below is a more detailed breakdown:
 | `lib/context/update_wf.bel` | Optional name-based update lemmas requiring Wf |
 | `lib/context/merge*.bel` | Lemmas about merge |
 | `lib/context/exchange.bel` | Lemmas about exchange |
-| `lib/context/delete.bel` | Deleting an entry of multiplicity 𝟘 |
 | `lib/context/exhausted.bel` | Lemmas about exhaustedness |
-| `lib/context/linear_lookup.bel` | Look-up corollaries for linear / affine systems |
-| `lib/context/same_elements.bel` | Lemmas about contexts containing the same elements |
+| `lib/context/zero_one/` | Context lemmas that name the constants 𝟘 and 𝟙 |
+| `lib/context/same_elements.bel` | Lemmas about contexts with the same names and types |
 | `lib/context/wellformed*.bel, varctx.bel` | Lemmas about well-formedness predicates |
-| `case_studies/shared/lambda_*.bel` | Types, terms and dynamics shared by the λ-calculus studies |
+| `case_studies/shared/` | Definitions and lemmas shared by the λ-calculus studies |
 | `case_studies/<study>/definitions/` | A study's syntax, typing rules and dynamics |
 | `case_studies/<study>/lemmas/` | Its lemmas |
 | `case_studies/<study>/<property>.bel` | Its theorems |
