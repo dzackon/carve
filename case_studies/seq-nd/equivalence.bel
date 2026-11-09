@@ -2,10 +2,10 @@
 % Equivalence of the two calculi
 %======================================================%
 
-% Equivalence of linear sequent calculus and natural deduction calculus
-% (1) If Γ ⊢ A and Δ ⊢ σ : Γ, then Δ ⊢ e ⟸ A for some e
-% (2) If Δ ⊢ e ⟸ C, then Δ ⊢ C
-% (3) If Δ₁ ⊢ s ⟹ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C
+% Equivalence of linear sequent calculus and natural deduction calculus.
+% (1) If Γ ⊢ A and Δ ⊢ σ : Γ, then Δ ⊢ e ⟸ A for some e.
+% (2) If Δ ⊢ e ⟸ C, then Δ ⊢ C.
+% (3) If Δ₁ ⊢ s ⟹ A, (Δ₂, x :¹ A) ⊢ C, and Δ₁ ⋈ Δ₂ = Δ, then Δ ⊢ C.
 
 LF inhabit : lctx _ → tp → type =
 | inh : chk Δ _ C → inhabit Δ C;
@@ -103,7 +103,7 @@ rec chk2seq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) [Ψ ⊢ chk Δ e A] → [Ψ ⊢ se
   / total 1 /
   fn ch ⇒ case ch of
   | [_ ⊢ conv SY1]:[_ ⊢ chk Δ _ _] ⇒
-    let [_ ⊢ merge-getid M_id E] = merge_getid [_ ⊢ Δ] in
+    let [_ ⊢ get-id-mg-r E M_id] = merge_get_id_r [_ ⊢ Δ] in
     syn2seq [_ ⊢ SY1] [_,x:obj ⊢ hyp (upd/t _) (exh/c E[..] hal/0)] [_ ⊢ M_id]
   | [_ ⊢ I① E] ⇒ [_ ⊢ R① E]
   | [_ ⊢ E① SY1 CH1 M] ⇒
@@ -152,7 +152,6 @@ and rec syn2seq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ coe CH1] ⇒ let [_ ⊢ SQ1] = chk2seq [_ ⊢ CH1] in [_ ⊢ cut M SQ1 \x.SQ]
   | [_ ⊢ init U1 E1] ⇒ [_ ⊢ cut M (hyp U1 E1) \x.SQ]
   | [_ ⊢ E-o SY1 CH M1] ⇒
-    let [_ ⊢ M1_comm] = merge_comm [_ ⊢ M1] in
     let [_ ⊢ merge-assoc M2 M3 _ _] = merge_assoc [_ ⊢ M] [_ ⊢ M1] in
     let [_ ⊢ SQ1] = chk2seq [_ ⊢ CH] in
     let [_ ⊢ _]:[_ ⊢ syn _ _ (B1[] -o B2[])] = [_ ⊢ SY1] in

@@ -1,0 +1,21 @@
+%======================================================%
+% Type safety
+%
+% A closed well-typed term never gets stuck: everything it reduces to is a
+% value or can take a further step, for both strong and weak reduction.
+%======================================================%
+
+% Type safety: if · ⊢ M : A and M ⟶* M', then M' is a value or M' ⟶ M''.
+
+rec safety : [ ⊢ oft nil M A] → [ ⊢ mstep M M'] → [ ⊢ val_or_step M'] =
+  / total /
+  fn d, ms ⇒ progress (preservation_multi d ms)
+  ;
+
+% Type safety for weak reduction: if · ⊢ M : A and M ⟶ʷ* M', then M' is a
+% value or M' ⟶ʷ M''.
+
+rec safety_w : [ ⊢ oft nil M A] → [ ⊢ wmstep M M'] → [ ⊢ val_or_wstep M'] =
+  / total /
+  fn d, ms ⇒ progress_w (preservation_multi d (wmstep_mstep ms))
+  ;

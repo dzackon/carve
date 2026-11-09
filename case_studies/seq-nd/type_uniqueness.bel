@@ -1,0 +1,182 @@
+%======================================================%
+% Uniqueness of contexts and synthesized types
+%======================================================%
+
+% Contexts and types agree.
+
+LF ctx_tp_eq : lctx N → lctx N → tp → tp → type =
+| ctx-tp/refl : ctx_tp_eq Δ Δ A A;
+
+% A term that synthesizes can only be checked by conversion.
+
+rec syn_of_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) (Δ':[Ψ ⊢ lctx N[]])
+  Wf [Ψ ⊢ Δ] → [Ψ ⊢ syn Δ M A[]] → [Ψ ⊢ chk Δ' M B[]]
+  → [Ψ ⊢ syn Δ' M B[]] =
+  / total 2 /
+  fn wf, sy, ch ⇒ case sy of
+  | [_ ⊢ coe _] ⇒ let [_ ⊢ conv S] = ch in [_ ⊢ S]
+  | [_ ⊢ init U _] ⇒
+    let Is-Var = wf_isvar wf [_ ⊢ U] in
+    let [_ ⊢ conv S] = ch in [_ ⊢ S]
+  | [_ ⊢ E-o _ _ _] ⇒ let [_ ⊢ conv S] = ch in [_ ⊢ S]
+  | [_ ⊢ E&1 _] ⇒ let [_ ⊢ conv S] = ch in [_ ⊢ S]
+  | [_ ⊢ E&2 _] ⇒ let [_ ⊢ conv S] = ch in [_ ⊢ S]
+  ;
+
+% A synthesized term determines its context and type, given names and types.
+
+rec syn_ctx_tp_unique : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  Wf [Ψ ⊢ Δ]
+  → [Ψ ⊢ same_elts Δ Δ']
+  → [Ψ ⊢ syn Δ M A[]]
+  → [Ψ ⊢ syn Δ' M B[]]
+  → [Ψ ⊢ ctx_tp_eq Δ Δ' A[] B[]] =
+  / total 3 /
+  fn wf, se, d1, d2 ⇒
+  let wf2 = wf_same_elts wf se in
+  case d1 of
+  | [_ ⊢ coe C1] ⇒
+    (case d2 of
+    | [_ ⊢ coe C2] ⇒
+      let [_ ⊢ ctx/refl] = chk_ctx_unique wf se [_ ⊢ C1] [_ ⊢ C2] in
+      [_ ⊢ ctx-tp/refl]
+    | [_ ⊢ init U _] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    )
+  | [_ ⊢ init U1 E1] ⇒
+    let Is-Var = wf_isvar wf [_ ⊢ U1] in
+    let [_ ⊢ init U2 E2] = d2 in
+    let v1 = upd_symm [_ ⊢ U1] in
+    let v2 = upd_symm [_ ⊢ U2] in
+    let se0 = same_elts_trans (upd_same_elts v1)
+      (same_elts_trans se (upd_same_elts [_ ⊢ U2])) in
+    let [_ ⊢ ctx/refl] =
+      exh_same_elts_eq mult_halunique se0 [_ ⊢ E1] [_ ⊢ E2] in
+    let [ ⊢ nat-tp-mult-refl] =
+      lookup_unique_obj v1 v2 (wf_upd wf [_ ⊢ U1]) in
+    let [_ ⊢ ctx/refl] = upd_func v1 v2 in
+    [_ ⊢ ctx-tp/refl]
+  | [_ ⊢ E-o S1 C1 MG1] ⇒
+    (case d2 of
+    | [_ ⊢ init U _] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E-o S2 C2 MG2] ⇒
+      let se1 = merge2_same_elts_l [_ ⊢ MG1] se [_ ⊢ MG2] in
+      let [_ ⊢ ctx-tp/refl] =
+        syn_ctx_tp_unique (wf_split wf [_ ⊢ MG1]) se1 [_ ⊢ S1] [_ ⊢ S2] in
+      let se2 = merge2_same_elts_r [_ ⊢ MG1] [_ ⊢ MG2] in
+      let [_ ⊢ ctx/refl] =
+        chk_ctx_unique (wf_split_r wf [_ ⊢ MG1]) se2 [_ ⊢ C1] [_ ⊢ C2] in
+      let [_ ⊢ ctx/refl] = merge_func [_ ⊢ MG1] [_ ⊢ MG2] in
+      [_ ⊢ ctx-tp/refl]
+    )
+  | [_ ⊢ E&1 S1] ⇒
+    (case d2 of
+    | [_ ⊢ init U _] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E&1 S2] ⇒
+      let [_ ⊢ ctx-tp/refl] = syn_ctx_tp_unique wf se [_ ⊢ S1] [_ ⊢ S2] in
+      [_ ⊢ ctx-tp/refl]
+    )
+  | [_ ⊢ E&2 S1] ⇒
+    (case d2 of
+    | [_ ⊢ init U _] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E&2 S2] ⇒
+      let [_ ⊢ ctx-tp/refl] = syn_ctx_tp_unique wf se [_ ⊢ S1] [_ ⊢ S2] in
+      [_ ⊢ ctx-tp/refl]
+    )
+
+% At a fixed checking type, a term determines its context.
+
+and rec chk_ctx_unique : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
+  Wf [Ψ ⊢ Δ]
+  → [Ψ ⊢ same_elts Δ Δ']
+  → [Ψ ⊢ chk Δ M A[]]
+  → [Ψ ⊢ chk Δ' M A[]]
+  → [Ψ ⊢ ctx_eq Δ Δ'] =
+  / total 3 /
+  fn wf, se, d1, d2 ⇒
+  let wf2 = wf_same_elts wf se in
+  let [_ ⊢ SE] = se in
+  case d1 of
+  | [_ ⊢ conv S1] ⇒
+    let sy2 = syn_of_chk wf [_ ⊢ S1] d2 in
+    let [_ ⊢ ctx-tp/refl] = syn_ctx_tp_unique wf se [_ ⊢ S1] sy2 in
+    [_ ⊢ ctx/refl]
+  | [_ ⊢ I① E1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I① E2] ⇒ exh_same_elts_eq mult_halunique se [_ ⊢ E1] [_ ⊢ E2]
+    )
+  | [_ ⊢ E① S1 C1 MG1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E① S2 C2 MG2] ⇒
+      let se1 = merge2_same_elts_l [_ ⊢ MG1] se [_ ⊢ MG2] in
+      let [_ ⊢ ctx-tp/refl] =
+        syn_ctx_tp_unique (wf_split wf [_ ⊢ MG1]) se1 [_ ⊢ S1] [_ ⊢ S2] in
+      let se2 = merge2_same_elts_r [_ ⊢ MG1] [_ ⊢ MG2] in
+      let [_ ⊢ ctx/refl] =
+        chk_ctx_unique (wf_split_r wf [_ ⊢ MG1]) se2 [_ ⊢ C1] [_ ⊢ C2] in
+      merge_func [_ ⊢ MG1] [_ ⊢ MG2]
+    )
+  | [_ ⊢ I⊗ C11 C12 MG1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I⊗ C21 C22 MG2] ⇒
+      let se1 = merge2_same_elts_l [_ ⊢ MG1] se [_ ⊢ MG2] in
+      let [_ ⊢ ctx/refl] =
+        chk_ctx_unique (wf_split wf [_ ⊢ MG1]) se1 [_ ⊢ C11] [_ ⊢ C21] in
+      let se2 = merge2_same_elts_r [_ ⊢ MG1] [_ ⊢ MG2] in
+      let [_ ⊢ ctx/refl] =
+        chk_ctx_unique (wf_split_r wf [_ ⊢ MG1]) se2 [_ ⊢ C12] [_ ⊢ C22] in
+      merge_func [_ ⊢ MG1] [_ ⊢ MG2]
+    )
+  | [_ ⊢ E⊗ S1 (\x.\y.C1) MG1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E⊗ S2 (\x.\y.C2) MG2] ⇒
+      let se1 = merge2_same_elts_l [_ ⊢ MG1] se [_ ⊢ MG2] in
+      let [_ ⊢ ctx-tp/refl] =
+        syn_ctx_tp_unique (wf_split wf [_ ⊢ MG1]) se1 [_ ⊢ S1] [_ ⊢ S2] in
+      let [_ ⊢ SE2] = merge2_same_elts_r [_ ⊢ MG1] [_ ⊢ MG2] in
+      let [_,x:obj,y:obj ⊢ ctx/refl] =
+        chk_ctx_unique (wf_extcons (wf_extcons (wf_split_r wf [_ ⊢ MG1])))
+          [_,x:obj,y:obj ⊢ se/c (se/c SE2[..])]
+          [_,x:obj,y:obj ⊢ C1] [_,x:obj,y:obj ⊢ C2] in
+      merge_func [_ ⊢ MG1] [_ ⊢ MG2]
+    )
+  | [_ ⊢ I-o (\x.C1)] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I-o (\x.C2)] ⇒
+      let [_,x:obj ⊢ ctx/refl] = chk_ctx_unique (wf_extcons wf)
+        [_,x:obj ⊢ se/c SE[..]] [_,x:obj ⊢ C1] [_,x:obj ⊢ C2] in
+      [_ ⊢ ctx/refl]
+    )
+  | [_ ⊢ I& C1 _] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I& C2 _] ⇒ chk_ctx_unique wf se [_ ⊢ C1] [_ ⊢ C2]
+    )
+  | [_ ⊢ I⊕1 C1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I⊕1 C2] ⇒ chk_ctx_unique wf se [_ ⊢ C1] [_ ⊢ C2]
+    )
+  | [_ ⊢ I⊕2 C1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ I⊕2 C2] ⇒ chk_ctx_unique wf se [_ ⊢ C1] [_ ⊢ C2]
+    )
+  | [_ ⊢ E⊕ S1 (\x.C1) (\x. _) MG1] ⇒
+    (case d2 of
+    | [_ ⊢ conv (init U _)] ⇒ impossible wf_isvar wf2 [_ ⊢ U]
+    | [_ ⊢ E⊕ S2 (\x.C2) (\x. _) MG2] ⇒
+      let se1 = merge2_same_elts_l [_ ⊢ MG1] se [_ ⊢ MG2] in
+      let [_ ⊢ ctx-tp/refl] =
+        syn_ctx_tp_unique (wf_split wf [_ ⊢ MG1]) se1 [_ ⊢ S1] [_ ⊢ S2] in
+      let [_ ⊢ SE2] = merge2_same_elts_r [_ ⊢ MG1] [_ ⊢ MG2] in
+      let [_,x:obj ⊢ ctx/refl] =
+        chk_ctx_unique (wf_extcons (wf_split_r wf [_ ⊢ MG1]))
+          [_,x:obj ⊢ se/c SE2[..]] [_,x:obj ⊢ C1] [_,x:obj ⊢ C2] in
+      merge_func [_ ⊢ MG1] [_ ⊢ MG2]
+    )
+  ;

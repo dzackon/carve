@@ -14,8 +14,8 @@ opam install beluga.1.1.3
 
 It may also be built and installed from source following the instructions at https://github.com/Beluga-lang/Beluga.
 
-Once installed, Beluga can be run on the file `run_all.cfg`. The expected total runtime is approximately 0m13s.
+Once installed, Beluga can be run on the file `all.cfg`. The expected total runtime is approximately 0m14s.
 
 ```sh
-beluga run_all.cfg
+beluga all.cfg
 ```

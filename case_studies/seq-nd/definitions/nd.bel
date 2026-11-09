@@ -3,8 +3,8 @@
 %======================================================%
 
 % Bidirectional typing judgments:
-% Δ ⊢ e ⟸ A, i.e., e checks against type A under Δ
-% Δ ⊢ e ⟹ A, i.e., e synthesizes type A under Δ
+% Δ ⊢ e ⟸ A, i.e., e checks against type A under Δ.
+% Δ ⊢ e ⟹ A, i.e., e synthesizes type A under Δ.
 
 LF syn : lctx _ → obj → tp → type =
 

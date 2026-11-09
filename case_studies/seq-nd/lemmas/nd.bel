@@ -6,7 +6,7 @@
 % Structural properties of typing judgment
 %------------------------------------------------------%
 
-% Pruning: if the context does not mention x, neither does the term nor the
+% Pruning: If the context does not mention x, neither does the term nor the
 % derivation
 
 inductive PruneChk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
@@ -91,10 +91,8 @@ and rec prune_syn : {SY:[Ψ,x:obj ⊢ syn Δ[..] M C[]]} PruneSyn [Ψ,x:obj ⊢ 
   ;
 
 % Exchange lemmas:
-% (1) If Δ ⊢ e ⟸ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟸ A
-% (2) If Δ ⊢ e ⟹ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟹ A
-% (Plus two corollaries as helper lemmas for permuting the topmost elements of a
-% context)
+% (1) If Δ ⊢ e ⟸ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟸ A.
+% (2) If Δ ⊢ e ⟹ A and Δ[(n, x) ↔ (m, y)] = Δ', then Δ' ⊢ e ⟹ A.
 
 rec chk_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ chk Δ M C]
@@ -170,6 +168,8 @@ and rec syn_exch : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   | [_ ⊢ E&2 SY1] ⇒ let [_ ⊢ SY2] = syn_exch [_ ⊢ SY1] ex1 in [_ ⊢ E&2 SY2]
   ;
 
+% Corollary: exchange the two topmost entries.
+
 rec chk_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ chk (cons (cons Δ X A[] α[]) Y B[] β[]) M C]
   → [Ψ ⊢ chk (cons (cons Δ Y B[] β[]) X A[] α[]) M C] =
@@ -177,6 +177,8 @@ rec chk_exch_top : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   fn ch1 ⇒ chk_exch ch1
     (exch_top [_ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _] [_ ⊢ _] [ ⊢ _] [ ⊢ _])
   ;
+
+% Corollary: move the third-topmost entry to the top.
 
 rec chk_exch_top2 : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ chk (cons (cons (cons Δ X A[] α[]) Y B[] β[]) Z C[] γ[]) M D]
@@ -260,8 +262,8 @@ and rec syn_del : (Ψ:ctx) (Δ:[Ψ ⊢ lctx (suc N[])])
   ;
 
 % Strengthening lemmas:
-% (1) If (Δ, x :⁰ B) ⊢ e ⟸ A, then Δ ⊢ e ⟸ A
-% (2) If (Δ, x :⁰ B) ⊢ e ⟹ A, then Δ ⊢ e ⟹ A
+% (1) If (Δ, x :⁰ B) ⊢ e ⟸ A, then Δ ⊢ e ⟸ A.
+% (2) If (Δ, x :⁰ B) ⊢ e ⟹ A, then Δ ⊢ e ⟹ A.
 
 rec chk_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ chk (cons Δ X A[] 𝟘) M C]
@@ -278,8 +280,8 @@ rec syn_str : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   ;
 
 % Weakening lemmas:
-% (1) If Δ ⊢ e ⟸ A, then (Δ, x :⁰ B) ⊢ e ⟸ A for any x, B
-% (2) If Δ ⊢ e ⟹ A, then (Δ, x :⁰ B) ⊢ e ⟹ A for any x, B
+% (1) If Δ ⊢ e ⟸ A, then (Δ, x :⁰ B) ⊢ e ⟸ A for any x, B.
+% (2) If Δ ⊢ e ⟹ A, then (Δ, x :⁰ B) ⊢ e ⟹ A for any x, B.
 
 rec chk_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ chk Δ M C]
@@ -350,7 +352,7 @@ and rec syn_weak : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 % Substitution lemma:
 % (1) If (a) Δ₁ ⊢ e ⟸ C, (b) x :¹ A is the k-th entry of Δ₁, and the rest of
 %     Δ₁, written Δ₁', does not mention x, (c) Δ₂ ⊢ s ⟹ A, and (d)
-%     Δ₁' ⋈ Δ₂ = Δ, then Δ ⊢ e[s/x] ⟸ C
+%     Δ₁' ⋈ Δ₂ = Δ, then Δ ⊢ e[s/x] ⟸ C.
 % (2) As above, for ⟹.
 
 rec subst_chk_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
@@ -570,8 +572,8 @@ and rec subst_syn_gen : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
 
 % Substitution lemma:
 % (1) If (Δ₁, x :¹ A) ⊢ e ⟸ C, Δ₂ ⊢ s ⟹ A, and Δ₁ ⋈ Δ₂ = Δ, then
-%     Δ ⊢ e[s/x] ⟸ C
-% (2) As above, for ⟹
+%     Δ ⊢ e[s/x] ⟸ C.
+% (2) As above, for ⟹.
 
 rec subst_chk : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ,x:obj ⊢ chk (cons Δ₁[..] x A[] 𝟙) e C[]]

@@ -6,8 +6,8 @@ LF pref_pair : (obj → obj → proc) → (obj → obj → proc) → type =
 | prfs : ({x:obj} {y:obj} pref x (P x y)) → ({x:obj} {y:obj} pref y (Q x y))
   → pref_pair P Q;
 
-% If pref_mismatch((νxy)(P ‖ Q)) then P,Q are prefixed by x,y respectively
-% (follows trivially from definition)
+% If pref_mismatch((νxy)(P ‖ Q)), then P, Q are prefixed by x, y respectively
+% (follows trivially from definition).
 
 rec pref_mismatch_pair : (Ψ:ctx)
   [Ψ ⊢ pref_mismatch (\x.\y.P) (\x.\y.Q)]
@@ -25,7 +25,7 @@ rec pref_mismatch_pair : (Ψ:ctx)
   ;
 
 % If pref_mismatch((νxy)(P ‖ Q)), then (νxy)(P ‖ Q) is not a pref_compatible
-% (follows trivially from definition)
+% (follows trivially from definition).
 
 rec pref_compatible_contra : (Ψ:ctx)
   [Ψ ⊢ pref_mismatch (\x.\y.P) (\x.\y.Q)]
@@ -41,7 +41,7 @@ rec pref_compatible_contra : (Ψ:ctx)
 
 % If (Δ, x :¹ T, y :¹ T^⊥) ⊢ (P ‖ Q), x ∉ fv(Q), y ∉ fv(P), and P and Q are
 % prefixed at x and y respectively, then the prefixes of (νxy)(P ‖ Q) are
-% compatible
+% compatible.
 
 rec typed_pref_compatible : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ,x:obj,y:obj ⊢
@@ -88,7 +88,7 @@ rec typed_pref_compatible : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   ;
 
 % Corollary: If (Δ, x :¹ T, y :¹ T^⊥) ⊢ (P ‖ Q), x ∉ fv(Q), and y ∉ fv(P),
-% then pref_mismatch((νxy)(P ‖ Q)) yields a contradiction
+% then pref_mismatch((νxy)(P ‖ Q)) yields a contradiction.
 
 rec typed_pref_mismatch_contra : (Ψ:ctx) (Δ:[Ψ ⊢ lctx K[]])
   [Ψ ⊢ pref_mismatch (\x.\y.P[..,x]) (\x.\y.Q[..,y])]

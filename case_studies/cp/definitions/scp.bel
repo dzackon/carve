@@ -8,6 +8,8 @@
 
 hyp : obj → tp → type.
 
+% Contexts of names paired with their SCP typing hypotheses.
+
 schema hctx = block x:obj, h:hyp x _;
 
 %------------------------------------------------------%

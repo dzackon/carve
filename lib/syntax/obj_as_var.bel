@@ -3,11 +3,11 @@
 %
 % These lemmas assume the signature declares no constructors for obj, so
 % that every object of type obj under an LF context Ψ is necessarily a
-% parameter variable drawn from Ψ
+% parameter variable drawn from Ψ.
 %======================================================%
 
 % Decidable equality of objects: for any M, N drawn from Ψ, either M = N or
-% M ≠ N
+% M ≠ N.
 
 rec comp_obj : {Ψ:ctx} {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]}
   CompareObjs [Ψ ⊢ M] [Ψ ⊢ N] =
@@ -32,7 +32,8 @@ rec comp_obj : {Ψ:ctx} {M:[Ψ ⊢ obj]} {N:[Ψ ⊢ obj]}
         | Obj-Neq n ⇒ Obj-Neq (obj_neq_weak n))
   ;
 
-% If X is an object under Ψ,x:obj and X ≠ x, then X is a parameter variable in Ψ
+% If X is an object under Ψ,x:obj and X ≠ x, then X is a parameter variable
+% in Ψ.
 
 rec prune_obj : {#p:#[Ψ,x:obj ⊢ obj]} ([Ψ,x:obj ⊢ obj_eq #p x] → [ ⊢ false])
   → PruneObj [Ψ,x:obj ⊢ #p] =

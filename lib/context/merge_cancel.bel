@@ -1,9 +1,9 @@
 %======================================================%
-% Algebraic properties that depend on
-% resource algebra operation being cancellative
+% Algebraic properties that depend on the
+% resource algebra's operation being cancellative
 %======================================================%
 
-% Cancellativity: If Δ₁ ⋈ Δ₂ = Δ₁ ⋈ Δ₂', then Δ₂ = Δ₂'
+% Cancellativity: If Δ₁ ⋈ Δ₂ = Δ₁ ⋈ Δ₂', then Δ₂ = Δ₂'.
 
 rec merge_cancel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]
@@ -18,6 +18,8 @@ rec merge_cancel : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
     let [ ⊢ mult/refl] = mult_canc_gen c [ ⊢ T1] [ ⊢ T2] in
     [_ ⊢ ctx/refl]
   ;
+
+% Corollary: If Δ₁ ⋈ Δ₂ = Δ and Δ₁' ⋈ Δ₂ = Δ, then Δ₁ = Δ₁'.
 
 rec merge_cancel_l : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]]) Cancl
   → [Ψ ⊢ merge Δ₁ Δ₂ Δ]

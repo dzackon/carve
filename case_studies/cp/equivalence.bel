@@ -146,7 +146,8 @@ rec scp2cp : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → [Φ ⊢ wtp P[$σ]] �
     [_ ⊢ oft/choice U1 (\x.O1) (\x.O2)]
   ;
 
-% The relations Enc and Dec used by the two translations are interderivable
+% The relations Enc and Dec used by the two translations are interderivable.
+% (The reverse direction, dec2enc, is proved in lemmas/scp2cp.bel.)
 
 rec enc2dec :
   Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ]
@@ -181,19 +182,4 @@ rec enc2dec :
     Dec/choice [_ ⊢ U1]
       (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O1])
       (enc2dec (Enc/c (encctx_upd ec [_ ⊢ U1]) [ ⊢ _] [ ⊢ _]) [_,x:obj ⊢ O2])
-  ;
-
-rec dec2enc : Dec [Ψ ⊢ P] [Ψ ⊢ Δ] $[Φ ⊢ $σ] → Enc [Ψ ⊢ Δ] $[Φ ⊢ $σ] =
-  / total 1 /
-  fn dc ⇒ case dc of
-  | Dec/fwd u1 rn ⇒ encctx_upd (relnm_to_encctx rn) (upd_symm u1)
-  | Dec/close rn ⇒ relnm_to_encctx rn
-  | Dec/wait u1 dc1 ⇒ encctx_upd (dec2enc dc1) (upd_symm u1)
-  | Dec/out _ m dc1 _ ⇒ encctx_merge_l (enc_tail (dec2enc dc1)) m
-  | Dec/inp u1 dc1 ⇒
-    encctx_upd (enc_tail (enc_tail (dec2enc dc1))) (upd_symm u1)
-  | Dec/pcomp m _ dc1 _ ⇒ encctx_merge_l (enc_tail (dec2enc dc1)) m
-  | Dec/inl u1 dc1 ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
-  | Dec/inr u1 dc1 ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
-  | Dec/choice u1 dc1 _ ⇒ encctx_upd (enc_tail (dec2enc dc1)) (upd_symm u1)
   ;

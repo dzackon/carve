@@ -1,12 +1,16 @@
 %======================================================%
 % Corollaries of look-up properties
-% (linear / affine systems)
+%
+% Requires of the algebra distinct constructors named 𝟘 and 𝟙 of mult
+% (lookup_mult_neq refutes an entry carrying both by impossible).
+% Checks with the linear, affine, partial and total exponential, and strict
+% contracting algebras.
 %======================================================%
 
-% Lookup-inequality properties:
-% (1) If (x :¹ A) ∈ₙ Δ and (y :⁰ B) ∈ₘ Δ, then n ≠ m
+% Look-up inequality properties:
+% (1) If (x :¹ A) ∈ₙ Δ and (y :⁰ B) ∈ₘ Δ, then n ≠ m.
 % (2) If (x :⁰ A) ∈ₙ Δ and (y :¹ B) ∈ₘ Δ, then n ≠ m
-%     [corollary of (1) using commutativity of ≠]
+%     [corollary of (1) using commutativity of ≠].
 
 rec lookup_mult_neq : (Ψ:ctx) (Δ:[Ψ ⊢ lctx N[]])
   [Ψ ⊢ upd Δ n[] X X' A A' 𝟙 α' Δ']

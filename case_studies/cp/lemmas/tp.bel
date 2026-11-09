@@ -6,7 +6,7 @@
 % Session types
 %------------------------------------------------------%
 
-% Duality is symmetric
+% Duality is symmetric.
 
 rec dual_symm : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
   / total 1 /
@@ -31,7 +31,7 @@ rec dual_symm : [ ⊢ dual A A'] → [ ⊢ dual A' A] =
     [ ⊢ D⊕ Dl' Dr']
   ;
 
-% Session types have a unique dual
+% Session types have a unique dual.
 
 rec dual_unique : [ ⊢ dual A A'] → [ ⊢ dual A A''] → [ ⊢ tp_eq A' A''] =
   / total 1 /

@@ -28,7 +28,7 @@ LF merge : lctx N → lctx N → lctx N → type =
 
 % Context update: Δ[x :α A ↦ₙ y :β B] = Δ'
 % i.e., x appears in Δ at position n with type A and multiplicity α, and
-% Δ' is the result of changing that entry to y :β B
+% Δ' is the result of changing that entry to y :β B.
 
 LF upd : lctx N → nat → obj → obj → tp → tp → mult → mult → lctx N → type =
 | upd/t : {Δ:lctx N}
@@ -37,7 +37,7 @@ LF upd : lctx N → nat → obj → obj → tp → tp → mult → mult → lctx
   → upd (cons Δ Y B β) n X X' A A' α α' (cons Δ' Y B β);
 
 % Exhaustedness: every assumption in Δ has harmless multiplicity.
-% "hal α" is the predicate for harmless multiplicities (e.g. α = 𝟘 in linear
+% hal(α) is the predicate for harmless multiplicities (e.g. α = 𝟘 in linear
 % systems).
 
 LF exh : lctx _ → type =
@@ -55,7 +55,7 @@ LF same_elts: lctx N → lctx N → type =
 % Derived exchange predicate
 %------------------------------------------------------%
 
-% Exchange: permute two distinct entries of a context
+% Exchange: permute two distinct entries of a context.
 
 LF exch : lctx N → nat → obj → nat → obj → lctx N → type =
 | exch/u : neq n m
@@ -92,7 +92,7 @@ LF lookup_intm : nat → obj → tp → mult → lctx _ → type =
 %------------------------------------------------------%
 
 % Wf [Ψ ⊢ Δ]: Δ has no duplicate names and all elements are parameter variables
-% from Ψ
+% from Ψ.
 
 inductive Wf : (Ψ:ctx) {Δ:[Ψ ⊢ lctx k]} ctype =
 | Wf-Nil : Wf [_ ⊢ nil]
@@ -100,13 +100,13 @@ inductive Wf : (Ψ:ctx) {Δ:[Ψ ⊢ lctx k]} ctype =
   → ([_ ⊢ lookup_n #p Δ] → [ ⊢ false])
   → Wf [_ ⊢ cons Δ #p _ _];
 
-% Explicit and LF contexts contain the same elements, in the same order
+% Explicit and LF contexts contain the same elements, in the same order.
 
 inductive Wf' : (Ψ:ctx) [Ψ ⊢ lctx K] → ctype =
 | Wf'-Nil : Wf' [ ⊢ nil]
 | Wf'-Cons : Wf' [Ψ ⊢ Δ] → Wf' [Ψ, x:obj ⊢ cons Δ[..] x A[] α[]];
 
-% VarCtx Δ: every name in Δ is a parameter variable from Ψ
+% VarCtx Δ: every name in Δ is a parameter variable from Ψ.
 
 inductive VarCtx : (Ψ:ctx) [Ψ ⊢ lctx K] → ctype =
 | VarCtx-Nil : VarCtx [_ ⊢ nil]

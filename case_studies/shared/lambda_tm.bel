@@ -9,3 +9,13 @@ LF obj : type =
 | app : obj → obj → obj
 | bang : obj → obj
 | letbang : obj → (obj → obj) → obj;
+
+%------------------------------------------------------%
+% Values
+%------------------------------------------------------%
+
+% V is a value.
+
+LF val : obj → type =
+| val/lam : val (lam M)
+| val/bang : val (bang M);

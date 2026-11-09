@@ -3,7 +3,7 @@
 %
 % Adapted from the proof of Andrew Cave
 % (https://github.com/Beluga-lang/Beluga/tree/master/examples/
-%   logrel/weak-norm-under-binders-beta-only.bel)
+%   logrel/weak-norm-under-binders-beta-only.bel).
 %======================================================%
 
 %------------------------------------------------------%
@@ -19,6 +19,8 @@ and neutral : obj → type =
 | n/app : neutral M → normal N → neutral (app M N)
 | n/letbang : neutral M → ({x:obj} neutral x → normal (N x))
   → neutral (letbang M N);
+
+% Contexts of variables that are assumed to be neutral.
 
 schema nctx = block x:obj, u:neutral x;
 
@@ -109,7 +111,7 @@ rec m_letbang2 : (Ψ:nctx) {M:[Ψ ⊢ obj]} {N:[Ψ, x:obj ⊢ obj]}
 % Basic properties of the logical relation
 %------------------------------------------------------%
 
-% Reducible terms halt
+% Reducible terms halt.
 
 rec reduce_halts : (Ψ:nctx) {A:[ ⊢ tp]} Reduce [ ⊢ A] [Ψ ⊢ M] → Halts [Ψ ⊢ M] =
   / total 1 /
@@ -157,7 +159,7 @@ rec m_closed : [Ψ ⊢ mstep M M'] → Reduce [ ⊢ A] [Ψ ⊢ M']
   | [_ ⊢ ms/onestep S MS] ⇒ bwd_closed [ ⊢ _] [_ ⊢ S] (m_closed [_ ⊢ MS] r)
   ;
 
-% Neutral terms are reducible at every type
+% Neutral terms are reducible at every type.
 
 rec reflect : (Ψ:nctx) {A:[ ⊢ tp]} {R:[Ψ ⊢ obj]} {NR:[Ψ ⊢ neutral R]}
   Reduce [ ⊢ A] [Ψ ⊢ R] =
@@ -208,7 +210,7 @@ and rec monotone_cl : {$σ:$[Φ ⊢ Ψ]} Closure [ ⊢ A] [Ψ ⊢ M]
   ;
 
 % Composing a reducible substitution with a variable substitution yields a
-% reducible substitution
+% reducible substitution.
 
 rec monotone_sub : (Δ:[Ψ ⊢ lctx K[]]) {$σ:$[Φ' ⊢ Φ]} RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ']
   → RedSub [Ψ ⊢ Δ] $[Φ' ⊢ $σ'[$σ]] =
@@ -219,8 +221,8 @@ rec monotone_sub : (Δ:[Ψ ⊢ lctx K[]]) {$σ:$[Φ' ⊢ Φ]} RedSub [Ψ ⊢ Δ]
     Rsub/cons (monotone_sub $[_ ⊢ $σ] rs') (monotone $[_ ⊢ $σ] rn)
   ;
 
-% If RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] and X : A ∈ Δ, then X[$σ] is reducible at type A
-% in the context Φ
+% If RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] and (X : A) ∈ Δ, then X[$σ] is reducible at type A
+% in the context Φ.
 
 rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
   → [Ψ ⊢ upd Δ n[] X X' A[] A'[] α[] α'[] Δ']
@@ -237,7 +239,7 @@ rec lookup_redsub : RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
   ;
 
 % If RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ] and Δ₁ ⋈ Δ₂ = Δ, then RedSub [Ψ ⊢ Δ₁] $[Φ ⊢ $σ]
-% and RedSub [Ψ ⊢ Δ₂] $[Φ ⊢ $σ]
+% and RedSub [Ψ ⊢ Δ₂] $[Φ ⊢ $σ].
 
 inductive RedSubMerge : (Ψ:ctx) (Φ:nctx) {Δ₁:[Ψ ⊢ lctx K[]]}
 {Δ₂:[Ψ ⊢ lctx K[]]} {Δ:[Ψ ⊢ lctx K[]]} {$σ:$[Φ ⊢ Ψ]} ctype =
@@ -289,7 +291,7 @@ rec eval_letbang : (Φ:nctx) {N:[Φ, x:obj ⊢ obj]}
 %------------------------------------------------------%
 
 % If Δ ⊢ M : A under Ψ and RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ], then M[$σ] is reducible at
-% type A in the context Φ
+% type A in the context Φ.
 
 rec eval : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
   → Reduce [ ⊢ A] [Φ ⊢ M[$σ]] =
@@ -331,7 +333,7 @@ rec eval : [Ψ ⊢ oft Δ M A[]] → RedSub [Ψ ⊢ Δ] $[Φ ⊢ $σ]
 % Theorem: well-typed terms halt
 %------------------------------------------------------%
 
-% $Id moves from a term context to a neutral-term context
+% $Id moves from a term context to a neutral-term context.
 
 inductive IdSub : (Ψ:ctx) (Φ:nctx) {Δ:[Ψ ⊢ lctx K[]]} {$Id:$[Φ ⊢ Ψ]} ctype =
 | Id/nil : IdSub [ ⊢ nil] $[ ⊢ ^]
@@ -348,11 +350,15 @@ rec id_rsub : IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id] → RedSub [Ψ ⊢ Δ] $[Φ ⊢ $I
     (reflect [ ⊢ _] [_ ⊢ _] [_, b:block x:obj, u:neutral x ⊢ b.2])
   ;
 
+% If Δ ⊢ M : A and IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id], then M[$Id] halts.
+
 rec weak_norm : [Ψ ⊢ oft Δ M A[]] → IdSub [Ψ ⊢ Δ] $[Φ ⊢ $Id]
   → Halts [Φ ⊢ M[$Id]] =
   / total 1 /
   fn d, is ⇒ reduce_halts [ ⊢ _] (eval d (id_rsub is))
   ;
+
+% Corollary: every closed well-typed term halts.
 
 rec weak_norm_cor : [ ⊢ oft nil M A] → Halts [ ⊢ M] =
   / total 1 /

@@ -2,7 +2,7 @@
 % Lemmas about CP processes
 %======================================================%
 
-% If P does not depend on the variable x then x ∉ P
+% If P does not depend on the variable x, then x ∉ fv(P).
 
 rec in_proc_contra : (Ψ:ctx) {P:[Ψ ⊢ obj]}
   [Ψ,x:obj ⊢ in_proc x P[..]] → [ ⊢ false] =

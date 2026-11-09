@@ -12,8 +12,8 @@ Run from the repository root:
 ```sh
 beluga config/algebra/linear.cfg
 beluga config/case_studies/linear_lambda.cfg
-beluga run_all.cfg
+beluga all.cfg
 ```
 
-[`run_all.cfg`](../run_all.cfg) checks all resource-algebra and case-study
+[`all.cfg`](../all.cfg) checks all resource-algebra and case-study
 configurations.

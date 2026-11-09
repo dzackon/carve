@@ -1,6 +1,5 @@
 %======================================================%
-% Multiplicities
-% (linear systems with exponentials)
+% Multiplicities (linear systems with exponentials)
 %======================================================%
 
 LF mult : type =
@@ -16,7 +15,7 @@ LF • : mult → mult → mult → type =
 | •/10 : • 𝟙 𝟘 𝟙
 | •/ωω : • ω ω ω;
 
-% α is harmless
+% α is harmless.
 
 LF hal : mult → type =
 | hal/0 : hal 𝟘
