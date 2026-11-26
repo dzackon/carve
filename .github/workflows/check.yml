@@ -1,0 +1,16 @@
+name: check
+on: [push, pull_request]
+jobs:
+  beluga:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 4.14
+      - run: opam install -y beluga.1.1.3
+      - name: Check all files
+        shell: bash
+        run: |
+          opam exec -- beluga all.cfg 2>&1 | tee log.txt
+          ! grep -q 'Hole number' log.txt
